@@ -53,9 +53,9 @@ const unordered_map<CUTS, vector<CUTS>, EnumHash> Analyzer::adjList = {
   {CUTS::eMuon2Elec1, {CUTS::eRMuon2, CUTS::eRElec1}},
   {CUTS::eMuon2Elec2, {CUTS::eRMuon2, CUTS::eRElec2}},
 
-  {CUTS::eDiElec, {CUTS::eRElec1, CUTS::eRElec2}},
-  {CUTS::eDiMuon, {CUTS::eRMuon1, CUTS::eRMuon2}},
-  {CUTS::eDiTau, {CUTS::eRTau1, CUTS::eRTau2}},
+  {CUTS::eDiElec, {CUTS::eRElec1, CUTS::eRElec2, CUTS::eR1stJet, CUTS::eR2ndJet}},
+  {CUTS::eDiMuon, {CUTS::eRMuon1, CUTS::eRMuon2, CUTS::eR1stJet, CUTS::eR2ndJet}},
+  {CUTS::eDiTau, {CUTS::eRTau1, CUTS::eRTau2, CUTS::eR1stJet, CUTS::eR2ndJet}},
   {CUTS::eDiJet, {CUTS::eRJet1, CUTS::eRJet2}},
   {CUTS::eSusyCom, {CUTS::eR1stJet, CUTS::eR2ndJet}},
   {CUTS::eGTau, {CUTS::eNuTau}},
