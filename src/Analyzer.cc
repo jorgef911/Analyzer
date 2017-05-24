@@ -170,13 +170,12 @@ Analyzer::Analyzer(string infile, string outfile, bool setCR) : goodParts(getArr
   }
   create_fillInfo();
   for(auto maper: distats["Control_Region"].dmap) {
-
+    
     setupCR(maper.first, maper.second);
   }
 
   setCutNeeds();  
   //  exit(1);
-  std::cout << "setup complete" << std::endl << endl;
 }
 
 unordered_map<CUTS, vector<int>*, EnumHash> Analyzer::getArray() {
@@ -343,6 +342,8 @@ void Analyzer::preprocess(int event) {
   getGoodRecoJets(CUTS::eR1stJet, _Jet->pstats["FirstLeadingJet"]);
   getGoodRecoJets(CUTS::eR2ndJet, _Jet->pstats["SecondLeadingJet"]);
 
+  treatMuons_Met();
+
   ///VBF Susy cut on leadin jets
   VBFTopologyCut(distats["VBFSUSY"]);
 
@@ -387,6 +388,7 @@ void Analyzer::fillCuts() {
   
   for(size_t i = 0; i < cut_order->size(); i++) {
     //  for(vector<string>::const_iterator it=cut_order->begin(); it != cut_order->end(); it++, i++) {
+
     string cut = cut_order->at(i);
     if(isData && cut.find("Gen") != string::npos) continue;
 
@@ -460,7 +462,7 @@ void Analyzer::printCuts() {
   for(size_t i = 0; i < cut_order.size(); i++) {
     cout << setw(28) << cut_order.at(i) << "    ";
     if(isData && cut_order.at(i).find("Gen") != string::npos) cout << "Skipped" << endl;
-    else if(crbins != 1 && blinded && i == SignalRegion) cout << "Blinded Signal Region" << endl;
+    else if(crbins != 1 && blinded && i == (size_t)SignalRegion) cout << "Blinded Signal Region" << endl;
     else {
       cout << setw(10) << cuts_per.at(i) << "  ( " << setw(5) << ((float)cuts_per.at(i)) / nentries << ") ";
       if(crbins == 1) cout << setw(12) << cuts_cumul.at(i) << "  ( " << setw(5) << ((float)cuts_cumul.at(i)) / nentries << ") ";
@@ -478,18 +480,7 @@ void Analyzer::printCuts() {
 
 ///Calculates met from values from each file plus smearing and treating muons as neutrinos
 void Analyzer::updateMet() {
-  ////// Neutrino update before calculation
-  // if(distats["Run"].bmap.at("TreatMuonsAsNeutrinos")) {
-  //   for(vec_iter it=goodParts[CUTS::eRMuon1]->begin(); it!=goodParts[CUTS::eRMuon1]->end(); it++) {
-  //     if(find(goodParts[CUTS::eRMuon2]->begin(), goodParts[CUTS::eRMuon2]->end(), (*it)) != goodParts[CUTS::eRMuon2]->end() ) continue;
-  //     deltaMEx += _Muon->smearP.at(*it).Px();
-  //     deltaMEy += _Muon->smearP.at(*it).Py();
-  //   }    
-  //   for(vec_iter it=goodParts[CUTS::eRMuon2]->begin(); it!=goodParts[CUTS::eRMuon2]->end(); it++) {
-  //     deltaMEx += _Muon->smearP.at(*it).Px();
-  //     deltaMEy += _Muon->smearP.at(*it).Py();
-  //   }
-  // }
+
   ///---MHT and HT calculations----////
   int i=0;
   for(vector<TLorentzVector>::iterator it=_Jet->smearP.begin(); it!=_Jet->smearP.end(); it++, i++) {
@@ -511,6 +502,83 @@ void Analyzer::updateMet() {
   if(distats["Run"].bmap.at("DiscrByHT") && sumptForHt < distats["Run"].dmap.at("HtCut")) return; 
   
   goodParts[CUTS::eMET]->push_back(1);
+}
+
+void Analyzer::treatMuons_Met() {
+  //  Neutrino update before calculation
+  deltaMEx = 0;
+  deltaMEy = 0;
+  
+  if(distats["Run"].bmap.at("TreatMuonsAsNeutrinos")) {
+    for(auto it : *goodParts[CUTS::eRMuon1]) {
+      if(find(goodParts[CUTS::eRMuon2]->begin(), goodParts[CUTS::eRMuon2]->end(), it) != goodParts[CUTS::eRMuon2]->end() ) continue;
+      deltaMEx += _Muon->smearP.at(it).Px();
+      deltaMEy += _Muon->smearP.at(it).Py();
+    }    
+    for(auto it : *goodParts[CUTS::eRMuon2]) {
+      deltaMEx += _Muon->smearP.at(it).Px();
+      deltaMEy += _Muon->smearP.at(it).Py();
+    }
+  }
+  if(distats["Run"].bmap.at("TreatMuonsAsTaus")) {
+    
+    if(goodParts[CUTS::eRMuon1]->size() == 1) {
+
+      int muon = (int)goodParts[CUTS::eRMuon1]->at(0);
+
+
+      
+    
+      double rand1 = 1;//Tau_HFrac->GetRandom();
+      double rand2 = 0;//Tau_Resol->GetRandom();
+
+      double ETau_Pt = _Muon->smearP.at(muon).Pt()*rand1*(rand2+1.0);
+      double ETau_Eta = _Muon->smearP.at(muon).Eta();
+      double ETau_Phi=normPhi(_Muon->smearP.at(muon).Phi());//+DeltaNu_Phi->GetRandom());
+      double ETau_Energy = 0.;
+
+
+      // double theta = 2.0*TMath::ATan2(1.0,TMath::Exp(_Muon->smearP.at(muon).Eta()));
+      // double sin_theta = TMath::Sin(theta);
+      // double P_tau = ETau_Pt/sin_theta;
+      
+      // //ETau_Energy = sqrt(pow(P_tau, 2) + pow(1.77699, 2));
+      // ETau_Energy = sqrt( pow(1.77699, 2) + pow(ETau_Pt, 2) + pow(_Muon->smearP.at(muon).Pz(), 2));
+      
+      /*if(ETau_Pt <= 15.0){
+	while(ETau_Pt<=15.0){
+	rand1 = Tau_HFrac->GetRandom();
+	rand2 = Tau_Resol->GetRandom();
+	ETau_Pt = _Muon->smearP.at(muon).Pt()*rand1*(rand2+1.0);
+	ENu_Pt = _Muon->smearP.at(muon).Pt()-ETau_Pt;
+	}
+	}
+      */
+      
+      TLorentzVector Emu_Tau;
+      Emu_Tau.SetPtEtaPhiE(ETau_Pt, ETau_Eta, ETau_Phi, ETau_Energy);
+      _Muon->smearP.clear();
+ 
+      if (ETau_Pt >= _Muon->pstats["Muon1"].pmap.at("PtCut").first ){
+	_Muon->smearP.push_back(Emu_Tau);
+	deltaMEx += (_Muon->smearP.at(muon).Px()-Emu_Tau.Px()); 
+	deltaMEy += (_Muon->smearP.at(muon).Py()-Emu_Tau.Py());
+
+      }
+    }    
+  }	
+
+
+  // recalculate MET
+  theMETVector.SetPxPyPzE(theMETVector.Px()+deltaMEx, theMETVector.Py()+deltaMEy, theMETVector.Pz(),
+  			  TMath::Sqrt(pow(theMETVector.Px()+deltaMEx,2) + pow(theMETVector.Py()+deltaMEy,2)));
+
+  /////MET CUTS
+  goodParts[CUTS::eMET]->clear();  
+
+  if(passCutRange("Met", theMETVector.Pt(), distats["Run"])) {
+    goodParts[CUTS::eMET]->push_back(1);  
+  }
 }
 
 
@@ -601,9 +669,12 @@ void Analyzer::read_info(string filename) {
 // This code works pretty much (at least in my tests), but dagnabit, its ugly.  They all can't be winners, at least now...
 void Analyzer::setCutNeeds() {
 
+
+
   for(auto e: Enum<CUTS>()) {
     need_cut[e] = false;
   }
+
   for(auto it: *histo.get_groups()) {
     if(fillInfo[it]->type == FILLER::None) continue;
     need_cut[fillInfo[it]->ePos] = true;
@@ -612,6 +683,7 @@ void Analyzer::setCutNeeds() {
       need_cut[e] = true;
     }
   }
+
   for(auto it: *histo.get_cutorder()) {
     need_cut[cut_num.at(it)] = true;
     if(adjList.find(cut_num.at(it)) == adjList.end()) continue;
@@ -619,6 +691,7 @@ void Analyzer::setCutNeeds() {
       need_cut[e] = true;
     }
   }
+
   for(auto it: testVec) {
     CUTS ePos = it->info->ePos;
     need_cut[ePos] = true;
@@ -636,7 +709,6 @@ void Analyzer::setCutNeeds() {
     }
   }
 
-
   for(auto it: jetCuts) {
     if(need_cut[it]) {
       for(auto it2: _Jet->overlapCuts(it)) {
@@ -649,7 +721,6 @@ void Analyzer::setCutNeeds() {
     }
   }
 
-
   if( !(need_cut[CUTS::eRTau1] || need_cut[CUTS::eRTau2]) ) {
     _Tau->unBranch();
   } else {
@@ -661,6 +732,7 @@ void Analyzer::setCutNeeds() {
       }
     }
   }
+
   if( !(need_cut[CUTS::eRElec1] || need_cut[CUTS::eRElec2]) ) {
     _Electron->unBranch();
   } else {
@@ -672,6 +744,7 @@ void Analyzer::setCutNeeds() {
       }
     }
   }
+
   if( !(need_cut[CUTS::eRMuon1] || need_cut[CUTS::eRMuon2]) ) {
     _Muon->unBranch();
   } else {
@@ -691,6 +764,7 @@ void Analyzer::setCutNeeds() {
     passGen = passGen || need_cut[e];
    
   }
+
   if(!passGen) _Gen->unBranch();
   else {
     if(need_cut[CUTS::eGTau]) genMaper[15] = new GenFill(2, CUTS::eGTau);
@@ -702,7 +776,6 @@ void Analyzer::setCutNeeds() {
     if(need_cut[CUTS::eGHiggs]) genMaper[25] = new GenFill(2, CUTS::eGHiggs);
     //  , CUTS::eNuTau
   }
-  
 }
 
 
@@ -1507,7 +1580,6 @@ void Analyzer::fill_Folder(string group, const int max) {
       part1 = lep1->smearP.at(p1);
       part2 = lep2->smearP.at(p2);
 
-
       histAddVal2(part1.Pt(),part2.Pt(), "Part1PtVsPart2Pt");
       histAddVal(part1.DeltaR(part2), "DeltaR"); 
       if(group.find("Di") != string::npos) {
@@ -1526,6 +1598,7 @@ void Analyzer::fill_Folder(string group, const int max) {
       double diMass = diParticleMass(part1,part2, distats[digroup].smap.at("HowCalculateMassReco"));
       if(passDiParticleApprox(part1,part2, distats[digroup].smap.at("HowCalculateMassReco"))) {
 	histAddVal(diMass, "ReconstructableMass");
+
       } else {
       	histAddVal(diMass, "NotReconstructableMass");
       }
@@ -1545,7 +1618,7 @@ void Analyzer::fill_Folder(string group, const int max) {
 
 	histAddVal(absnormPhi(part1.Phi() - TheLeadDiJetVect.Phi()), "Part1DiJetDeltaPhi");
 	histAddVal(absnormPhi(part2.Phi() - TheLeadDiJetVect.Phi()), "Part2DiJetDeltaPhi");
-	histAddVal(diParticleMass(TheLeadDiJetVect, part1+part2, "VectorSumOfVisProductsAndMet"), "DiJetReconstructableMass"); 
+	histAddVal(diParticleMass(TheLeadDiJetVect, part1+part2, "VectorSumOfVisProductsAndMet"), "DiJetReconstructableMass");
       }
       
       if(lep1->type != PType::Tau) {
@@ -1621,12 +1694,18 @@ bool Analyzer::partPassBoth(string name) {
   return (diff.size() == 0);
 }
 
+bool Analyzer::PassCut(CUTS ePos, int cut) {
+  return (int)goodParts[ePos]->size() >= cut;
+}
+
 
 bool CRTester::test(Analyzer* analyzer) {
 
-  bool pass = false;
+  bool pass = true;
 
-  if(info->type == FILLER::Single) {
+  if(variable == "Pass") {
+    return analyzer->PassCut(info->ePos, cutVal);
+  } else if(info->type == FILLER::Single) {
     if(variable == "PassBoth") return analyzer->partPassBoth(partName);
 
     for(auto index: *analyzer->getList(info->ePos)) {
@@ -1635,7 +1714,6 @@ bool CRTester::test(Analyzer* analyzer) {
       if(variable == "Eta") pass = pass && part.Eta() > cutVal;
       else if(variable == "Pt") pass = pass && part.Pt() > cutVal;
       else if(variable == "Energy") pass = pass && part.Energy() > cutVal;
-
       //	else if(variable == "Zdecay") pass = pass && analyzer.isZdecay(part, static_cast<Lepton>(*info->part)) > cutVal;
       //else if(variable == "MetPhi") pass = pass && part.Eta() > cutval;
     }	  

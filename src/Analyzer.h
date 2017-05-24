@@ -61,6 +61,7 @@ class Analyzer {
   }
 
   bool partPassBoth(string);
+  bool PassCut(CUTS, int);
 
  private:
   
@@ -111,6 +112,7 @@ class Analyzer {
   inline bool passCutRange(string, double, const PartStats&);  
 
   void updateMet();
+  void treatMuons_Met();
   double getPileupWeight(float);
   unordered_map<CUTS, vector<int>*, EnumHash> getArray();
 
