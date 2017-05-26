@@ -115,13 +115,7 @@ Analyzer::Analyzer(string infile, string outfile, bool setCR) : goodParts(getArr
 
   setupGeneral(BOOM,infile);
   
-  TFile* tmpfile = new TFile((PUSPACE +"extra.root").c_str());
-  extraWeight = (TH1*)(tmpfile->FindObjectAny("extra")->Clone());
-  //  tmpfile->Close();
-  //  calib = BTagCalibration("csvv1", "CSVv2_ichep.csv");
-  
   reader.load(calib, BTagEntry::FLAV_B, "comb");
-  
   
 
   isData = distats["Run"].bmap.at("isData");
@@ -275,7 +269,6 @@ void Analyzer::setupCR(string var, double val) {
 
 ////destructor
 Analyzer::~Analyzer() {
-  cout << "start" << endl;
   f->Close();
   delete _Electron;
   delete _Muon;
@@ -664,8 +657,8 @@ void Analyzer::read_info(string filename) {
     } else if(stemp.size() == 2) {
       if(stemp.at(0).find("Trigger") != string::npos) {
 	int ntrig = (stemp.at(0).find("1") != string::npos) ? 0 : 1;
-	trigName[ntrig].push_back(stemp.at(1));
-	trigPlace[ntrig].push_back(0);
+	trigName[ntrig]->push_back(stemp.at(1));
+	trigPlace[ntrig]->push_back(0);
 	continue;
       }
 	
