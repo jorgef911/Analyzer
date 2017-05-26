@@ -5,30 +5,17 @@
 #include <memory>
 
 // user include files
-#include <Math/VectorUtil.h>
 #include <fstream>
-#include <TH1.h>
-#include <TH2.h>
-#include <TFile.h>
-#include <TTree.h>
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <TRandom3.h>
-#include <TMath.h>
 #include <iostream>
-#include <iomanip>
-#include <utility>
-#include <TROOT.h>
+
+#include <TTree.h>
 #include <TBranch.h>
-#include <TApplication.h>
-#include <TChain.h>
-#include <TDirectory.h>
 #include <TLorentzVector.h>
-#include <TEnv.h>
+
+
 #include "tokenizer.hpp"
 #include "Cut_enum.h"
 
@@ -42,25 +29,56 @@ struct PartStats {
 };
 
 
+enum class PType { Electron, Muon, Tau, Jet, None};
+
 class Particle {
 
  public:
   Particle();
   Particle(TTree*, string, string);
-  virtual ~Particle() {};
-  void getPartStats(string);
+  virtual ~Particle() {}
 
+  virtual void findExtraCuts() {}
+
+  vector<CUTS> extraCuts;
+  
+  void unBranch();
+  PType type;  
+
+  const map<PType,CUTS> cutMap = {{PType::Electron, CUTS::eGElec}, {PType::Muon, CUTS::eGMuon}, 
+				  {PType::Tau, CUTS::eGTau}};
+  
+  
   vector<double>* pt = 0;
   vector<double>* eta = 0;
   vector<double>* phi = 0;
   vector<double>* energy = 0;
-
   unordered_map<string, PartStats> pstats;
-
   vector<TLorentzVector> smearP;
+  
+ protected:
+  void getPartStats(string);
+  TTree* BOOM;
+  string GenName;
+
 };
 
-///template <typename T> vector<TLorentzVector> Particle<T>::smearP = {}; 
+class Photon : public Particle {
+public:
+  Photon();
+  Photon(TTree*, string);
+
+  vector<double>* et = 0;
+  vector<double>* hoverE = 0;
+  vector<double>* phoR = 0;
+  vector<double>* sigmaIEtaIEta = 0;
+  vector<double>* sigmaIPhiIPhi = 0;
+  vector<double>* pfChIso = 0;
+  vector<double>* pfPhoIso = 0;
+  vector<double>* pfNeuIso = 0;
+  vector<bool>*   eleVeto = 0;
+  vector<bool>*   hasPixelSeed = 0;
+};
 
 
 /////////////////////////////////////////////////////////////////
@@ -83,6 +101,15 @@ class Jet : public Particle {
 public:
   Jet(TTree*, string);
 
+  unordered_map<CUTS, string, EnumHash> jetNameMap = {
+    {CUTS::eRJet1, "Jet1"},               {CUTS::eRJet2, "Jet2"}, 
+    {CUTS::eRCenJet, "CentralJet"},      {CUTS::eRBJet, "BJet"},
+    {CUTS::eR1stJet, "FirstLeadingJet"},  {CUTS::eR2ndJet, "SecondLeadingJet"}
+  };
+
+  void findExtraCuts();
+  vector<CUTS> overlapCuts(CUTS);
+
   vector<double>* neutralHadEnergyFraction = 0;
   vector<double>* neutralEmEmEnergyFraction = 0;
   vector<int>*    numberOfConstituents = 0;
@@ -94,20 +121,24 @@ public:
   vector<double>* bDiscriminator = 0;
 };
 
-
 class Lepton : public Particle {
 
 public: 
   Lepton(TTree*, string, string);
 
-  vector<double>* charge = 0;
+  void findExtraCuts();
 
+  vector<double>* charge = 0;
+  
+  virtual bool get_Iso(int, double, double) const {return false;}
 };
 
 class Electron : public Lepton {
 
 public:
   Electron(TTree*, string);
+
+  bool get_Iso(int, double, double) const;
 
    vector<int>     *isPassVeto = 0;
    vector<int>     *isPassLoose = 0;
@@ -120,10 +151,14 @@ public:
    vector<double>  *isoPU = 0;
 };
 
+
+
 class Muon : public Lepton {
 
 public: 
   Muon(TTree*, string);
+
+  bool get_Iso(int, double, double) const;
 
    vector<bool>* tight = 0;
    vector<bool>* soft = 0;
@@ -137,6 +172,10 @@ class Taus : public Lepton {
 
  public:
   Taus(TTree*, string);
+
+  void findExtraCuts();
+
+  bool get_Iso(int, double, double) const;
 
    vector<int>     *decayModeFindingNewDMs = 0;
    vector<double>  *nProngs = 0;
