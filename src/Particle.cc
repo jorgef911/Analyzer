@@ -74,7 +74,39 @@ vector<CUTS> Jet::overlapCuts(CUTS ePos) {
   return returnCuts;
 }
 
-    
+
+FatJet::FatJet(TTree* _BOOM, string filename) : Particle(_BOOM, "Jet", filename) {
+  type = PType::FatJet;
+  SetBranch("Jet_toptag_tau1", tau1);
+  SetBranch("Jet_toptag_tau2", tau2);
+  SetBranch("Jet_toptag_tau3", tau3);
+  SetBranch("Jet_toptag_PrunedMass", PrunedMass);
+  SetBranch("Jet_toptag_SoftDropMass", SoftDropMass);
+}
+
+void FatJet::findExtraCuts() {
+  if(pstats["Smear"].bmap.at("SmearTheJet")) {
+    extraCuts.push_back(CUTS::eGMuon);
+    extraCuts.push_back(CUTS::eGElec);
+    extraCuts.push_back(CUTS::eGTau);
+  }
+
+}
+
+vector<CUTS> FatJet::overlapCuts(CUTS ePos) {
+  string pName = jetNameMap.at(ePos);
+  vector<CUTS> returnCuts;
+  if(pstats.at(pName).bmap.at("RemoveOverlapWithMuon1s")) returnCuts.push_back(CUTS::eRMuon1);
+  if(pstats[pName].bmap.at("RemoveOverlapWithMuon2s")) returnCuts.push_back(CUTS::eRMuon2);
+  if(pstats[pName].bmap.at("RemoveOverlapWithElectron1s")) returnCuts.push_back(CUTS::eRElec1);
+  if(pstats[pName].bmap.at("RemoveOverlapWithElectron2s")) returnCuts.push_back(CUTS::eRElec2);
+  if(pstats[pName].bmap.at("RemoveOverlapWithTau1s")) returnCuts.push_back(CUTS::eRTau1);
+  if(pstats[pName].bmap.at("RemoveOverlapWithTau2s")) returnCuts.push_back(CUTS::eRTau2);
+
+  return returnCuts;
+}
+
+
 Lepton::Lepton(TTree* _BOOM, string GenName, string EndName) : Particle(_BOOM, GenName, EndName) {
   SetBranch((GenName+"_charge").c_str(), charge);
 }

@@ -81,10 +81,11 @@ private:
   TLorentzVector matchLeptonToGen(const TLorentzVector&, const PartStats&, CUTS);
   TLorentzVector matchTauToGen(const TLorentzVector&, double);
 
-  void getGoodTauNu();  
+  void getGoodTauNu();
   void getGoodGen(const PartStats&);
   void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&);
   void getGoodRecoJets(CUTS, const PartStats&);
+  void getGoodRecoFatJets(CUTS, const PartStats&);
 
   void getGoodMetTopologyLepton(const Lepton&, CUTS,CUTS, const PartStats&);
   void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&);
@@ -127,6 +128,7 @@ private:
   Muon* _Muon;
   Taus* _Tau;
   Jet* _Jet;
+  FatJet* _FatJet;
   Histogramer histo;
   PartStats genStat;
 

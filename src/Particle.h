@@ -119,17 +119,41 @@ public:
   vector<double>* chargedEmEnergyFraction = 0;
   vector<int>*    partonFlavour = 0;
   vector<double>* bDiscriminator = 0;
+  vector<double>* tau1 = 0;
+  vector<double>* tau2 = 0;
+  vector<double>* tau3 = 0;
+  vector<double>* PrunedMass = 0;
+  vector<double>* SoftDropMass = 0;
+};
+
+class FatJet : public Particle {
+
+public:
+  FatJet(TTree*, string);
+
+  unordered_map<CUTS, string, EnumHash> jetNameMap = {
+    {CUTS::eRWjet, "Wjet"}
+  };
+
+  void findExtraCuts();
+  vector<CUTS> overlapCuts(CUTS);
+
+  vector<double>* tau1 = 0;
+  vector<double>* tau2 = 0;
+  vector<double>* tau3 = 0;
+  vector<double>* PrunedMass = 0;
+  vector<double>* SoftDropMass = 0;
 };
 
 class Lepton : public Particle {
 
-public: 
+public:
   Lepton(TTree*, string, string);
 
   void findExtraCuts();
 
   vector<double>* charge = 0;
-  
+
   virtual bool get_Iso(int, double, double) const {return false;}
 };
 

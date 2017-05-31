@@ -31,7 +31,7 @@ int main (int argc, char* argv[]) {
 
   Analyzer testing(inputname, outputname, setCR);
 
-
+  
   for(int i=0; i < testing.nentries; i++) {
     testing.clear_values();
     testing.preprocess(i);

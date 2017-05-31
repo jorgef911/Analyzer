@@ -122,11 +122,13 @@ Analyzer::Analyzer(string infile, string outfile, bool setCR) : goodParts(getArr
   _Muon = new Muon(BOOM, FILESPACE + "Muon_info.in");
   _Tau = new Taus(BOOM, FILESPACE + "Tau_info.in");
   _Jet = new Jet(BOOM, FILESPACE + "Jet_info.in");
+  _FatJet = new FatJet(BOOM, FILESPACE + "FatJet_info.in");
 
   _Electron->findExtraCuts();
   _Muon->findExtraCuts();
   _Tau->findExtraCuts();
   _Jet->findExtraCuts();
+  _FatJet->findExtraCuts();
 
 
   vector<string> cr_variables;
@@ -333,15 +335,17 @@ void Analyzer::preprocess(int event) {
   getGoodRecoLeptons(*_Muon, CUTS::eRMuon2, CUTS::eGMuon, _Muon->pstats["Muon2"]);
   getGoodRecoLeptons(*_Tau, CUTS::eRTau1, CUTS::eGTau, _Tau->pstats["Tau1"]);
   getGoodRecoLeptons(*_Tau, CUTS::eRTau2, CUTS::eGTau, _Tau->pstats["Tau2"]);
-  
+
 
   getGoodRecoJets(CUTS::eRJet1, _Jet->pstats["Jet1"]);
   getGoodRecoJets(CUTS::eRJet2, _Jet->pstats["Jet2"]);
   getGoodRecoJets(CUTS::eRCenJet, _Jet->pstats["CentralJet"]);
   getGoodRecoJets(CUTS::eRBJet, _Jet->pstats["BJet"]);
-  
+
   getGoodRecoJets(CUTS::eR1stJet, _Jet->pstats["FirstLeadingJet"]);
   getGoodRecoJets(CUTS::eR2ndJet, _Jet->pstats["SecondLeadingJet"]);
+  
+  getGoodRecoFatJets(CUTS::eRWjet, _Jet->pstats["Wjet"]);
 
   ///VBF Susy cut on leadin jets
   VBFTopologyCut(distats["VBFSUSY"]);
@@ -966,24 +970,63 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats) {
     if(stats.bmap.at("RemoveOverlapWithTau2s") && isOverlaping(lvec, *_Tau, CUTS::eRTau2, stats.dmap.at("Tau2MatchingDeltaR"))) continue;
 
     /////fill up array
-    goodParts[ePos]->push_back(i);    
+    goodParts[ePos]->push_back(i);
   }
-
+  
+  //clean up for first and second jet
+  //note the leading jet has to be selected fist!
   if(ePos == CUTS::eR1stJet || ePos == CUTS::eR2ndJet) {
     int potential = -1;
     double prevPt = -1;
     for(vec_iter leadit = goodParts[ePos]->begin(); leadit != goodParts[ePos]->end(); ++leadit) {
       if(((ePos == CUTS::eR2ndJet && (*leadit) != leadIndex) || ePos == CUTS::eR1stJet) && _Jet->smearP.at(*leadit).Pt() > prevPt) {
-	potential = (*leadit);
-	prevPt = _Jet->smearP.at(*leadit).Pt();
+        potential = (*leadit);
+        prevPt = _Jet->smearP.at(*leadit).Pt();
       }
     }
     goodParts[ePos]->clear();
     goodParts[ePos]->push_back(potential);
-    if(ePos == CUTS::eR1stJet) leadIndex = goodParts[CUTS::eR1stJet]->at(0); 
+    if(ePos == CUTS::eR1stJet) leadIndex = goodParts[CUTS::eR1stJet]->at(0);
   }
 
-} 
+}
+
+
+////FatJet specific function for finding the number of V-jets that pass the cuts.
+void Analyzer::getGoodRecoFatJets(CUTS ePos, const PartStats& stats) {
+  if(! need_cut[ePos]) return;
+  int i=0;
+
+
+  for(vector<TLorentzVector>::iterator it=_FatJet->smearP.begin(); it != _FatJet->smearP.end(); it++, i++) {
+    TLorentzVector lvec = (*it);
+    ///if else loop for central jet requirements
+
+    if (fabs(lvec.Eta()) < stats.pmap.at("EtaCut").first || fabs(lvec.Eta()) > stats.pmap.at("EtaCut").second) continue;
+
+    if (lvec.Pt() < stats.dmap.at("PtCut")) continue;
+
+    /// BJet specific
+    if(ePos == CUTS::eRWjet) { //W Tagging
+      if(stats.bmap.at("ApplyJetWTagging") && 
+      not (_FatJet->tau2->at(i)/_FatJet->tau1->at(i)> stats.pmap.at("JetTau1Tau2Ratio").first &&
+        _FatJet->tau2->at(i)/_FatJet->tau1->at(i)< stats.pmap.at("JetTau1Tau2Ratio").second &&
+        _FatJet->PrunedMass->at(i) > stats.pmap.at("JetWmassCut").first &&
+        _FatJet->PrunedMass->at(i) < stats.pmap.at("JetWmassCut").second)) continue;
+    }
+    
+    // ----anti-overlap requirements
+    if(stats.bmap.at("RemoveOverlapWithMuon1s") && isOverlaping(lvec, *_Muon, CUTS::eRMuon1, stats.dmap.at("Muon1MatchingDeltaR"))) continue;
+    if(stats.bmap.at("RemoveOverlapWithMuon2s") && isOverlaping(lvec, *_Muon, CUTS::eRMuon2, stats.dmap.at("Muon2MatchingDeltaR"))) continue;
+    if(stats.bmap.at("RemoveOverlapWithElectron1s") && isOverlaping(lvec, *_Electron, CUTS::eRElec1, stats.dmap.at("Electron1MatchingDeltaR"))) continue;
+    if(stats.bmap.at("RemoveOverlapWithElectron2s") && isOverlaping(lvec, *_Electron, CUTS::eRElec2, stats.dmap.at("Electron2MatchingDeltaR"))) continue;
+    if(stats.bmap.at("RemoveOverlapWithTau1s") && isOverlaping(lvec, *_Tau, CUTS::eRTau1, stats.dmap.at("Tau1MatchingDeltaR"))) continue;
+    if(stats.bmap.at("RemoveOverlapWithTau2s") && isOverlaping(lvec, *_Tau, CUTS::eRTau2, stats.dmap.at("Tau2MatchingDeltaR"))) continue;
+
+    /////fill up array
+    goodParts[ePos]->push_back(i);
+  }
+}
 
 ///function to see if a lepton is overlapping with another particle.  Used to tell if jet or tau
 //came ro decayed into those leptons
