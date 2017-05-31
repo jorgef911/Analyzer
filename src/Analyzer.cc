@@ -179,6 +179,7 @@ Analyzer::Analyzer(string infile, string outfile, bool setCR) : goodParts(getArr
   setCutNeeds();
   //  exit(1);
   std::cout << "setup complete" << std::endl << endl;
+  start_time = clock();
 }
 
 unordered_map<CUTS, vector<int>*, EnumHash> Analyzer::getArray() {
@@ -452,12 +453,18 @@ void Analyzer::printCuts() {
   vector<string> cut_order;
   if(crbins > 1) cut_order = *(histo.get_folders());
   else cut_order = *(histo.get_cutorder());
+  clock_t end_time = clock();
+  double run_time=  static_cast<double>(end_time-start_time)/CLOCKS_PER_SEC;
 
   cout.setf(ios::floatfield,ios::fixed);
   cout<<setprecision(3);
   cout << "\n";
   cout << "Selection Efficiency " << "\n";
   cout << "Total events: " << nentries << "\n";
+  cout << "\n";
+  cout << "Run Time: " <<run_time <<" s\n";
+  cout << "Time per 1k Events: " << static_cast<double>(run_time)/(nentries/1000) <<" s\n";
+  cout << "Events/s: " << static_cast<double>(nentries)/(run_time) <<" 1/s\n";
   cout << "                        Name                  Indiv.";
   if(crbins == 1) cout << "            Cumulative";
   cout << endl << "---------------------------------------------------------------------------\n";

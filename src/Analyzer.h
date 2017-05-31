@@ -14,6 +14,7 @@ struct CRTester;
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <ctime>
 
 #include <TDirectory.h>
 #include <TLorentzVector.h>
@@ -173,6 +174,7 @@ private:
   vector<CRTester*> testVec;
   int SignalRegion = -1;
   bool blinded = true;
+  clock_t start_time;
 };
 
 
