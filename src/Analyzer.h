@@ -15,7 +15,6 @@ struct CRTester;
 #include <stdlib.h>
 #include <iostream>
 
-
 #include <TDirectory.h>
 #include <TLorentzVector.h>
 #include <TFile.h>
@@ -37,7 +36,7 @@ static const int nTrigReq = 2;
 
 class Analyzer {
 
- public:
+public:
   Analyzer(string, string, bool setCR = false);
   ~Analyzer();
   void clear_values();
@@ -62,15 +61,15 @@ class Analyzer {
 
   bool partPassBoth(string);
 
- private:
-  
+private:
+
   void CRfillCuts();
   ///// Functions /////
   void fill_Folder(string, const int);
 
   void getInputs();
   void setupJob(string);
-  void initializePileupInfo(string, string);  
+  void initializePileupInfo(string, string);
   void read_info(string);
   void setupGeneral(TTree*, string);
   void setCutNeeds();
@@ -108,7 +107,7 @@ class Analyzer {
   pair<double, double> getPZeta(const TLorentzVector&, const TLorentzVector&);
   void create_fillInfo();
 
-  inline bool passCutRange(string, double, const PartStats&);  
+  inline bool passCutRange(string, double, const PartStats&);
 
   void updateMet();
   double getPileupWeight(float);
@@ -176,13 +175,13 @@ class Analyzer {
 
 
 struct CRTester {
-    
+
   const FillVals* info;
   const string variable;
   const double cutVal;
   const string partName;
 
-CRTester(FillVals* _info, string var, double val, string _name) : info(_info), variable(var), cutVal(val), partName(_name) {}
+  CRTester(FillVals* _info, string var, double val, string _name) : info(_info), variable(var), cutVal(val), partName(_name) {}
   bool test(Analyzer* analyzer);
 };
 

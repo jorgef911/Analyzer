@@ -87,7 +87,7 @@ void Lepton::findExtraCuts() {
 
 Electron::Electron(TTree* _BOOM, string filename) : Lepton(_BOOM, "patElectron", filename) {
   type = PType::Electron;
-  if(pstats["Elec1"].bmap["DoDiscrByIsolation"] || pstats["Elec2"].bmap["DoDiscrByIsolation"]) {  
+  if(pstats["Elec1"].bmap["DoDiscrByIsolation"] || pstats["Elec2"].bmap["DoDiscrByIsolation"]) {
     SetBranch("patElectron_isoChargedHadrons", isoChargedHadrons);
     SetBranch("patElectron_isoNeutralHadrons", isoNeutralHadrons);
     SetBranch("patElectron_isoPhotons", isoPhotons);
@@ -133,8 +133,8 @@ Taus::Taus(TTree* _BOOM, string filename) : Lepton(_BOOM, "Tau", filename) {
 
   ////Electron discrimination
   if((pstats["Tau1"].bmap["DoDiscrAgainstElectron"] || pstats["Tau1"].bmap["SelectTausThatAreElectrons"]) &&
-     (pstats["Tau2"].bmap["DoDiscrAgainstElectron"] || pstats["Tau2"].bmap["SelectTausThatAreElectrons"]) &&
-     (pstats["Tau1"].smap["DiscrAgainstElectron"] == pstats["Tau2"].smap["DiscrAgainstElectron"]) ) {
+  (pstats["Tau2"].bmap["DoDiscrAgainstElectron"] || pstats["Tau2"].bmap["SelectTausThatAreElectrons"]) &&
+  (pstats["Tau1"].smap["DiscrAgainstElectron"] == pstats["Tau2"].smap["DiscrAgainstElectron"]) ) {
     SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrAgainstElectron"]).c_str(), againstElectron.first);
     againstElectron.second = againstElectron.first;
   } else {
@@ -147,8 +147,8 @@ Taus::Taus(TTree* _BOOM, string filename) : Lepton(_BOOM, "Tau", filename) {
   }
   ////Muon discrimination
   if((pstats["Tau1"].bmap["DoDiscrAgainstMuon"] || pstats["Tau1"].bmap["SelectTausThatAreMuons"]) &&
-     (pstats["Tau2"].bmap["DoDiscrAgainstMuon"] || pstats["Tau2"].bmap["SelectTausThatAreMuons"]) &&
-     (pstats["Tau1"].smap["DiscrAgainstMuon"] == pstats["Tau2"].smap["DiscrAgainstMuon"]) ) {
+  (pstats["Tau2"].bmap["DoDiscrAgainstMuon"] || pstats["Tau2"].bmap["SelectTausThatAreMuons"]) &&
+  (pstats["Tau1"].smap["DiscrAgainstMuon"] == pstats["Tau2"].smap["DiscrAgainstMuon"]) ) {
     SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrAgainstMuon"]).c_str(), againstMuon.first);
     againstMuon.second = againstMuon.first;
   } else {
@@ -162,31 +162,31 @@ Taus::Taus(TTree* _BOOM, string filename) : Lepton(_BOOM, "Tau", filename) {
 
   /////Isolation discrimination
   if(pstats["Tau1"].bmap["DoDiscrByIsolation"] && pstats["Tau2"].bmap["DoDiscrByIsolation"] &&
-     pstats["Tau1"].smap["DiscrByMaxIsolation"] == pstats["Tau2"].smap["DiscrByMaxIsolation"]) {
-    SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrByMaxIsolation"]).c_str(), (maxIso.first));      
+  pstats["Tau1"].smap["DiscrByMaxIsolation"] == pstats["Tau2"].smap["DiscrByMaxIsolation"]) {
+    SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrByMaxIsolation"]).c_str(), (maxIso.first));
     maxIso.second = maxIso.first;
   } else {
     if(pstats["Tau1"].bmap["DoDiscrByIsolation"]) {
-      SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrByMaxIsolation"]).c_str(), (maxIso.first));      
+      SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrByMaxIsolation"]).c_str(), (maxIso.first));
     }
     if(pstats["Tau2"].bmap["DoDiscrByIsolation"]) {
       SetBranch(("Tau_"+pstats["Tau2"].smap["DiscrByMaxIsolation"]).c_str(), (maxIso.second));
     }
   }      ////min stuff
   if(pstats["Tau1"].bmap["DoDiscrByIsolation"] && pstats["Tau2"].bmap["DoDiscrByIsolation"] &&
-     pstats["Tau1"].smap["DiscrByMinIsolation"] == pstats["Tau2"].smap["DiscrByMinIsolation"] &&
-     pstats["Tau1"].smap["DiscrByMinIsolation"] != "ZERO") {
-    SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrByMinIsolation"]).c_str(), (minIso.first));      
+  pstats["Tau1"].smap["DiscrByMinIsolation"] == pstats["Tau2"].smap["DiscrByMinIsolation"] &&
+  pstats["Tau1"].smap["DiscrByMinIsolation"] != "ZERO") {
+    SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrByMinIsolation"]).c_str(), (minIso.first));
     minIso.second = minIso.first;
   } else {
     if(pstats["Tau1"].bmap["DoDiscrByIsolation"] && pstats["Tau1"].smap["DiscrByMinIsolation"] != "ZERO") {
 
-      SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrByMinIsolation"]).c_str(), (minIso.first));      
+      SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrByMinIsolation"]).c_str(), (minIso.first));
     }
     if(pstats["Tau2"].bmap["DoDiscrByIsolation"] && pstats["Tau2"].smap["DiscrByMinIsolation"] != "ZERO") {
       SetBranch(("Tau_"+pstats["Tau2"].smap["DiscrByMaxIsolation"]).c_str(), (minIso.second));
     }
-  }      
+  }
 
 
   SetBranch("Tau_decayModeFindingNewDMs", decayModeFindingNewDMs);
@@ -198,14 +198,14 @@ Taus::Taus(TTree* _BOOM, string filename) : Lepton(_BOOM, "Tau", filename) {
 void Taus::findExtraCuts() {
   Lepton::findExtraCuts();
 
-  if(pstats["Tau1"].bmap.at("RemoveOverlapWithMuon1s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithMuon1s")) 
-    extraCuts.push_back(CUTS::eRMuon1);
+  if(pstats["Tau1"].bmap.at("RemoveOverlapWithMuon1s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithMuon1s"))
+  extraCuts.push_back(CUTS::eRMuon1);
   if(pstats["Tau1"].bmap.at("RemoveOverlapWithMuon2s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithMuon2s"))
-    extraCuts.push_back(CUTS::eRMuon2);
+  extraCuts.push_back(CUTS::eRMuon2);
   if(pstats["Tau1"].bmap.at("RemoveOverlapWithElectron1s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithElectron1s"))
-    extraCuts.push_back(CUTS::eRElec1);
-  if(pstats["Tau1"].bmap.at("RemoveOverlapWithElectron2s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithElectron2s")) 
-    extraCuts.push_back(CUTS::eRElec2);
+  extraCuts.push_back(CUTS::eRElec1);
+  if(pstats["Tau1"].bmap.at("RemoveOverlapWithElectron2s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithElectron2s"))
+  extraCuts.push_back(CUTS::eRElec2);
 }
 
 void Particle::getPartStats(string filename) {
@@ -237,7 +237,7 @@ void Particle::getPartStats(string filename) {
     } else if(stemp.size() == 2) {
 
       if(stemp[1] == "1" || stemp[1] == "true" ) pstats[group].bmap[stemp[0]] = true;
-      else if(stemp[1] == "0"  || stemp[1] == "false" ) pstats[group].bmap[stemp[0]]=false; 
+      else if(stemp[1] == "0"  || stemp[1] == "false" ) pstats[group].bmap[stemp[0]]=false;
 
       else if(stemp[1].find_first_not_of("0123456789+-.") == string::npos) pstats[group].dmap[stemp[0]]=stod(stemp[1]);
       else pstats[group].smap[stemp[0]] = stemp[1];

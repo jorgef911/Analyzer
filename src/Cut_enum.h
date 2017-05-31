@@ -1,32 +1,32 @@
 #ifndef CUTS_ENUM_H_
-#define CUTS_ENUM_H_  
+#define CUTS_ENUM_H_
 
 #include <string>
 #include <functional>
 template< typename T >
 class Enum {
 public:
-   class Iterator {
+  class Iterator {
 
-   public:
-     Iterator( int value ) :  m_value( value ) { }
+  public:
+    Iterator( int value ) :  m_value( value ) { }
 
-     T operator*( void ) const {
-       return (T)m_value;
-     }
+    T operator*( void ) const {
+      return (T)m_value;
+    }
 
-     void operator++( void ) {
-       ++m_value;
-     }
+    void operator++( void ) {
+      ++m_value;
+    }
 
-     bool operator!=( Iterator rhs ) {
-       return m_value != rhs.m_value;
-     }
+    bool operator!=( Iterator rhs ) {
+      return m_value != rhs.m_value;
+    }
 
-   private:
-     int m_value;
-   };
-  
+  private:
+    int m_value;
+  };
+
 };
 
 template< typename T >

@@ -1,7 +1,7 @@
 #include "Analyzer.h"
 
 int main (int argc, char* argv[]) {
-  
+
   bool setCR = false;
 
   if(argc < 3) {
@@ -16,8 +16,8 @@ int main (int argc, char* argv[]) {
     if(argv[i][0] == '-') {
       if(strcmp(argv[i], "-CR") == 0) setCR = true;
       else {
-	cout << "wrong option, exiting" << endl;
-	exit(0);
+        cout << "wrong option, exiting" << endl;
+        exit(0);
       }
     } else if(inputname == "") inputname = argv[i];
     else outputname = argv[i];
@@ -30,7 +30,7 @@ int main (int argc, char* argv[]) {
   }
 
   Analyzer testing(inputname, outputname, setCR);
-  
+
 
   for(int i=0; i < testing.nentries; i++) {
     testing.clear_values();
