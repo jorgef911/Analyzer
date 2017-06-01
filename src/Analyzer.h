@@ -37,7 +37,7 @@ using namespace std;
 static const int nTrigReq = 2;
 
 class Analyzer {
-
+  friend class CRTester;
 public:
   Analyzer(string, string, bool setCR = false);
   ~Analyzer();
