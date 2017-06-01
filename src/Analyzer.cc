@@ -378,9 +378,12 @@ void Analyzer::preprocess(int event) {
   ////Dijet cuts
   getGoodDiJets(distats["DiJet"]);
 
-  if(event % 50000 == 0) {
-    cout << "Event #" << event << endl;
-  }
+  if( event < 10 || ( event < 100 && event % 10 == 0 ) ||
+    ( event < 1000 && event % 100 == 0 ) ||
+    ( event < 10000 && event % 1000 == 0 ) ||
+    ( event >= 10000 && event % 10000 == 0 ) ) {
+       cout << event << " Events analyzed\n";
+    }
 }
 
 
@@ -465,8 +468,8 @@ void Analyzer::printCuts() {
   cout << "Selection Efficiency " << "\n";
   cout << "Total events: " << nentries << "\n";
   cout << "\n";
-  cout << "Run Time: " <<run_time <<" s\n";
-  cout << "Time per 1k Events: " << static_cast<double>(run_time)/(nentries/1000) <<" s\n";
+  cout << "Run Time (cpu): " <<run_time <<" s\n";
+  cout << "Time per 1k Events: " << run_time/(nentries/1000) <<" s\n";
   cout << "Events/s: " << static_cast<double>(nentries)/(run_time) <<" 1/s\n";
   cout << "                        Name                  Indiv.";
   if(crbins == 1) cout << "            Cumulative";
@@ -474,7 +477,7 @@ void Analyzer::printCuts() {
   for(size_t i = 0; i < cut_order.size(); i++) {
     cout << setw(28) << cut_order.at(i) << "    ";
     if(isData && cut_order.at(i).find("Gen") != string::npos) cout << "Skipped" << endl;
-    else if(crbins != 1 && blinded && i == SignalRegion) cout << "Blinded Signal Region" << endl;
+    else if(crbins != 1 && blinded && ival(i) == SignalRegion) cout << "Blinded Signal Region" << endl;
     else {
       cout << setw(10) << cuts_per.at(i) << "  ( " << setw(5) << ((float)cuts_per.at(i)) / nentries << ") ";
       if(crbins == 1) cout << setw(12) << cuts_cumul.at(i) << "  ( " << setw(5) << ((float)cuts_cumul.at(i)) / nentries << ") ";
@@ -985,7 +988,7 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats) {
     /////fill up array
     goodParts[ePos]->push_back(i);
   }
-  
+
   //clean up for first and second jet
   //note the leading jet has to be selected fist!
   if(ePos == CUTS::eR1stJet || ePos == CUTS::eR2ndJet) {
@@ -1009,7 +1012,6 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats) {
 void Analyzer::getGoodRecoFatJets(CUTS ePos, const PartStats& stats) {
   if(! need_cut[ePos]) return;
   int i=0;
-
 
   for(vector<TLorentzVector>::iterator it=_FatJet->smearP.begin(); it != _FatJet->smearP.end(); it++, i++) {
     TLorentzVector lvec = (*it);
@@ -1451,6 +1453,7 @@ void Analyzer::fill_Folder(string group, const int max) {
       histAddVal(leadpt, "FirstLeadingPt");
       histAddVal(leadeta, "FirstLeadingEta");
     }
+
 
     histAddVal(goodParts[ePos]->size(), "N");
 

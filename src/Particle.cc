@@ -90,7 +90,6 @@ void FatJet::findExtraCuts() {
     extraCuts.push_back(CUTS::eGElec);
     extraCuts.push_back(CUTS::eGTau);
   }
-
 }
 
 vector<CUTS> FatJet::overlapCuts(CUTS ePos) {

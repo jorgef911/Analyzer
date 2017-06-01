@@ -1,8 +1,15 @@
 #include "Analyzer.h"
+#include <csignal>
+
+bool do_break;
+void KeyboardInterrupt_endJob(int signum) {
+    do_break = true;
+}
 
 int main (int argc, char* argv[]) {
 
   bool setCR = false;
+  do_break =false;
 
   if(argc < 3) {
     std::cout << "You have entered too little arguments, please type:" << std::endl;
@@ -31,11 +38,17 @@ int main (int argc, char* argv[]) {
 
   Analyzer testing(inputname, outputname, setCR);
 
-  
+
+  //catch ctrl+c and just exit the loop
+  //this way we still have the output
+  signal(SIGINT,KeyboardInterrupt_endJob);
+
+
   for(int i=0; i < testing.nentries; i++) {
     testing.clear_values();
     testing.preprocess(i);
     testing.fill_histogram();
+    if(do_break)break;
   }
   testing.printCuts();
   return 0;
