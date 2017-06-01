@@ -75,7 +75,7 @@ vector<CUTS> Jet::overlapCuts(CUTS ePos) {
 }
 
 
-FatJet::FatJet(TTree* _BOOM, string filename) : Particle(_BOOM, "Jet", filename) {
+FatJet::FatJet(TTree* _BOOM, string filename) : Particle(_BOOM, "Jet_toptag", filename) {
   type = PType::FatJet;
   SetBranch("Jet_toptag_tau1", tau1);
   SetBranch("Jet_toptag_tau2", tau2);

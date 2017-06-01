@@ -83,7 +83,8 @@ const unordered_map<string, CUTS> Analyzer::cut_num = {
   {"NElectron2Tau1Combinations", CUTS::eElec2Tau1},     {"NElectron2Tau2Combinations", CUTS::eElec2Tau2},
   {"NMuon1Electron1Combinations", CUTS::eMuon1Elec1},   {"NMuon1Electron2Combinations", CUTS::eMuon1Elec2},
   {"NMuon2Electron1Combinations", CUTS::eMuon2Elec1},   {"NMuon2Electron2Combinations", CUTS::eMuon2Elec2},
-  {"NLeadJetCombinations", CUTS::eSusyCom},             {"METCut", CUTS::eMET}
+  {"NLeadJetCombinations", CUTS::eSusyCom},             {"METCut", CUTS::eMET},
+  {"NRecoWJet", CUTS::eRWjet}
 };
 
 
@@ -194,10 +195,10 @@ unordered_map<CUTS, vector<int>*, EnumHash> Analyzer::getArray() {
 
 void Analyzer::create_fillInfo() {
 
-  fillInfo["FillLeadingJet"] =    new FillVals(CUTS::eSusyCom, FILLER::Dipart, _Jet, _Jet);
-  fillInfo["FillGen"] =   new FillVals(CUTS::eGen, FILLER::Single, _Gen);
-  fillInfo["FillTau1"] =    new FillVals(CUTS::eRTau1, FILLER::Single, _Tau);
-  fillInfo["FillTau2"] =    new FillVals(CUTS::eRTau2, FILLER::Single, _Tau);
+  fillInfo["FillLeadingJet"] = new FillVals(CUTS::eSusyCom, FILLER::Dipart, _Jet, _Jet);
+  fillInfo["FillGen"] =        new FillVals(CUTS::eGen, FILLER::Single, _Gen);
+  fillInfo["FillTau1"] =       new FillVals(CUTS::eRTau1, FILLER::Single, _Tau);
+  fillInfo["FillTau2"] =       new FillVals(CUTS::eRTau2, FILLER::Single, _Tau);
   fillInfo["FillMuon1"] =      new FillVals(CUTS::eRMuon1, FILLER::Single, _Muon);
   fillInfo["FillMuon2"] =      new FillVals(CUTS::eRMuon2, FILLER::Single, _Muon);
   fillInfo["FillElectron1"] =  new FillVals(CUTS::eRElec1, FILLER::Single, _Electron);
@@ -207,20 +208,21 @@ void Analyzer::create_fillInfo() {
   fillInfo["FillJet2"] =       new FillVals(CUTS::eRJet2, FILLER::Single, _Jet);
   fillInfo["FillBJet"] =       new FillVals(CUTS::eRBJet, FILLER::Single, _Jet);
   fillInfo["FillCentralJet"] = new FillVals(CUTS::eRCenJet, FILLER::Single, _Jet);
+  fillInfo["FillWJet"] =     new FillVals(CUTS::eRWjet, FILLER::Single, _FatJet);
 
   fillInfo["FillDiMuon"] =     new FillVals(CUTS::eDiMuon, FILLER::Dipart, _Muon, _Muon);
   fillInfo["FillDiTau"] =      new FillVals(CUTS::eDiTau, FILLER::Dipart, _Tau, _Tau);
-  fillInfo["FillMetCuts"] =  new FillVals();
-  fillInfo["FillDiJet"] =  new FillVals(CUTS::eDiJet, FILLER::Dipart, _Jet, _Jet);
+  fillInfo["FillMetCuts"] =    new FillVals();
+  fillInfo["FillDiJet"] =      new FillVals(CUTS::eDiJet, FILLER::Dipart, _Jet, _Jet);
 
-  fillInfo["FillMuon1Tau1"] =  new FillVals(CUTS::eMuon1Tau1, FILLER::Dipart, _Muon, _Tau);
-  fillInfo["FillMuon1Tau2"] =  new FillVals(CUTS::eMuon1Tau1, FILLER::Dipart, _Muon, _Tau);
-  fillInfo["FillMuon2Tau1"] =  new FillVals(CUTS::eMuon2Tau1, FILLER::Dipart, _Muon, _Tau);
-  fillInfo["FillMuon2Tau2"] =  new FillVals(CUTS::eMuon2Tau2, FILLER::Dipart, _Muon, _Tau);
-  fillInfo["FillElectron1Tau1"] =  new FillVals(CUTS::eElec1Tau1, FILLER::Dipart, _Electron, _Tau);
-  fillInfo["FillElectron1Tau2"] =  new FillVals(CUTS::eElec1Tau1, FILLER::Dipart, _Electron, _Tau);
-  fillInfo["FillElectron2Tau1"] =  new FillVals(CUTS::eElec2Tau1, FILLER::Dipart, _Electron, _Tau);
-  fillInfo["FillElectron2Tau2"] =  new FillVals(CUTS::eElec2Tau2, FILLER::Dipart, _Electron, _Tau);
+  fillInfo["FillMuon1Tau1"] =       new FillVals(CUTS::eMuon1Tau1, FILLER::Dipart, _Muon, _Tau);
+  fillInfo["FillMuon1Tau2"] =       new FillVals(CUTS::eMuon1Tau1, FILLER::Dipart, _Muon, _Tau);
+  fillInfo["FillMuon2Tau1"] =       new FillVals(CUTS::eMuon2Tau1, FILLER::Dipart, _Muon, _Tau);
+  fillInfo["FillMuon2Tau2"] =       new FillVals(CUTS::eMuon2Tau2, FILLER::Dipart, _Muon, _Tau);
+  fillInfo["FillElectron1Tau1"] =   new FillVals(CUTS::eElec1Tau1, FILLER::Dipart, _Electron, _Tau);
+  fillInfo["FillElectron1Tau2"] =   new FillVals(CUTS::eElec1Tau1, FILLER::Dipart, _Electron, _Tau);
+  fillInfo["FillElectron2Tau1"] =   new FillVals(CUTS::eElec2Tau1, FILLER::Dipart, _Electron, _Tau);
+  fillInfo["FillElectron2Tau2"] =   new FillVals(CUTS::eElec2Tau2, FILLER::Dipart, _Electron, _Tau);
   fillInfo["FillMuon1Electron1"] =  new FillVals(CUTS::eMuon1Elec1, FILLER::Dipart, _Muon, _Electron);
   fillInfo["FillMuon1Electron2"] =  new FillVals(CUTS::eMuon1Elec1, FILLER::Dipart, _Muon, _Electron);
   fillInfo["FillMuon2Electron1"] =  new FillVals(CUTS::eMuon2Elec1, FILLER::Dipart, _Muon, _Electron);
@@ -228,8 +230,8 @@ void Analyzer::create_fillInfo() {
 
   //////I hate this solution so much.  Its terrible
   fillInfo["FillElectron1Electron2"] =     new FillVals(CUTS::eDiElec, FILLER::Single, _Electron, _Electron);
-  fillInfo["FillMuon1Muon2"] =     new FillVals(CUTS::eDiMuon, FILLER::Single, _Muon, _Muon);
-  fillInfo["FillTau1Tau2"] =      new FillVals(CUTS::eDiTau, FILLER::Single, _Tau, _Tau);
+  fillInfo["FillMuon1Muon2"] =             new FillVals(CUTS::eDiMuon, FILLER::Single, _Muon, _Muon);
+  fillInfo["FillTau1Tau2"] =               new FillVals(CUTS::eDiTau, FILLER::Single, _Tau, _Tau);
 
 
 
@@ -319,7 +321,8 @@ void Analyzer::preprocess(int event) {
   smearLepton(*_Muon, CUTS::eGMuon, _Muon->pstats["Smear"]);
   smearLepton(*_Tau, CUTS::eGTau, _Tau->pstats["Smear"]);
 
-  smearJet(_Jet->pstats["Smear"]);
+  smearJet(*_Jet,_Jet->pstats["Smear"]);
+  smearJet(*_FatJet,_FatJet->pstats["Smear"]);
 
   //////Triggers and Vertices
   goodParts[CUTS::eRVertex]->resize(bestVertices);
@@ -345,8 +348,8 @@ void Analyzer::preprocess(int event) {
 
   getGoodRecoJets(CUTS::eR1stJet, _Jet->pstats["FirstLeadingJet"]);
   getGoodRecoJets(CUTS::eR2ndJet, _Jet->pstats["SecondLeadingJet"]);
-  
-  getGoodRecoFatJets(CUTS::eRWjet, _Jet->pstats["Wjet"]);
+
+  getGoodRecoFatJets(CUTS::eRWjet, _FatJet->pstats["Wjet"]);
 
   ///VBF Susy cut on leadin jets
   VBFTopologyCut(distats["VBFSUSY"]);
@@ -753,16 +756,16 @@ void Analyzer::smearLepton(Lepton& lepton, CUTS eGenPos, const PartStats& stats)
 }
 
 ///Same as smearlepton, just jet specific
-void Analyzer::smearJet(const PartStats& stats) {
-  _Jet->smearP.clear();
+void Analyzer::smearJet(Particle& jet,const PartStats& stats) {
+  jet.smearP.clear();
 
   TLorentzVector jetV;
 
-  for(size_t i=0; i< _Jet->pt->size(); i++) {
-    jetV.SetPtEtaPhiE(_Jet->pt->at(i), _Jet->eta->at(i), _Jet->phi->at(i), _Jet->energy->at(i));
+  for(size_t i=0; i< jet.pt->size(); i++) {
+    jetV.SetPtEtaPhiE(jet.pt->at(i), jet.eta->at(i), jet.phi->at(i), jet.energy->at(i));
 
     if(isData || !stats.bmap.at("SmearTheJet")) {
-      _Jet->smearP.push_back(jetV);
+      jet.smearP.push_back(jetV);
       continue;
     }
 
@@ -770,14 +773,17 @@ void Analyzer::smearJet(const PartStats& stats) {
     JetMatchesLepton(*_Tau, jetV, stats.dmap.at("TauMatchingDeltaR"), CUTS::eGTau) ||
     JetMatchesLepton(*_Electron, jetV,stats.dmap.at("ElectronMatchingDeltaR"), CUTS::eGElec)){
 
-      _Jet->smearP.push_back(jetV);
+      jet.smearP.push_back(jetV);
 
       continue;
     }
 
-    _Jet->smearP.push_back(stats.dmap.at("JetEnergyScaleOffset") * jetV);
-    deltaMEx += (1 - stats.dmap.at("JetEnergyScaleOffset"))*jetV.Px();
-    deltaMEy += (1 -stats.dmap.at("JetEnergyScaleOffset"))*jetV.Py();
+    jet.smearP.push_back(stats.dmap.at("JetEnergyScaleOffset") * jetV);
+    //only apply corrections for jets not for FatJets
+    if(jet.type == PType::Jet){
+      deltaMEx += (1 - stats.dmap.at("JetEnergyScaleOffset"))*jetV.Px();
+      deltaMEy += (1 -stats.dmap.at("JetEnergyScaleOffset"))*jetV.Py();
+    }
   }
 }
 
@@ -1013,15 +1019,15 @@ void Analyzer::getGoodRecoFatJets(CUTS ePos, const PartStats& stats) {
 
     if (lvec.Pt() < stats.dmap.at("PtCut")) continue;
 
-    /// BJet specific
+    /// WJet specific
     if(ePos == CUTS::eRWjet) { //W Tagging
-      if(stats.bmap.at("ApplyJetWTagging") && 
-      not (_FatJet->tau2->at(i)/_FatJet->tau1->at(i)> stats.pmap.at("JetTau1Tau2Ratio").first &&
-        _FatJet->tau2->at(i)/_FatJet->tau1->at(i)< stats.pmap.at("JetTau1Tau2Ratio").second &&
+      if(stats.bmap.at("ApplyJetWTagging") &&
+      not (_FatJet->tau2->at(i)/_FatJet->tau1->at(i)> stats.pmap.at("JetTau2Tau1Ratio").first &&
+        _FatJet->tau2->at(i)/_FatJet->tau1->at(i)< stats.pmap.at("JetTau2Tau1Ratio").second &&
         _FatJet->PrunedMass->at(i) > stats.pmap.at("JetWmassCut").first &&
         _FatJet->PrunedMass->at(i) < stats.pmap.at("JetWmassCut").second)) continue;
     }
-    
+
     // ----anti-overlap requirements
     if(stats.bmap.at("RemoveOverlapWithMuon1s") && isOverlaping(lvec, *_Muon, CUTS::eRMuon1, stats.dmap.at("Muon1MatchingDeltaR"))) continue;
     if(stats.bmap.at("RemoveOverlapWithMuon2s") && isOverlaping(lvec, *_Muon, CUTS::eRMuon2, stats.dmap.at("Muon2MatchingDeltaR"))) continue;
@@ -1423,6 +1429,13 @@ void Analyzer::fill_Folder(string group, const int max) {
       }
       if(part->type != PType::Jet) {
         histAddVal(calculateLeptonMetMt(part->smearP.at(*it)), "MetMt");
+      }
+      if(part->type == PType::FatJet ) {
+        histAddVal(_FatJet->PrunedMass->at(*it), "PrunedMass");
+        histAddVal(_FatJet->SoftDropMass->at(*it), "SoftDropMass");
+        histAddVal(_FatJet->tau1->at(*it), "tau1");
+        histAddVal(_FatJet->tau2->at(*it), "tau2");
+        histAddVal(_FatJet->tau2->at(*it)/_FatJet->tau1->at(*it), "tau2Overtau1");
       }
     }
     if((part->type != PType::Jet ) && goodParts[ePos]->size() > 0) {
