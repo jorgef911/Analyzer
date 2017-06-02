@@ -1424,7 +1424,6 @@ pair<double, double> Analyzer::getPZeta(const TLorentzVector& Tobj1, const TLore
 void Analyzer::fill_histogram() {
   if(distats["Run"].bmap["ApplyGenWeight"] && gen_weight == 0.0) return;
 
-  cout<<crbins<<"\n";
   if(crbins != 1) CRfillCuts();
   else fillCuts();
 
