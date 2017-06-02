@@ -488,6 +488,9 @@ void Analyzer::printCuts() {
     }
   }
   cout << "---------------------------------------------------------------------------\n";
+
+  //write all the histograms
+  //attention this is not the fill_histogram method from the Analyser
   histo.fill_histogram();
 }
 
@@ -671,10 +674,15 @@ void Analyzer::read_info(string filename) {
 
       char* p;
       strtod(stemp[1].c_str(), &p);
-      if(stemp[1] == "1" || stemp[1] == "true") distats[group].bmap[stemp[0]]=true;
-      else if(stemp[1] == "0" || stemp[1] == "false") distats[group].bmap[stemp[0]]=false;
-      else if(*p) distats[group].smap[stemp[0]] = stemp[1];
-      else  distats[group].dmap[stemp[0]]=stod(stemp[1]);
+      if(group.compare("Control_Region") !=0 ){
+        if(stemp[1] == "1" || stemp[1] == "true") distats[group].bmap[stemp[0]]=true;
+        else if(stemp[1] == "0" || stemp[1] == "false") distats[group].bmap[stemp[0]]=false;
+        else if(*p) distats[group].smap[stemp[0]] = stemp[1];
+        else  distats[group].dmap[stemp[0]]=stod(stemp[1]);
+      }else{
+        if(*p) distats[group].smap[stemp[0]] = stemp[1];
+        else  distats[group].dmap[stemp[0]]=stod(stemp[1]);
+      }
 
     } else if(stemp.size() == 3) distats[group].pmap[stemp[0]] = make_pair(stod(stemp[1]), stod(stemp[2]));
   }
@@ -846,8 +854,8 @@ void Analyzer::smearJet(Particle& jet,const PartStats& stats) {
     }
 
     if(JetMatchesLepton(*_Muon, jetV, stats.dmap.at("MuonMatchingDeltaR"), CUTS::eGMuon) ||
-    JetMatchesLepton(*_Tau, jetV, stats.dmap.at("TauMatchingDeltaR"), CUTS::eGTau) ||
-    JetMatchesLepton(*_Electron, jetV,stats.dmap.at("ElectronMatchingDeltaR"), CUTS::eGElec)){
+      JetMatchesLepton(*_Tau, jetV, stats.dmap.at("TauMatchingDeltaR"), CUTS::eGTau) ||
+      JetMatchesLepton(*_Electron, jetV,stats.dmap.at("ElectronMatchingDeltaR"), CUTS::eGElec)){
 
       jet.smearP.push_back(jetV);
 
@@ -926,12 +934,6 @@ void Analyzer::getGoodGen(const PartStats& stats) {
       goodParts[genMaper[id]->ePos]->push_back(j);
     }
   }
-
-
-  // if((abs(_Gen->pdg_id->at(j)) == particle_id) && (_Gen->status->at(j) == particle_status)) {
-  //   goodParts[ePos]->push_back(j);
-  // }
-  //}
 
 }
 
@@ -1150,9 +1152,9 @@ bool Analyzer::passedLooseJetID(int nobj) {
   if (_Jet->numberOfConstituents->at(nobj) <= 1) return false;
   if (_Jet->muonEnergyFraction->at(nobj) >= 0.80) return false;
   if ( (fabs(_Jet->smearP.at(nobj).Eta()) < 2.4) &&
-  ((_Jet->chargedHadronEnergyFraction->at(nobj) <= 0.0) ||
-  (_Jet->chargedMultiplicity->at(nobj) <= 0.0) ||
-  (_Jet->chargedEmEnergyFraction->at(nobj) >= 0.99) )) return false;
+    ((_Jet->chargedHadronEnergyFraction->at(nobj) <= 0.0) ||
+    (_Jet->chargedMultiplicity->at(nobj) <= 0.0) ||
+    (_Jet->chargedEmEnergyFraction->at(nobj) >= 0.99) )) return false;
   return true;
 }
 
@@ -1301,7 +1303,7 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
 
       if (stats.bmap.at("DiscrByCDFzeta2D")) {
         double CDFzeta = stats.dmap.at("PZetaCutCoefficient") * getPZeta(part1, part2).first
-        + stats.dmap.at("PZetaVisCutCoefficient") * getPZeta(part1, part2).second;
+                + stats.dmap.at("PZetaVisCutCoefficient") * getPZeta(part1, part2).second;
         if( CDFzeta < stats.pmap.at("CDFzeta2DCutValue").first || CDFzeta > stats.pmap.at("CDFzeta2DCutValue").second ) continue;
       }
 
@@ -1422,8 +1424,10 @@ pair<double, double> Analyzer::getPZeta(const TLorentzVector& Tobj1, const TLore
 void Analyzer::fill_histogram() {
   if(distats["Run"].bmap["ApplyGenWeight"] && gen_weight == 0.0) return;
 
+  cout<<crbins<<"\n";
   if(crbins != 1) CRfillCuts();
   else fillCuts();
+
   if(isData && blinded && maxCut == SignalRegion) return;
   const vector<string>* groups = histo.get_groups();
   wgt = pu_weight;
