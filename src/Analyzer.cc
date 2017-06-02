@@ -1682,7 +1682,7 @@ void Analyzer::fill_Folder(string group, const int max) {
       histAddVal2(PZetaVis,PZeta, "Zeta2D");
       histAddVal((distats.at(digroup).dmap.at("PZetaCutCoefficient") * PZeta) + (distats.at(digroup).dmap.at("PZetaVisCutCoefficient") * PZetaVis), "Zeta1D");
 
-      if ((goodParts[CUTS::eR1stJet]->at(0) != -1) && (goodParts[CUTS::eR2ndJet]->at(0) != -1)) {
+      if ((goodParts[CUTS::eR1stJet]->size()>0 && goodParts[CUTS::eR1stJet]->at(0) != -1) && (goodParts[CUTS::eR2ndJet]->size()>0 && goodParts[CUTS::eR2ndJet]->at(0) != -1)) {
         TLorentzVector TheLeadDiJetVect = _Jet->smearP.at(goodParts[CUTS::eR1stJet]->at(0)) + _Jet->smearP.at(goodParts[CUTS::eR2ndJet]->at(0));
 
         histAddVal(absnormPhi(part1.Phi() - TheLeadDiJetVect.Phi()), "Part1DiJetDeltaPhi");
