@@ -5,11 +5,15 @@
 Particle::Particle(TTree* _BOOM, string _GenName, string filename) : BOOM(_BOOM), GenName(_GenName) {
   type = PType::None;
   getPartStats(filename);
-
-  SetBranch((GenName+"_pt").c_str(), pt);
-  SetBranch((GenName+"_eta").c_str(), eta);
-  SetBranch((GenName+"_phi").c_str(), phi);
-  SetBranch((GenName+"_energy").c_str(), energy);
+  //set the pt to an empty vector if the branch does not exist
+  if( _BOOM->GetListOfBranches()->FindObject((GenName+"_pt").c_str()) ==0){
+    pt=new vector<double>();
+  }else{
+    SetBranch((GenName+"_pt").c_str(), pt);
+    SetBranch((GenName+"_eta").c_str(), eta);
+    SetBranch((GenName+"_phi").c_str(), phi);
+    SetBranch((GenName+"_energy").c_str(), energy);
+  }
 
 }
 
