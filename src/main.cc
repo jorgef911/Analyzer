@@ -48,7 +48,10 @@ int main (int argc, char* argv[]) {
     testing.clear_values();
     testing.preprocess(i);
     testing.fill_histogram();
-    if(do_break)break;
+    if(do_break){
+      testing.nentries=i;
+      break;
+    }
   }
   testing.printCuts();
   return 0;

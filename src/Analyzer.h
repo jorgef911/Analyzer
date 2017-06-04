@@ -70,7 +70,7 @@ private:
 
   void getInputs();
   void setupJob(string);
-  void initializePileupInfo(string, string);
+  void initializePileupInfo(string, string, string, string);
   void read_info(string);
   void setupGeneral(TTree*, string);
   void setCutNeeds();

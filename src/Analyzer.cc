@@ -113,7 +113,7 @@ Analyzer::Analyzer(string infile, string outfile, bool setCR) : goodParts(getArr
 
   isData = distats["Run"].bmap.at("isData");
   CalculatePUSystematics = distats["Run"].bmap.at("CalculatePUSystematics");
-  initializePileupInfo(distats["Run"].smap.at("MCHistos"), distats["Run"].smap.at("DataHistos"));
+  initializePileupInfo(distats["Run"].smap.at("MCHistos"), distats["Run"].smap.at("DataHistos"),distats["Run"].smap.at("DataPUHistName"),distats["Run"].smap.at("MCPUHistName"));
 
 
   if(!isData) {
@@ -1700,14 +1700,14 @@ void Analyzer::fill_Folder(string group, const int max) {
 }
 
 
-void Analyzer::initializePileupInfo(string MCHisto, string DataHisto) {
+void Analyzer::initializePileupInfo(string MCHisto, string DataHisto, string DataHistoName, string MCHistoName) {
 
   TFile *file1 = new TFile((PUSPACE+MCHisto).c_str());
-  TH1D* histmc = (TH1D*)file1->FindObjectAny("NVertices_0");
+  TH1D* histmc = (TH1D*)file1->FindObjectAny(MCHistoName.c_str());
   if(!histmc) throw std::runtime_error("failed to extract histogram");
 
   TFile* file2 = new TFile((PUSPACE+DataHisto).c_str());
-  TH1D* histdata = (TH1D*)file2->FindObjectAny("NVertices_0");
+  TH1D* histdata = (TH1D*)file2->FindObjectAny(DataHistoName.c_str());
   if(!histdata) throw std::runtime_error("failed to extract histogram");
 
   double factor = histmc->Integral() / histdata->Integral();
