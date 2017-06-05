@@ -1421,11 +1421,6 @@ pair<double, double> Analyzer::getPZeta(const TLorentzVector& Tobj1, const TLore
 }
 
 
-///Normalizes phi to be between -PI and PI
-
-///Takes the absolute value of of normPhi (made because constant use)
-
-
 
 ////Grabs a list of the groups of histograms to be filled and asked Fill_folder to fill up the histograms
 void Analyzer::fill_histogram() {
@@ -1731,6 +1726,7 @@ void Analyzer::initializePileupInfo(string MCHisto, string DataHisto, string Dat
 
 }
 
+///Normalizes phi to be between -PI and PI
 double normPhi(double phi) {
   static double const TWO_PI = TMath::Pi() * 2;
   while ( phi <= -TMath::Pi() ) phi += TWO_PI;
@@ -1738,6 +1734,8 @@ double normPhi(double phi) {
   return phi;
 }
 
+
+///Takes the absolute value of of normPhi (made because constant use)
 double absnormPhi(double phi) {
   return abs(normPhi(phi));
 }
