@@ -7,6 +7,11 @@ CXXFLAGS += -Wall $(ROOTCFLAGS) -I./ -O3
 LD = g++
 LDFLAGS += -Wall $(ROOTLIBS) -lGenVector -O3
 
+ifdef DEBUG
+CXXFLAGS = -O0 -g -pg -Wall $(ROOTCFLAGS) -I./
+LDFLAGS = -O0 -g -Wall $(ROOTLIBS) -lGenVector
+endif
+
 LIBS=
 
 SRCDIR = src
@@ -22,16 +27,16 @@ OBJECTS = $(SOURCES:$(SRCDIR)/%.cc=$(OBJDIR)/%.o)
 all: $(EXE)
 
 $(EXE): $(OBJECTS)
-	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS) 
+	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 obj/main.o: src/main.cc
-	$(CXX) $(CXXFLAGS) -c $< -o $@ 
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cc $(SRCDIR)/%.h
-	$(CXX) $(CXXFLAGS) -c $< -o $@ 
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 %: $(OBJDIR)/%.o
-	$(LD) -o $@ $(LDFLAGS) $<  $(LIBS) 
+	$(LD) -o $@ $(LDFLAGS) $<  $(LIBS)
 
 
 clean :

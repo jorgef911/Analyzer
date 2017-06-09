@@ -1,8 +1,15 @@
 #include "Analyzer.h"
+#include <csignal>
+
+bool do_break;
+void KeyboardInterrupt_endJob(int signum) {
+    do_break = true;
+}
 
 int main (int argc, char* argv[]) {
-  
+
   bool setCR = false;
+  do_break =false;
 
   if(argc < 3) {
     std::cout << "You have entered too little arguments, please type:" << std::endl;
@@ -16,8 +23,8 @@ int main (int argc, char* argv[]) {
     if(argv[i][0] == '-') {
       if(strcmp(argv[i], "-CR") == 0) setCR = true;
       else {
-	cout << "wrong option, exiting" << endl;
-	exit(0);
+        cout << "wrong option, exiting" << endl;
+        exit(0);
       }
     } else if(inputname == "") inputname = argv[i];
     else outputname = argv[i];
@@ -30,12 +37,21 @@ int main (int argc, char* argv[]) {
   }
 
   Analyzer testing(inputname, outputname, setCR);
-  
+
+
+  //catch ctrl+c and just exit the loop
+  //this way we still have the output
+  signal(SIGINT,KeyboardInterrupt_endJob);
+
 
   for(int i=0; i < testing.nentries; i++) {
     testing.clear_values();
     testing.preprocess(i);
     testing.fill_histogram();
+    if(do_break){
+      testing.nentries=i;
+      break;
+    }
   }
   testing.printCuts();
   return 0;
