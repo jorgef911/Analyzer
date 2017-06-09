@@ -269,7 +269,7 @@ void Analyzer::setupCR(string var, double val) {
 
 ////destructor
 Analyzer::~Analyzer() {
-  f->Close();
+  delete f;
   delete _Electron;
   delete _Muon;
   delete _Tau;
