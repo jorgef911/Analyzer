@@ -147,7 +147,6 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   _Jet->findExtraCuts();
   _FatJet->findExtraCuts();
 
-
   vector<string> cr_variables;
   if(setCR) {
     char buf[64];
@@ -187,6 +186,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
     cuts_per.resize(histo.get_cuts()->size());
     cuts_cumul.resize(histo.get_cuts()->size());
   }
+
   create_fillInfo();
   for(auto maper: distats["Control_Region"].dmap) {
 
@@ -195,6 +195,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
 
   setCutNeeds();
   //  exit(1);
+
   std::cout << "setup complete" << std::endl << endl;
   start_time = clock();
 }
