@@ -131,7 +131,6 @@ Analyzer::Analyzer(string infile, string outfile, bool setCR) : goodParts(getArr
   _Jet->findExtraCuts();
   _FatJet->findExtraCuts();
 
-
   vector<string> cr_variables;
   if(setCR) {
     char buf[64];
@@ -162,6 +161,7 @@ Analyzer::Analyzer(string infile, string outfile, bool setCR) : goodParts(getArr
     }
   }
 
+
   histo = Histogramer(1, FILESPACE+"Hist_entries.in", FILESPACE+"Cuts.in", outfile, isData, cr_variables);
 
   if(setCR) {
@@ -171,6 +171,7 @@ Analyzer::Analyzer(string infile, string outfile, bool setCR) : goodParts(getArr
     cuts_per.resize(histo.get_cuts()->size());
     cuts_cumul.resize(histo.get_cuts()->size());
   }
+
   create_fillInfo();
   for(auto maper: distats["Control_Region"].dmap) {
 
@@ -179,6 +180,7 @@ Analyzer::Analyzer(string infile, string outfile, bool setCR) : goodParts(getArr
 
   setCutNeeds();
   //  exit(1);
+
   std::cout << "setup complete" << std::endl << endl;
   start_time = clock();
 }
