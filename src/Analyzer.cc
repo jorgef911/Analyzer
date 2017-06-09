@@ -1071,7 +1071,7 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats) {
 
     /////fill up array
 
-    if(ePos == CUTS::eRBJet && !isData) {
+    if(ePos == CUTS::eRBJet && stats.bmap.at("UseBtagSF") && !isData) {
       double bjet_SF = reader.eval_auto_bounds("central", BTagEntry::FLAV_B, lvec.Eta(), lvec.Pt());
       if(bjet_SF > 1) {
         cout << "didn't pass" << endl;
