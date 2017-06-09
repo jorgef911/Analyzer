@@ -17,6 +17,7 @@ struct CRTester;
 #include <ctime>
 
 #include <TDirectory.h>
+#include <TEnv.h>
 #include <TLorentzVector.h>
 #include <TChain.h>
 #include <TTree.h>

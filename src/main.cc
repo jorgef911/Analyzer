@@ -7,32 +7,29 @@ void KeyboardInterrupt_endJob(int signum) {
 }
 
 void usage() {
-  cout << endl;
-  cout << "You have entered too little arguments, please type:\n";
   cout << "./Analyzer infile.root outfile.root\n";
   cout << "or\n";
-  cout << "./Analyzer -out outfile.root -inlist infile.root infile.root infile.root\n";
+  cout << "./Analyzer -out outfile.root -in infile.root infile.root infile.root ...\n";
   cout << "or\n";
   cout << "./Analyzer -out outfile.root -in infile.root\n";
   cout << "Available options are:\n";
   cout << "-CR: to run over the control regions (not the usual output)\n";
-  cout << "-C: use a different config folder than \n";
+  cout << "-C: use a different config folder than the default 'PartDet'\n";
   cout << "\n";
-  cout << "Note the -inlist option must be used with the -out option and will add all files, which are after the flag (breaks on '-').";
 
   exit(EXIT_FAILURE);
 }
 
 void parseCommandLine(int argc, char *argv[], vector<string> &inputnames, string &outputname, bool &setCR, string &configFolder) {
-  if (argc==1)
+  if(argc < 3) {
+    cout << endl;
+    cout << "You have entered too little arguments, please type:\n";
     usage();
-  if(argc < 3)
-    usage();
+  }
   for (int arg=1; arg<argc; arg++) {
-
+    //// extra arg++ are there to move past flags
     if (strcmp(argv[arg], "-CR") == 0) {
       setCR = true;
-      arg++;
       continue;
     }else if (strcmp(argv[arg], "-C") == 0) {
       configFolder=argv[arg+1];
@@ -40,27 +37,23 @@ void parseCommandLine(int argc, char *argv[], vector<string> &inputnames, string
       arg++;
       continue;
     }else if (strcmp(argv[arg], "-in") == 0) {
-      inputnames.push_back(argv[arg+1]);
-      cout << "Analyser: Inputfile " << inputnames.back() << endl;
-      arg++;
-      continue;
-    }else if (strcmp(argv[arg], "-out") == 0) {
-      outputname=argv[arg+1];
-      cout << "Analyser: Outputfile " << outputname << endl;
-      arg++;
-      continue;
-    }else if (strcmp(argv[arg], "-inlist") == 0) {
-      inputnames.push_back(argv[arg+1]);
-      cout << "Analyser: Inputfilelist " << inputnames.back() << endl;
       arg++;
       while( arg<argc and (argv[arg][0] != '-')){
         inputnames.push_back(argv[arg]);
         cout << "Analyser: Inputfilelist " << inputnames.back() << endl;
         arg++;
       }
-      if(argv[arg][0] == '-')
-        arg--;
+      arg--; /// to counteract arg++ that is in the for loop
       continue;
+    }else if (strcmp(argv[arg], "-out") == 0) {
+      outputname=argv[arg+1];
+      cout << "Analyser: Outputfile " << outputname << endl;
+      arg++;
+      continue;
+    } else if(argv[arg][0] == '-') {
+      cout << endl;
+      cout << "You entered an option that doesn't exist.  Please use one of the options:" << endl; 
+      usage();
     }else if(inputnames.size()==0){
       inputnames.push_back(argv[arg]);
     }else if(outputname==""){
@@ -68,10 +61,23 @@ void parseCommandLine(int argc, char *argv[], vector<string> &inputnames, string
     }
   }
 
-  ifstream ifile(inputnames.back());
-  if ( !ifile && inputnames.back().find("root://") == string::npos && inputnames.back().find("root\\://") == string::npos) {
-    std::cout << "The file '" << inputnames.back() << "' doesn't exist" << std::endl;
-    exit(EXIT_FAILURE);
+  if(inputnames.size() == 0) {
+    cout << endl;
+    cout << "No input files given!  Please type:" << endl;
+    usage();
+  } else if(outputname == "") {
+    cout << endl;
+    cout << "No output file given!  Please type:" << endl;
+    usage();
+  }
+
+
+  for( auto file: inputnames) {
+    ifstream ifile(file);
+    if ( !ifile && file.find("root://") == string::npos && file.find("root\\://") == string::npos) {
+      std::cout << "The file '" << inputnames.back() << "' doesn't exist" << std::endl;
+      exit(EXIT_FAILURE);
+    }
   }
   return;
 }
@@ -88,6 +94,7 @@ int main (int argc, char* argv[]) {
 
   //get the command line options in a nice loop
   parseCommandLine(argc, argv, inputnames, outputname, setCR, configFolder);
+
 
   //setup the analyser
   Analyzer testing(inputnames, outputname, setCR, configFolder);

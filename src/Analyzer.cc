@@ -98,7 +98,17 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
 
   BOOM= new TChain("TNT/BOOM");
 
+  gEnv->SetValue("TFile.Recover", 0);
+
+
   for( string infile: infiles){
+    TFile* tmp;
+    tmp = TFile::Open(infile.c_str());
+    if(!tmp) {
+      cout << endl << endl << "File " << infile << " did not open correctly, exiting" <<endl;
+      exit(EXIT_FAILURE);
+    }
+
     BOOM->Add(infile.c_str());
   }
   nentries = (int) BOOM->GetEntries();
