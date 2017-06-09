@@ -133,6 +133,18 @@ NCentralJet      20   0.    20.
 CentralJetPt    200   0.   500.
 CentralJetEta   100  -5.0   +5.0
 
+
+FillWJet 0
+
+NWJet      20   0.    20.
+WJetPt    200   0.   500.
+WJetEta   100  -5.0   +5.0
+WJetPrunedMass   300  0   300
+WJetSoftDropMass   300  0   300
+WJettau1   100  0   1
+WJettau2   100  0   1
+WJettau2Overtau1   100  0   1
+
 //------------------------------------------------//
 
 FillMetCuts 0
@@ -191,7 +203,7 @@ LargestMassDiJetDeltaEta     200   0    10.
 FillDiMuon 1
 
 DiMuon_Muon1DiJetDeltaPhi       72     0       +3.15
-DiMuon_Muon2DiJetDeltaPhi       72     0       +3.15 
+DiMuon_Muon2DiJetDeltaPhi       72     0       +3.15
 DiMuon_Muon1IsZdecay             2     0        2
 DiMuon_Muon2IsZdecay             2     0        2
 DiMuonDeltaR                   100     0        5.
@@ -218,7 +230,7 @@ Muon1MetDeltaPhiVsDiMuonCosDphi   72  0   +3.15  220    -1.1    1.1
 
 FillDiTau 1
 
-DiTau_Tau1DiJetDeltaPhi          72     0    +3.15 
+DiTau_Tau1DiJetDeltaPhi          72     0    +3.15
 DiTau_Tau2DiJetDeltaPhi          72     0    +3.15
 DiTauDeltaR                     100     0     5.
 DiTauDeltaPtDivSumPt            100    -5     5.
@@ -236,7 +248,7 @@ DiTauZeta1D                     150  -300   300
 DiTauNotReconstructableMass     200     0  5000
 DiTauReconstructableMass        200     0  5000
 DiTauDiJetReconstructableMass   200     0  5000
-Tau1MetDeltaPhiVsDiTauCosDphi    72     0    +3.15  220    -1.1   1.1 
+Tau1MetDeltaPhiVsDiTauCosDphi    72     0    +3.15  220    -1.1   1.1
 DiTauZeta2D                     100     0   100     200  -100   100
 Tau1PtVsTau2Pt                  100     0   500     100     0   500
 

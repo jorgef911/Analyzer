@@ -14,7 +14,7 @@ struct CRTester;
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-
+#include <ctime>
 
 #include <TDirectory.h>
 #include <TLorentzVector.h>
@@ -42,7 +42,7 @@ static const int nTrigReq = 2;
 
 class Analyzer {
   friend class CRTester;
- public:
+public:
   Analyzer(string, string, bool setCR = false);
   ~Analyzer();
   void clear_values();
@@ -65,30 +65,32 @@ class Analyzer {
     return distats[partName].dmap.at("PZetaCutCoefficient") * getPZeta(Tobj1, Tobj2).first;
   }
 
- private:
-  
+
+private:
+
   void CRfillCuts();
   ///// Functions /////
   void fill_Folder(string, const int);
 
   void getInputs();
   void setupJob(string);
-  void initializePileupInfo(string, string);  
+  void initializePileupInfo(string, string, string, string);
   void read_info(string);
   void setupGeneral(TTree*, string);
   void setCutNeeds();
 
   void smearLepton(Lepton&, CUTS, const PartStats&);
-  void smearJet(const PartStats&);
+  void smearJet(Particle&, const PartStats&);
 
   bool JetMatchesLepton(const Lepton&, const TLorentzVector&, double, CUTS);
   TLorentzVector matchLeptonToGen(const TLorentzVector&, const PartStats&, CUTS);
   TLorentzVector matchTauToGen(const TLorentzVector&, double);
 
-  void getGoodTauNu();  
+  void getGoodTauNu();
   void getGoodGen(const PartStats&);
   void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&);
   void getGoodRecoJets(CUTS, const PartStats&);
+  void getGoodRecoFatJets(CUTS, const PartStats&);
 
   void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&);
   void getGoodDiJets(const PartStats&);
@@ -110,7 +112,7 @@ class Analyzer {
   pair<double, double> getPZeta(const TLorentzVector&, const TLorentzVector&);
   void create_fillInfo();
 
-  inline bool passCutRange(string, double, const PartStats&);  
+  inline bool passCutRange(string, double, const PartStats&);
 
   void updateMet();
   void treatMuons_Met();
@@ -131,6 +133,7 @@ class Analyzer {
   Muon* _Muon;
   Taus* _Tau;
   Jet* _Jet;
+  FatJet* _FatJet;
   Histogramer histo;
   PartStats genStat;
 
@@ -175,9 +178,8 @@ class Analyzer {
   vector<CRTester*> testVec;
   int SignalRegion = -1;
   bool blinded = true;
+  clock_t start_time;
 };
-
-
 
 
 

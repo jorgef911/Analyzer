@@ -446,7 +446,7 @@ BTagCalibrationReader::BTagCalibrationReaderImpl::BTagCalibrationReaderImpl(
 		<< ost;
       throw std::exception();
     }
-    otherSysTypeReaders_[ost] = std::auto_ptr<BTagCalibrationReaderImpl>(
+    otherSysTypeReaders_[ost] = std::unique_ptr<BTagCalibrationReaderImpl>(
 									 new BTagCalibrationReaderImpl(op, ost)
 									 );
   }
