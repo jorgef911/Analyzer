@@ -17,8 +17,9 @@ struct CRTester;
 #include <ctime>
 
 #include <TDirectory.h>
+#include <TEnv.h>
 #include <TLorentzVector.h>
-#include <TFile.h>
+#include <TChain.h>
 #include <TTree.h>
 #include <TH1.h>
 
@@ -43,7 +44,7 @@ static const int nTrigReq = 2;
 class Analyzer {
   friend class CRTester;
 public:
-  Analyzer(string, string, bool setCR = false);
+  Analyzer(vector<string>, string, bool setCR = false, string configFolder="PartDet");
   ~Analyzer();
   void clear_values();
   void preprocess(int);
@@ -76,7 +77,7 @@ private:
   void setupJob(string);
   void initializePileupInfo(string, string, string, string);
   void read_info(string);
-  void setupGeneral(TTree*, string);
+  void setupGeneral(TTree*);
   void setCutNeeds();
 
   void smearLepton(Lepton&, CUTS, const PartStats&);
@@ -124,8 +125,8 @@ private:
 
   ///// values /////
 
-  TFile* f;
-  TTree* BOOM;
+  TChain* BOOM;
+  string filespace = "";
   double hPU[100];
 
   Generated* _Gen;

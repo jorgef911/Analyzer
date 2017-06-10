@@ -20,7 +20,6 @@ typedef vector<int>::iterator vec_iter;
 //////////////////////////////////////////////////////////////////
 
 //Filespace that has all of the .in files
-const string FILESPACE = "PartDet/";
 const string PUSPACE = "Pileup/";
 
 
@@ -96,11 +95,24 @@ const unordered_map<string, CUTS> Analyzer::cut_num = {
 //////////////////////////////////////////////////////
 
 ///Constructor
-Analyzer::Analyzer(string infile, string outfile, bool setCR) : goodParts(getArray()) {
+Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string configFolder) : goodParts(getArray()) {
   cout << "setup start" << endl;
-  f = TFile::Open(infile.c_str());
-  f->cd("TNT");
-  BOOM = (TTree*)f->Get("TNT/BOOM");
+
+  BOOM= new TChain("TNT/BOOM");
+
+  gEnv->SetValue("TFile.Recover", 0);
+
+
+  for( string infile: infiles){
+    TFile* tmp;
+    tmp = TFile::Open(infile.c_str());
+    if(!tmp) {
+      cout << endl << endl << "File " << infile << " did not open correctly, exiting" <<endl;
+      exit(EXIT_FAILURE);
+    }
+
+    BOOM->Add(infile.c_str());
+  }
   nentries = (int) BOOM->GetEntries();
   BOOM->SetBranchStatus("*", 0);
   std::cout << "TOTAL EVENTS: " << nentries << std::endl;
@@ -114,7 +126,10 @@ Analyzer::Analyzer(string infile, string outfile, bool setCR) : goodParts(getArr
     trigName[i] = tmps;
   }
 
-  setupGeneral(BOOM,infile);
+  filespace=configFolder;
+  filespace+="/";
+
+  setupGeneral(BOOM);
 
   reader.load(calib, BTagEntry::FLAV_B, "comb");
 
@@ -125,13 +140,13 @@ Analyzer::Analyzer(string infile, string outfile, bool setCR) : goodParts(getArr
 
 
   if(!isData) {
-    _Gen = new Generated(BOOM, FILESPACE + "Gen_info.in");
+    _Gen = new Generated(BOOM, filespace + "Gen_info.in");
   }
-  _Electron = new Electron(BOOM, FILESPACE + "Electron_info.in");
-  _Muon = new Muon(BOOM, FILESPACE + "Muon_info.in");
-  _Tau = new Taus(BOOM, FILESPACE + "Tau_info.in");
-  _Jet = new Jet(BOOM, FILESPACE + "Jet_info.in");
-  _FatJet = new FatJet(BOOM, FILESPACE + "FatJet_info.in");
+  _Electron = new Electron(BOOM, filespace + "Electron_info.in");
+  _Muon = new Muon(BOOM, filespace + "Muon_info.in");
+  _Tau = new Taus(BOOM, filespace + "Tau_info.in");
+  _Jet = new Jet(BOOM, filespace + "Jet_info.in");
+  _FatJet = new FatJet(BOOM, filespace + "FatJet_info.in");
 
   _Electron->findExtraCuts();
   _Muon->findExtraCuts();
@@ -139,11 +154,10 @@ Analyzer::Analyzer(string infile, string outfile, bool setCR) : goodParts(getArr
   _Jet->findExtraCuts();
   _FatJet->findExtraCuts();
 
-
   vector<string> cr_variables;
   if(setCR) {
     char buf[64];
-    read_info(FILESPACE + "Control_Regions.in");
+    read_info(filespace + "Control_Regions.in");
     crbins = pow(2.0, distats["Control_Region"].dmap.size());
     for(auto maper: distats["Control_Region"].dmap) {
       cr_variables.push_back(maper.first);
@@ -170,7 +184,7 @@ Analyzer::Analyzer(string infile, string outfile, bool setCR) : goodParts(getArr
     }
   }
 
-  histo = Histogramer(1, FILESPACE+"Hist_entries.in", FILESPACE+"Cuts.in", outfile, isData, cr_variables);
+  histo = Histogramer(1, filespace+"Hist_entries.in", filespace+"Cuts.in", outfile, isData, cr_variables);
 
   if(setCR) {
     cuts_per.resize(histo.get_folders()->size());
@@ -179,6 +193,7 @@ Analyzer::Analyzer(string infile, string outfile, bool setCR) : goodParts(getArr
     cuts_per.resize(histo.get_cuts()->size());
     cuts_cumul.resize(histo.get_cuts()->size());
   }
+
   create_fillInfo();
   for(auto maper: distats["Control_Region"].dmap) {
 
@@ -187,6 +202,7 @@ Analyzer::Analyzer(string infile, string outfile, bool setCR) : goodParts(getArr
 
   setCutNeeds();
   //  exit(1);
+
   std::cout << "setup complete" << std::endl << endl;
   start_time = clock();
 }
@@ -275,7 +291,8 @@ void Analyzer::setupCR(string var, double val) {
 
 ////destructor
 Analyzer::~Analyzer() {
-  delete f;
+
+  delete BOOM;
   delete _Electron;
   delete _Muon;
   delete _Tau;
@@ -574,13 +591,13 @@ void Analyzer::treatMuons_Met() {
       // ETau_Energy = sqrt( pow(1.77699, 2) + pow(ETau_Pt, 2) + pow(_Muon->smearP.at(muon).Pz(), 2));
 
       /*if(ETau_Pt <= 15.0){
-	while(ETau_Pt<=15.0){
-	rand1 = Tau_HFrac->GetRandom();
-	rand2 = Tau_Resol->GetRandom();
-	ETau_Pt = _Muon->smearP.at(muon).Pt()*rand1*(rand2+1.0);
-	ENu_Pt = _Muon->smearP.at(muon).Pt()-ETau_Pt;
-	}
-	}
+        while(ETau_Pt<=15.0){
+        rand1 = Tau_HFrac->GetRandom();
+        rand2 = Tau_Resol->GetRandom();
+        ETau_Pt = _Muon->smearP.at(muon).Pt()*rand1*(rand2+1.0);
+        ENu_Pt = _Muon->smearP.at(muon).Pt()-ETau_Pt;
+        }
+      }
       */
 
       TLorentzVector Emu_Tau;
@@ -588,9 +605,9 @@ void Analyzer::treatMuons_Met() {
       _Muon->smearP.clear();
 
       if (ETau_Pt >= _Muon->pstats["Muon1"].pmap.at("PtCut").first ){
-	_Muon->smearP.push_back(Emu_Tau);
-	deltaMEx += (_Muon->smearP.at(muon).Px()-Emu_Tau.Px());
-	deltaMEy += (_Muon->smearP.at(muon).Py()-Emu_Tau.Py());
+        _Muon->smearP.push_back(Emu_Tau);
+        deltaMEx += (_Muon->smearP.at(muon).Px()-Emu_Tau.Px());
+        deltaMEy += (_Muon->smearP.at(muon).Py()-Emu_Tau.Py());
 
       }
     }
@@ -611,7 +628,7 @@ void Analyzer::treatMuons_Met() {
 
 
 /////sets up other values needed for analysis that aren't particle specific
-void Analyzer::setupGeneral(TTree* BOOM, string infile) {
+void Analyzer::setupGeneral(TTree* BOOM) {
   SetBranch("Trigger_decision", Trigger_decision);
   SetBranch("Trigger_names", Trigger_names);
   SetBranch("nTruePUInteractions", nTruePU);
@@ -621,12 +638,12 @@ void Analyzer::setupGeneral(TTree* BOOM, string infile) {
   SetBranch("Met_type1PF_py", Met[1]);
   SetBranch("Met_type1PF_pz", Met[2]);
 
-  read_info(FILESPACE + "ElectronTau_info.in");
-  read_info(FILESPACE + "MuonTau_info.in");
-  read_info(FILESPACE + "MuonElectron_info.in");
-  read_info(FILESPACE + "DiParticle_info.in");
-  read_info(FILESPACE + "VBFCuts_info.in");
-  read_info(FILESPACE + "Run_info.in");
+  read_info(filespace + "ElectronTau_info.in");
+  read_info(filespace + "MuonTau_info.in");
+  read_info(filespace + "MuonElectron_info.in");
+  read_info(filespace + "DiParticle_info.in");
+  read_info(filespace + "VBFCuts_info.in");
+  read_info(filespace + "Run_info.in");
 
   BOOM->GetEntry(0);
   for(int i = 0; i < nTrigReq; i++) {
@@ -1435,11 +1452,6 @@ pair<double, double> Analyzer::getPZeta(const TLorentzVector& Tobj1, const TLore
 }
 
 
-///Normalizes phi to be between -PI and PI
-
-///Takes the absolute value of of normPhi (made because constant use)
-
-
 
 ////Grabs a list of the groups of histograms to be filled and asked Fill_folder to fill up the histograms
 void Analyzer::fill_histogram() {
@@ -1745,6 +1757,7 @@ void Analyzer::initializePileupInfo(string MCHisto, string DataHisto, string Dat
 
 }
 
+///Normalizes phi to be between -PI and PI
 double normPhi(double phi) {
   static double const TWO_PI = TMath::Pi() * 2;
   while ( phi <= -TMath::Pi() ) phi += TWO_PI;
@@ -1752,6 +1765,8 @@ double normPhi(double phi) {
   return phi;
 }
 
+
+///Takes the absolute value of of normPhi (made because constant use)
 double absnormPhi(double phi) {
   return abs(normPhi(phi));
 }
