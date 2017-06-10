@@ -23,6 +23,8 @@ typedef vector<int>::iterator vec_iter;
 const string PUSPACE = "Pileup/";
 
 
+//////////PUBLIC FUNCTIONS////////////////////
+
 const vector<CUTS> Analyzer::genCuts = {
   CUTS::eGTau, CUTS::eNuTau, CUTS::eGTop,
   CUTS::eGElec, CUTS::eGMuon, CUTS::eGZ,
@@ -115,6 +117,8 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   BOOM->SetBranchStatus("*", 0);
   std::cout << "TOTAL EVENTS: " << nentries << std::endl;
 
+  srand(0);
+
   for(int i=0; i < nTrigReq; i++) {
     vector<int>* tmpi = new vector<int>();
     vector<string>* tmps = new vector<string>();
@@ -126,6 +130,9 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   filespace+="/";
 
   setupGeneral(BOOM);
+
+  reader.load(calib, BTagEntry::FLAV_B, "comb");
+
 
   isData = distats["Run"].bmap.at("isData");
   CalculatePUSystematics = distats["Run"].bmap.at("CalculatePUSystematics");
@@ -327,6 +334,7 @@ void Analyzer::preprocess(int event) {
 
   theMETVector.SetPxPyPzE(Met[0], Met[1], Met[2], sqrt(pow(Met[0],2) + pow(Met[1],2)));
   pu_weight = (!isData && CalculatePUSystematics) ? hPU[(int)(nTruePU+1)] : 1.0;
+
 
   // SET NUMBER OF GEN PARTICLES
   if(!isData){
@@ -1079,7 +1087,19 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats) {
     if(stats.bmap.at("RemoveOverlapWithTau2s") && isOverlaping(lvec, *_Tau, CUTS::eRTau2, stats.dmap.at("Tau2MatchingDeltaR"))) continue;
 
     /////fill up array
+
+    if(ePos == CUTS::eRBJet && stats.bmap.at("UseBtagSF") && !isData) {
+      double bjet_SF = reader.eval_auto_bounds("central", BTagEntry::FLAV_B, lvec.Eta(), lvec.Pt());
+      if(bjet_SF > 1) {
+        cout << "didn't pass" << endl;
+      }
+      if(((double) rand()/(RAND_MAX)) >  bjet_SF) {
+        continue;
+      }
+    }
+
     goodParts[ePos]->push_back(i);
+
   }
 
   //clean up for first and second jet
