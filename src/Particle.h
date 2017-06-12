@@ -20,6 +20,7 @@
 #include "Cut_enum.h"
 
 using namespace std;
+typedef unsigned int uint;
 
 struct PartStats {
   unordered_map<string,double> dmap;
@@ -39,22 +40,31 @@ public:
   virtual ~Particle() {}
 
   virtual void findExtraCuts() {}
-
-  vector<CUTS> extraCuts;
-
+  void init();
   void unBranch();
-  PType type;
+  double pt(uint) const;
+  double eta(uint) const;
+  double phi(uint) const;
+  double energy(uint) const;
+  TLorentzVector p4(uint) const;
 
+  uint size() const;
+  void setPtEtaPhiESyst(uint, double, double, double, double, string);
+  void addPtEtaPhiESyst(double, double, double, double, string);
+  void setSystematic(string);
+
+  PType type;
+  vector<CUTS> extraCuts;
   const map<PType,CUTS> cutMap = {{PType::Electron, CUTS::eGElec}, {PType::Muon, CUTS::eGMuon},
   {PType::Tau, CUTS::eGTau}};
-
-
-  vector<double>* pt = 0;
-  vector<double>* eta = 0;
-  vector<double>* phi = 0;
-  vector<double>* energy = 0;
+  vector<double>* mpt = 0;
+  vector<double>* meta = 0;
+  vector<double>* mphi = 0;
+  vector<double>* menergy = 0;
   unordered_map<string, PartStats> pstats;
   vector<TLorentzVector> smearP;
+  unordered_map<string, vector<TLorentzVector> > systVec;
+  string activeSystematic;
 
 protected:
   void getPartStats(string);

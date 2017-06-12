@@ -130,6 +130,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   isData = distats["Run"].bmap.at("isData");
   CalculatePUSystematics = distats["Run"].bmap.at("CalculatePUSystematics");
   initializePileupInfo(distats["Run"].smap.at("MCHistos"), distats["Run"].smap.at("DataHistos"),distats["Run"].smap.at("DataPUHistName"),distats["Run"].smap.at("MCPUHistName"));
+  doSystematics=distats["Systematics"].bmap.at("useSystematics");
 
 
   if(!isData) {
@@ -146,6 +147,8 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   _Tau->findExtraCuts();
   _Jet->findExtraCuts();
   _FatJet->findExtraCuts();
+
+  allParticles= {_Gen,_Electron,_Muon,_Tau,_Jet,_FatJet};
 
   vector<string> cr_variables;
   if(setCR) {
@@ -326,6 +329,10 @@ void Analyzer::preprocess(int event) {
   BOOM->GetEntry(event);
 
   theMETVector.SetPxPyPzE(Met[0], Met[1], Met[2], sqrt(pow(Met[0],2) + pow(Met[1],2)));
+  for(Particle* ipart: allParticles){
+    ipart->init();
+  }
+
   pu_weight = (!isData && CalculatePUSystematics) ? hPU[(int)(nTruePU+1)] : 1.0;
 
   // SET NUMBER OF GEN PARTICLES
@@ -348,6 +355,24 @@ void Analyzer::preprocess(int event) {
   TriggerCuts(*(trigPlace[1]), *(trigName[1]), CUTS::eRTrig2);
 
   updateMet();
+
+  getGoodParticles("");
+
+  if(doSystematics){
+    getGoodParticles("Muon_scale");
+  }
+
+  if( event < 10 || ( event < 100 && event % 10 == 0 ) ||
+    ( event < 1000 && event % 100 == 0 ) ||
+    ( event < 10000 && event % 1000 == 0 ) ||
+    ( event >= 10000 && event % 10000 == 0 ) ) {
+       cout << event << " Events analyzed\n";
+    }
+}
+
+
+void Analyzer::getGoodParticles(string syst){
+
 
   // // SET NUMBER OF RECO PARTICLES
   // // MUST BE IN ORDER: Muon/Electron, Tau, Jet
@@ -396,13 +421,6 @@ void Analyzer::preprocess(int event) {
 
   ////Dijet cuts
   getGoodDiJets(distats["DiJet"]);
-
-  if( event < 10 || ( event < 100 && event % 10 == 0 ) ||
-    ( event < 1000 && event % 100 == 0 ) ||
-    ( event < 10000 && event % 1000 == 0 ) ||
-    ( event >= 10000 && event % 10000 == 0 ) ) {
-       cout << event << " Events analyzed\n";
-    }
 }
 
 
@@ -636,6 +654,7 @@ void Analyzer::setupGeneral(TTree* BOOM) {
   read_info(filespace + "DiParticle_info.in");
   read_info(filespace + "VBFCuts_info.in");
   read_info(filespace + "Run_info.in");
+  read_info(filespace + "Systematics_info.in");
 
   BOOM->GetEntry(0);
   for(int i = 0; i < nTrigReq; i++) {
@@ -824,78 +843,70 @@ void Analyzer::setCutNeeds() {
 
 ///Smears lepton only if specified and not a data file.  Otherwise, just filles up lorentz vectors
 //of the data into the vector container smearP with is in each lepton object.
-void Analyzer::smearLepton(Lepton& lepton, CUTS eGenPos, const PartStats& stats) {
-  lepton.smearP.clear();
+void Analyzer::smearLepton(Lepton& lepton, CUTS eGenPos, const PartStats& stats, string syst) {
+  //lepton.init();
 
-  for(int i = 0; i < (int)lepton.pt->size(); i++) {
-    TLorentzVector tmpSmear;
-    tmpSmear.SetPtEtaPhiE(lepton.pt->at(i), lepton.eta->at(i), lepton.phi->at(i), lepton.energy->at(i));
-
+  for(size_t i = 0; i < lepton.size(); i++) {
     if(isData || !stats.bmap.at("SmearTheParticle")) {
-      lepton.smearP.push_back(tmpSmear);
       continue;
     }
 
-    TLorentzVector genVec =  matchLeptonToGen(tmpSmear, lepton.pstats["Smear"],eGenPos);
+    TLorentzVector genVec =  matchLeptonToGen(lepton.p4(i), lepton.pstats["Smear"],eGenPos);
     if(genVec == TLorentzVector(0,0,0,0)) {
-      lepton.smearP.push_back(tmpSmear);
       continue;
     }
 
-    double smearedPt = (genVec.Pt()*stats.dmap.at("PtScaleOffset")) + (tmpSmear.Pt() - genVec.Pt())*stats.dmap.at("PtSigmaOffset");
-    double smearedEta =(genVec.Eta()*stats.dmap.at("EtaScaleOffset")) + (tmpSmear.Eta() - genVec.Eta())*stats.dmap.at("EtaSigmaOffset");
-    double smearedPhi = (genVec.Phi() * stats.dmap.at("PhiScaleOffset")) + (tmpSmear.Phi() - genVec.Phi())*stats.dmap.at("PhiSigmaOffset");
-    double smearedEnergy = (genVec.Energy()*stats.dmap.at("EnergyScaleOffset")) + (tmpSmear.Energy() - genVec.Energy())*stats.dmap.at("EnergySigmaOffset");
+    double smearedPt = (genVec.Pt()*stats.dmap.at("PtScaleOffset")) + (lepton.pt(i) - genVec.Pt())*stats.dmap.at("PtSigmaOffset");
+    double smearedEta =(genVec.Eta()*stats.dmap.at("EtaScaleOffset")) + (lepton.eta(i) - genVec.Eta())*stats.dmap.at("EtaSigmaOffset");
+    double smearedPhi = (genVec.Phi() * stats.dmap.at("PhiScaleOffset")) + (lepton.phi(i) - genVec.Phi())*stats.dmap.at("PhiSigmaOffset");
+    double smearedEnergy = (genVec.Energy()*stats.dmap.at("EnergyScaleOffset")) + (lepton.energy(i) - genVec.Energy())*stats.dmap.at("EnergySigmaOffset");
 
-    TLorentzVector final;
-    final.SetPtEtaPhiE(smearedPt, smearedEta, smearedPhi, smearedEnergy);
-    lepton.smearP.push_back(final);
-    deltaMEx += tmpSmear.Px() - final.Px();
-    deltaMEy += tmpSmear.Py() - final.Py();
+    TLorentzVector tmpSmear=lepton.p4(i);
+    cout<<"before"<<tmpSmear.Pt()<<endl;
+
+    lepton.setPtEtaPhiESyst(i,smearedPt, smearedEta, smearedPhi, smearedEnergy,syst);
+
+    cout<<"after"<<tmpSmear.Pt()<<"   "<< lepton.p4(i).Pt() <<endl;
+
+    deltaMEx += tmpSmear.Px() - lepton.p4(i).Px();
+    deltaMEy += tmpSmear.Py() - lepton.p4(i).Py();
+
 
   }
 
 }
 
 ///Same as smearlepton, just jet specific
-void Analyzer::smearJet(Particle& jet,const PartStats& stats) {
-  jet.smearP.clear();
+void Analyzer::smearJet(Particle& jet,const PartStats& stats, string syst) {
+  //jet.init();
 
-  TLorentzVector jetV;
-
-  for(size_t i=0; i< jet.pt->size(); i++) {
-    jetV.SetPtEtaPhiE(jet.pt->at(i), jet.eta->at(i), jet.phi->at(i), jet.energy->at(i));
+  for(size_t i=0; i< jet.size(); i++) {
 
     if(isData || !stats.bmap.at("SmearTheJet")) {
-      jet.smearP.push_back(jetV);
       continue;
     }
 
-    if(JetMatchesLepton(*_Muon, jetV, stats.dmap.at("MuonMatchingDeltaR"), CUTS::eGMuon) ||
-      JetMatchesLepton(*_Tau, jetV, stats.dmap.at("TauMatchingDeltaR"), CUTS::eGTau) ||
-      JetMatchesLepton(*_Electron, jetV,stats.dmap.at("ElectronMatchingDeltaR"), CUTS::eGElec)){
-
-      jet.smearP.push_back(jetV);
-
+    if(JetMatchesLepton(*_Muon, jet.p4(i), stats.dmap.at("MuonMatchingDeltaR"), CUTS::eGMuon) ||
+      JetMatchesLepton(*_Tau, jet.p4(i), stats.dmap.at("TauMatchingDeltaR"), CUTS::eGTau) ||
+      JetMatchesLepton(*_Electron, jet.p4(i),stats.dmap.at("ElectronMatchingDeltaR"), CUTS::eGElec)){
       continue;
     }
 
-    jet.smearP.push_back(stats.dmap.at("JetEnergyScaleOffset") * jetV);
     //only apply corrections for jets not for FatJets
     if(jet.type == PType::Jet){
-      deltaMEx += (1 - stats.dmap.at("JetEnergyScaleOffset"))*jetV.Px();
-      deltaMEy += (1 -stats.dmap.at("JetEnergyScaleOffset"))*jetV.Py();
+      deltaMEx += (1 - stats.dmap.at("JetEnergyScaleOffset"))*jet.p4(i).Px();
+      deltaMEy += (1 -stats.dmap.at("JetEnergyScaleOffset"))*jet.p4(i).Py();
     }
+
+    jet.smearP[i]*=stats.dmap.at("JetEnergyScaleOffset");
   }
 }
 
 /////checks if jet is close to a lepton and the lepton is a gen particle, then the jet is a lepton object, so
 //this jet isn't smeared
 bool Analyzer::JetMatchesLepton(const Lepton& lepton, const TLorentzVector& jetV, double partDeltaR, CUTS eGenPos) {
-  TLorentzVector tempV;
-  for(size_t j = 0; j < lepton.pt->size(); j++) {
-    tempV.SetPtEtaPhiE(lepton.pt->at(j), lepton.eta->at(j), lepton.phi->at(j), lepton.energy->at(j));
-    if(jetV.DeltaR(tempV) < partDeltaR && matchLeptonToGen(tempV, lepton.pstats.at("Smear"), eGenPos) != TLorentzVector(0,0,0,0)) return true;
+  for(size_t j = 0; j < lepton.size(); j++) {
+    if(jetV.DeltaR(lepton.p4(j)) < partDeltaR && matchLeptonToGen(lepton.p4(j), lepton.pstats.at("Smear"), eGenPos) != TLorentzVector(0,0,0,0)) return true;
   }
   return false;
 }
@@ -906,16 +917,12 @@ TLorentzVector Analyzer::matchLeptonToGen(const TLorentzVector& lvec, const Part
   if(ePos == CUTS::eGTau) {
     return matchTauToGen(lvec, stats.dmap.at("GenMatchingDeltaR"));
   }
-  TLorentzVector genVec = TLorentzVector(0,0,0,0);
-
   for(vec_iter it=goodParts[ePos]->begin(); it !=goodParts[ePos]->end();it++) {
-    genVec.SetPtEtaPhiE(_Gen->pt->at(*it), _Gen->eta->at(*it), _Gen->phi->at(*it), _Gen->energy->at(*it));
-    if(lvec.DeltaR(genVec) <= stats.dmap.at("GenMatchingDeltaR")) {
+    if(lvec.DeltaR(_Gen->p4(*it)) <= stats.dmap.at("GenMatchingDeltaR")) {
       if(stats.bmap.at("UseMotherID") && abs(_Gen->motherpdg_id->at(*it)) != stats.dmap.at("MotherID")) continue;
-      return genVec;
+      return _Gen->p4(*it);
     }
   }
-
   return TLorentzVector(0,0,0,0);
 }
 
@@ -929,10 +936,7 @@ TLorentzVector Analyzer::matchTauToGen(const TLorentzVector& lvec, double lDelta
     int nu = goodParts[CUTS::eNuTau]->at(i);
     if(nu == -1) continue;
 
-    TLorentzVector tmp1, tmp2;
-    tmp1.SetPtEtaPhiE(_Gen->pt->at(*it), _Gen->eta->at(*it), _Gen->phi->at(*it), _Gen->energy->at(*it));
-    tmp2.SetPtEtaPhiE(_Gen->pt->at(nu), _Gen->eta->at(nu), _Gen->phi->at(nu), _Gen->energy->at(nu));
-    genVec = tmp1 - tmp2;
+    genVec = _Gen->p4(*it) - _Gen->p4(nu);
     if(lvec.DeltaR(genVec) <= lDeltaR) {
       return genVec;
     }
@@ -945,10 +949,10 @@ TLorentzVector Analyzer::matchTauToGen(const TLorentzVector& lvec, double lDelta
 ////Calculates the number of gen particles.  Based on id number and status of each particle
 void Analyzer::getGoodGen(const PartStats& stats) {
 
-  for(size_t j = 0; j < _Gen->pt->size(); j++) {
+  for(size_t j = 0; j < _Gen->size(); j++) {
     int id = abs(_Gen->pdg_id->at(j));
     if(genMaper[id] != nullptr && _Gen->pdg_id->at(j) == genMaper[id]->status) {
-      if(id == 15 && (_Gen->pt->at(j) < stats.pmap.at("TauPtCut").first || _Gen->pt->at(j) > stats.pmap.at("TauPtCut").second || abs(_Gen->eta->at(j)) > stats.dmap.at("TauEtaCut"))) continue;
+      if(id == 15 && (_Gen->pt(j) < stats.pmap.at("TauPtCut").first || _Gen->pt(j) > stats.pmap.at("TauPtCut").second || abs(_Gen->eta(j)) > stats.dmap.at("TauEtaCut"))) continue;
       goodParts[genMaper[id]->ePos]->push_back(j);
     }
   }
@@ -961,7 +965,7 @@ void Analyzer::getGoodTauNu() {
   for(vec_iter it=goodParts[CUTS::eGTau]->begin(); it !=goodParts[CUTS::eGTau]->end();it++) {
     bool leptonDecay = false;
     int nu = -1;
-    for(size_t j = 0; j < _Gen->pt->size(); j++) {
+    for(size_t j = 0; j < _Gen->size(); j++) {
       if(abs(_Gen->BmotherIndex->at(j)) == (*it)) {
         if( (abs(_Gen->pdg_id->at(j)) == 16) && (abs(_Gen->motherpdg_id->at(j)) == 15) && (_Gen->status->at(_Gen->BmotherIndex->at(j)) == 2) ) nu = j;
         else if( (abs(_Gen->pdg_id->at(j)) == 12) || (abs(_Gen->pdg_id->at(j)) == 14) ) leptonDecay = true;
@@ -1470,35 +1474,28 @@ void Analyzer::fill_Folder(string group, const int max) {
 
       int nu = goodParts[CUTS::eNuTau]->at(i);
       if(nu != -1) {
-        TLorentzVector tmp1, tmp2;
-        tmp1.SetPtEtaPhiE(_Gen->pt->at(*it), _Gen->eta->at(*it), _Gen->phi->at(*it), _Gen->energy->at(*it));
-        tmp2.SetPtEtaPhiE(_Gen->pt->at(nu), _Gen->eta->at(nu), _Gen->phi->at(nu), _Gen->energy->at(nu));
-        genVec = tmp1 - tmp2;
+        genVec = _Gen->p4(*it) - _Gen->p4(nu);
         histAddVal(genVec.Pt(), "HadTauPt");
         histAddVal(genVec.Eta(), "HadTauEta");
         nhadtau++;
 
       }
-      histAddVal(_Gen->energy->at(*it), "TauEnergy");
-      histAddVal(_Gen->pt->at(*it), "TauPt");
-      histAddVal(_Gen->eta->at(*it), "TauEta");
-      histAddVal(_Gen->phi->at(*it), "TauPhi");
+      histAddVal(_Gen->energy(*it), "TauEnergy");
+      histAddVal(_Gen->pt(*it), "TauPt");
+      histAddVal(_Gen->eta(*it), "TauEta");
+      histAddVal(_Gen->phi(*it), "TauPhi");
       for(vec_iter it2=it+1; it2!=goodParts[CUTS::eGTau]->end(); it2++) {
-        TLorentzVector genObjt1;
-        genObjt1.SetPtEtaPhiE(_Gen->pt->at(*it), _Gen->eta->at(*it), _Gen->phi->at(*it), _Gen->energy->at(*it));
-        TLorentzVector genObjt2;
-        genObjt2.SetPtEtaPhiE(_Gen->pt->at(*it2), _Gen->eta->at(*it2), _Gen->phi->at(*it2), _Gen->energy->at(*it2));
-        histAddVal(diParticleMass(genObjt1,genObjt2, "none"), "DiTauMass");
+        histAddVal(diParticleMass(_Gen->p4(*it),_Gen->p4(*it2), "none"), "DiTauMass");
       }
     }
     histAddVal(goodParts[CUTS::eGTau]->size(), "NTau");
     histAddVal(nhadtau, "NHadTau");
 
     for(vec_iter it=goodParts[CUTS::eGMuon]->begin(); it!=goodParts[CUTS::eGMuon]->end(); it++) {
-      histAddVal(_Gen->energy->at(*it), "MuonEnergy");
-      histAddVal(_Gen->pt->at(*it), "MuonPt");
-      histAddVal(_Gen->eta->at(*it), "MuonEta");
-      histAddVal(_Gen->phi->at(*it), "MuonPhi");
+      histAddVal(_Gen->energy(*it), "MuonEnergy");
+      histAddVal(_Gen->pt(*it), "MuonPt");
+      histAddVal(_Gen->eta(*it), "MuonEta");
+      histAddVal(_Gen->phi(*it), "MuonPhi");
     }
     histAddVal(goodParts[CUTS::eGMuon]->size(), "NMuon");
 

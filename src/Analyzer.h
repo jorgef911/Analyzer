@@ -76,13 +76,15 @@ private:
   void setupGeneral(TTree*);
   void setCutNeeds();
 
-  void smearLepton(Lepton&, CUTS, const PartStats&);
-  void smearJet(Particle&, const PartStats&);
+  void smearLepton(Lepton&, CUTS, const PartStats&, string syst="");
+  void smearJet(Particle&, const PartStats&, string syst="");
 
   bool JetMatchesLepton(const Lepton&, const TLorentzVector&, double, CUTS);
   TLorentzVector matchLeptonToGen(const TLorentzVector&, const PartStats&, CUTS);
   TLorentzVector matchTauToGen(const TLorentzVector&, double);
 
+
+  void getGoodParticles(string);
   void getGoodTauNu();
   void getGoodGen(const PartStats&);
   void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&);
@@ -139,6 +141,7 @@ private:
   unordered_map<string, double> genMap;
   unordered_map<CUTS, vector<int>*, EnumHash> goodParts;
   unordered_map<CUTS, bool, EnumHash> need_cut;
+  vector<Particle*> allParticles;
 
   static const unordered_map<string, CUTS> cut_num;
   static const unordered_map<CUTS, vector<CUTS>, EnumHash> adjList;
@@ -154,7 +157,7 @@ private:
 
   double maxIso, minIso;
   int leadIndex, maxCut, crbins=1;
-  bool isData, CalculatePUSystematics;
+  bool isData, CalculatePUSystematics, doSystematics;
 
   vector<double>* Trigger_decision = 0;
   vector<string>* Trigger_names = 0;

@@ -2,20 +2,64 @@
 
 #define SetBranch(name, variable) BOOM->SetBranchStatus(name, 1);  BOOM->SetBranchAddress(name, &variable);
 
+//particle is a objet that stores multiple versions of the particle candidates
 Particle::Particle(TTree* _BOOM, string _GenName, string filename) : BOOM(_BOOM), GenName(_GenName) {
   type = PType::None;
   getPartStats(filename);
   //set the pt to an empty vector if the branch does not exist
   if( _BOOM->GetListOfBranches()->FindObject((GenName+"_pt").c_str()) ==0){
-    pt=new vector<double>();
+    mpt=new vector<double>();
   }else{
-    SetBranch((GenName+"_pt").c_str(), pt);
-    SetBranch((GenName+"_eta").c_str(), eta);
-    SetBranch((GenName+"_phi").c_str(), phi);
-    SetBranch((GenName+"_energy").c_str(), energy);
+    SetBranch((GenName+"_pt").c_str(), mpt);
+    SetBranch((GenName+"_eta").c_str(), meta);
+    SetBranch((GenName+"_phi").c_str(), mphi);
+    SetBranch((GenName+"_energy").c_str(), menergy);
   }
-
+  activeSystematic="orig";
 }
+
+void Particle::setPtEtaPhiESyst(uint index,double ipt,double ieta, double iphi, double ienergy, string syst){
+  TLorentzVector mp4;
+  mp4.SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
+  systVec[syst][index]= mp4;
+}
+
+void Particle::addPtEtaPhiESyst(double ipt,double ieta, double iphi, double ienergy, string syst){
+  TLorentzVector mp4;
+  mp4.SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
+  systVec[syst].push_back(mp4);
+}
+
+void Particle::init(){
+    //cleanup of the particles
+    smearP.clear();
+    for(auto &it: systVec){
+        it.second.clear();
+    }
+    setSystematic("orig");
+}
+double Particle::pt(uint index)const         {return smearP[index].Pt();}
+double Particle::eta(uint index)const        {return smearP[index].Eta();}
+double Particle::phi(uint index)const        {return smearP[index].Phi();}
+double Particle::energy(uint index)const     {return smearP[index].E();}
+uint Particle::size()const                   {
+    return smearP.size();}
+TLorentzVector Particle::p4(uint index)const {return smearP[index];}
+
+
+void Particle::setSystematic(string syst){
+  //original vector has to be backed up!!
+  //just as a precaution
+  if( activeSystematic=="orig" && syst=="orig"){
+
+    for(uint i=0;i<mpt->size();i++){
+      addPtEtaPhiESyst(mpt->at(i),meta->at(i),mphi->at(i),menergy->at(i),"orig");
+    }
+  }
+  smearP= systVec[syst];
+  activeSystematic=syst;
+}
+
 
 void Particle::unBranch() {
   BOOM->SetBranchStatus((GenName+"*").c_str(), 0);
