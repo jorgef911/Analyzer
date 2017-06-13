@@ -179,6 +179,15 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
 
   histo = Histogramer(1, filespace+"Hist_entries.in", filespace+"Cuts.in", outfile, isData, cr_variables);
 
+
+
+  ///this can be done nicer
+  //put the variables that you use here:
+  zBoostTree["mu1_pt"]=0;
+
+  histo.createTree(&zBoostTree,"zboost");
+
+
   if(setCR) {
     cuts_per.resize(histo.get_folders()->size());
     cuts_cumul.resize(histo.get_folders()->size());
@@ -1661,6 +1670,13 @@ void Analyzer::fill_Folder(string group, const int max) {
 
       part1 = lep1->smearP.at(p1);
       part2 = lep2->smearP.at(p2);
+
+
+      //do our dirty tree stuff here:
+      zBoostTree["mu1_pt"]=part1.Pt();
+      //put it accidentally in the tree
+      histo.fillTree("zboost");
+
 
       histAddVal2(part1.Pt(),part2.Pt(), "Part1PtVsPart2Pt");
       histAddVal(part1.DeltaR(part2), "DeltaR");

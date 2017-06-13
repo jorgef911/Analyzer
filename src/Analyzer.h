@@ -123,6 +123,7 @@ private:
 
   TChain* BOOM;
   string filespace = "";
+  TFile * outfile;
   double hPU[100];
 
   Generated* _Gen;
@@ -151,6 +152,8 @@ private:
 
   TLorentzVector theMETVector;
   double deltaMEx, deltaMEy, sumpxForMht, sumpyForMht, sumptForHt, phiForMht;
+
+  unordered_map< string,float > zBoostTree;
 
   double maxIso, minIso;
   int leadIndex, maxCut, crbins=1;
