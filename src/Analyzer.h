@@ -76,8 +76,8 @@ private:
   void setupGeneral(TTree*);
   void setCutNeeds();
 
-  void smearLepton(Lepton&, CUTS, const PartStats&, string syst="");
-  void smearJet(Particle&, const PartStats&, string syst="");
+  void smearLepton(Lepton&, CUTS, const PartStats&, string syst="orig");
+  void smearJet(Particle&, const PartStats&, string syst="orig");
 
   bool JetMatchesLepton(const Lepton&, const TLorentzVector&, double, CUTS);
   TLorentzVector matchLeptonToGen(const TLorentzVector&, const PartStats&, CUTS);

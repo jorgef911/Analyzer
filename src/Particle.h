@@ -47,8 +47,14 @@ public:
   double phi(uint) const;
   double energy(uint) const;
   TLorentzVector p4(uint) const;
+  TLorentzVector& p4(uint);
 
   uint size() const;
+  vector<TLorentzVector>::iterator begin();
+  vector<TLorentzVector>::iterator end();
+  vector<TLorentzVector>::const_iterator begin() const;
+  vector<TLorentzVector>::const_iterator end() const;
+
   void setPtEtaPhiESyst(uint, double, double, double, double, string);
   void addPtEtaPhiESyst(double, double, double, double, string);
   void setSystematic(string);
@@ -62,7 +68,8 @@ public:
   vector<double>* mphi = 0;
   vector<double>* menergy = 0;
   unordered_map<string, PartStats> pstats;
-  vector<TLorentzVector> smearP;
+  vector<TLorentzVector> *smearP;
+  //unordered_map<string, *vector<TLorentzVector> > systVec;
   unordered_map<string, vector<TLorentzVector> > systVec;
   string activeSystematic;
 

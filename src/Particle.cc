@@ -19,12 +19,16 @@ Particle::Particle(TTree* _BOOM, string _GenName, string filename) : BOOM(_BOOM)
 }
 
 void Particle::setPtEtaPhiESyst(uint index,double ipt,double ieta, double iphi, double ienergy, string syst){
-  TLorentzVector mp4;
-  mp4.SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
-  systVec[syst][index]= mp4;
+  if(systVec[syst].size()< index ){
+    cout<<"syst  "<<syst<<" at index "<<index<<" does not exist"<<"  size "<<systVec[syst].size()<<endl;
+  }
+  systVec[syst][index].SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
 }
 
 void Particle::addPtEtaPhiESyst(double ipt,double ieta, double iphi, double ienergy, string syst){
+  //if(systVec.find(syst)==systVec.end()){
+    //systVec[syst]=vector<TLorentzVector>;
+  //}
   TLorentzVector mp4;
   mp4.SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
   systVec[syst].push_back(mp4);
@@ -32,19 +36,25 @@ void Particle::addPtEtaPhiESyst(double ipt,double ieta, double iphi, double iene
 
 void Particle::init(){
     //cleanup of the particles
-    smearP.clear();
+    smearP->clear();
     for(auto &it: systVec){
         it.second.clear();
     }
     setSystematic("orig");
 }
-double Particle::pt(uint index)const         {return smearP[index].Pt();}
-double Particle::eta(uint index)const        {return smearP[index].Eta();}
-double Particle::phi(uint index)const        {return smearP[index].Phi();}
-double Particle::energy(uint index)const     {return smearP[index].E();}
-uint Particle::size()const                   {
-    return smearP.size();}
-TLorentzVector Particle::p4(uint index)const {return smearP[index];}
+double Particle::pt(uint index)const         {return smearP->at(index).Pt();}
+double Particle::eta(uint index)const        {return smearP->at(index).Eta();}
+double Particle::phi(uint index)const        {return smearP->at(index).Phi();}
+double Particle::energy(uint index)const     {return smearP->at(index).E();}
+uint Particle::size()const                   {return smearP->size();}
+vector<TLorentzVector>::iterator Particle::begin(){ return smearP->begin();}
+vector<TLorentzVector>::iterator Particle::end(){ return smearP->end();}
+vector<TLorentzVector>::const_iterator Particle::begin()const { return smearP->begin();}
+vector<TLorentzVector>::const_iterator Particle::end()const { return smearP->end();}
+
+
+TLorentzVector Particle::p4(uint index)const {return (smearP->at(index));}
+TLorentzVector& Particle::p4(uint index) {return &(smearP->at(index));}
 
 
 void Particle::setSystematic(string syst){
@@ -56,7 +66,7 @@ void Particle::setSystematic(string syst){
       addPtEtaPhiESyst(mpt->at(i),meta->at(i),mphi->at(i),menergy->at(i),"orig");
     }
   }
-  smearP= systVec[syst];
+  smearP  = &(systVec[syst]);
   activeSystematic=syst;
 }
 
@@ -332,13 +342,13 @@ void Particle::getPartStats(string filename) {
 
 bool Electron::get_Iso(int index, double min, double max) const {
   double maxIsoval = std::max(0.0, isoNeutralHadrons->at(index) + isoPhotons->at(index) - 0.5 * isoPU->at(index));
-  double isoSum = (isoChargedHadrons->at(index) + maxIsoval) / smearP.at(index).Pt();
+  double isoSum = (isoChargedHadrons->at(index) + maxIsoval) / smearP->at(index).Pt();
   return (isoSum >= min && isoSum < max);
 }
 
 bool Muon::get_Iso(int index, double min, double max) const {
   double maxIsoval = std::max(0.0, isoNeutralHadron->at(index) + isoPhoton->at(index) - 0.5 * isoPU->at(index));
-  double isoSum = (isoCharged->at(index) + maxIsoval) / smearP.at(index).Pt();
+  double isoSum = (isoCharged->at(index) + maxIsoval) / smearP->at(index).Pt();
   return (isoSum >= min && isoSum < max);
 }
 

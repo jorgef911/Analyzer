@@ -538,7 +538,7 @@ void Analyzer::printCuts() {
 void Analyzer::updateMet() {
   ///---MHT and HT calculations----////
   int i=0;
-  for(vector<TLorentzVector>::iterator it=_Jet->smearP.begin(); it!=_Jet->smearP.end(); it++, i++) {
+  for(vector<TLorentzVector>::iterator it=_Jet->begin(); it!=_Jet->end(); it++, i++) {
     if( (it->Pt() > distats["Run"].dmap.at("JetPtForMhtAndHt")) && (fabs(it->Eta()) < distats["Run"].dmap.at("JetEtaForMhtAndHt")) ) {
       if(distats["Run"].bmap.at("ApplyJetLooseIDforMhtAndHt") && !passedLooseJetID(i) ) continue;
 
@@ -567,12 +567,12 @@ void Analyzer::treatMuons_Met() {
   if(distats["Run"].bmap.at("TreatMuonsAsNeutrinos")) {
     for(auto it : *goodParts[CUTS::eRMuon1]) {
       if(find(goodParts[CUTS::eRMuon2]->begin(), goodParts[CUTS::eRMuon2]->end(), it) != goodParts[CUTS::eRMuon2]->end() ) continue;
-      deltaMEx += _Muon->smearP.at(it).Px();
-      deltaMEy += _Muon->smearP.at(it).Py();
+      deltaMEx += _Muon->p4(it).Px();
+      deltaMEy += _Muon->p4(it).Py();
     }
     for(auto it : *goodParts[CUTS::eRMuon2]) {
-      deltaMEx += _Muon->smearP.at(it).Px();
-      deltaMEy += _Muon->smearP.at(it).Py();
+      deltaMEx += _Muon->p4(it).Px();
+      deltaMEy += _Muon->p4(it).Py();
     }
   }
   if(distats["Run"].bmap.at("TreatMuonsAsTaus")) {
@@ -587,37 +587,37 @@ void Analyzer::treatMuons_Met() {
       double rand1 = 1;//Tau_HFrac->GetRandom();
       double rand2 = 0;//Tau_Resol->GetRandom();
 
-      double ETau_Pt = _Muon->smearP.at(muon).Pt()*rand1*(rand2+1.0);
-      double ETau_Eta = _Muon->smearP.at(muon).Eta();
-      double ETau_Phi=normPhi(_Muon->smearP.at(muon).Phi());//+DeltaNu_Phi->GetRandom());
+      double ETau_Pt = _Muon->p4(muon).Pt()*rand1*(rand2+1.0);
+      double ETau_Eta = _Muon->p4(muon).Eta();
+      double ETau_Phi=normPhi(_Muon->p4(muon).Phi());//+DeltaNu_Phi->GetRandom());
       double ETau_Energy = 0.;
 
 
-      // double theta = 2.0*TMath::ATan2(1.0,TMath::Exp(_Muon->smearP.at(muon).Eta()));
+      // double theta = 2.0*TMath::ATan2(1.0,TMath::Exp(_Muon->p4(muon).Eta()));
       // double sin_theta = TMath::Sin(theta);
       // double P_tau = ETau_Pt/sin_theta;
 
       // //ETau_Energy = sqrt(pow(P_tau, 2) + pow(1.77699, 2));
-      // ETau_Energy = sqrt( pow(1.77699, 2) + pow(ETau_Pt, 2) + pow(_Muon->smearP.at(muon).Pz(), 2));
+      // ETau_Energy = sqrt( pow(1.77699, 2) + pow(ETau_Pt, 2) + pow(_Muon->p4(muon).Pz(), 2));
 
       /*if(ETau_Pt <= 15.0){
         while(ETau_Pt<=15.0){
         rand1 = Tau_HFrac->GetRandom();
         rand2 = Tau_Resol->GetRandom();
-        ETau_Pt = _Muon->smearP.at(muon).Pt()*rand1*(rand2+1.0);
-        ENu_Pt = _Muon->smearP.at(muon).Pt()-ETau_Pt;
+        ETau_Pt = _Muon->p4(muon).Pt()*rand1*(rand2+1.0);
+        ENu_Pt = _Muon->p4(muon).Pt()-ETau_Pt;
         }
       }
       */
 
       TLorentzVector Emu_Tau;
       Emu_Tau.SetPtEtaPhiE(ETau_Pt, ETau_Eta, ETau_Phi, ETau_Energy);
-      _Muon->smearP.clear();
+      _Muon->smearP->clear();
 
       if (ETau_Pt >= _Muon->pstats["Muon1"].pmap.at("PtCut").first ){
-        _Muon->smearP.push_back(Emu_Tau);
-        deltaMEx += (_Muon->smearP.at(muon).Px()-Emu_Tau.Px());
-        deltaMEy += (_Muon->smearP.at(muon).Py()-Emu_Tau.Py());
+        _Muon->smearP->push_back(Emu_Tau);
+        deltaMEx += (_Muon->p4(muon).Px()-Emu_Tau.Px());
+        deltaMEy += (_Muon->p4(muon).Py()-Emu_Tau.Py());
 
       }
     }
@@ -862,11 +862,11 @@ void Analyzer::smearLepton(Lepton& lepton, CUTS eGenPos, const PartStats& stats,
     double smearedEnergy = (genVec.Energy()*stats.dmap.at("EnergyScaleOffset")) + (lepton.energy(i) - genVec.Energy())*stats.dmap.at("EnergySigmaOffset");
 
     TLorentzVector tmpSmear=lepton.p4(i);
-    cout<<"before"<<tmpSmear.Pt()<<endl;
+    //cout<<"before"<<tmpSmear.Pt()<<"   "<<smearedPt<<endl;
 
     lepton.setPtEtaPhiESyst(i,smearedPt, smearedEta, smearedPhi, smearedEnergy,syst);
 
-    cout<<"after"<<tmpSmear.Pt()<<"   "<< lepton.p4(i).Pt() <<endl;
+    //cout<<"after"<<tmpSmear.Pt()<<"   "<< lepton.p4(i).Pt() <<endl;
 
     deltaMEx += tmpSmear.Px() - lepton.p4(i).Px();
     deltaMEy += tmpSmear.Py() - lepton.p4(i).Py();
@@ -898,7 +898,7 @@ void Analyzer::smearJet(Particle& jet,const PartStats& stats, string syst) {
       deltaMEy += (1 -stats.dmap.at("JetEnergyScaleOffset"))*jet.p4(i).Py();
     }
 
-    jet.smearP[i]*=stats.dmap.at("JetEnergyScaleOffset");
+    jet.p4(i)*=stats.dmap.at("JetEnergyScaleOffset");
   }
 }
 
@@ -951,7 +951,7 @@ void Analyzer::getGoodGen(const PartStats& stats) {
 
   for(size_t j = 0; j < _Gen->size(); j++) {
     int id = abs(_Gen->pdg_id->at(j));
-    if(genMaper[id] != nullptr && _Gen->pdg_id->at(j) == genMaper[id]->status) {
+    if(genMaper[id] != nullptr && _Gen->status->at(j) == genMaper[id]->status) {
       if(id == 15 && (_Gen->pt(j) < stats.pmap.at("TauPtCut").first || _Gen->pt(j) > stats.pmap.at("TauPtCut").second || abs(_Gen->eta(j)) > stats.dmap.at("TauEtaCut"))) continue;
       goodParts[genMaper[id]->ePos]->push_back(j);
     }
@@ -983,7 +983,7 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
   if(! need_cut[ePos]) return;
   int i = 0;
 
-  for(vector<TLorentzVector>::const_iterator it=lep.smearP.begin(); it != lep.smearP.end(); it++, i++) {
+  for(vector<TLorentzVector>::const_iterator it=lep.begin(); it != lep.end(); it++, i++) {
     TLorentzVector lvec = (*it);
 
     if (fabs(lvec.Eta()) > stats.dmap.at("EtaCut")) continue;
@@ -1058,7 +1058,7 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats) {
   int i=0;
 
 
-  for(vector<TLorentzVector>::iterator it=_Jet->smearP.begin(); it != _Jet->smearP.end(); it++, i++) {
+  for(vector<TLorentzVector>::iterator it=_Jet->begin(); it != _Jet->end(); it++, i++) {
     TLorentzVector lvec = (*it);
     ///if else loop for central jet requirements
 
@@ -1092,9 +1092,9 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats) {
     int potential = -1;
     double prevPt = -1;
     for(vec_iter leadit = goodParts[ePos]->begin(); leadit != goodParts[ePos]->end(); ++leadit) {
-      if(((ePos == CUTS::eR2ndJet && (*leadit) != leadIndex) || ePos == CUTS::eR1stJet) && _Jet->smearP.at(*leadit).Pt() > prevPt) {
+      if(((ePos == CUTS::eR2ndJet && (*leadit) != leadIndex) || ePos == CUTS::eR1stJet) && _Jet->p4(*leadit).Pt() > prevPt) {
         potential = (*leadit);
-        prevPt = _Jet->smearP.at(*leadit).Pt();
+        prevPt = _Jet->p4(*leadit).Pt();
       }
     }
     goodParts[ePos]->clear();
@@ -1110,7 +1110,7 @@ void Analyzer::getGoodRecoFatJets(CUTS ePos, const PartStats& stats) {
   if(! need_cut[ePos]) return;
   int i=0;
 
-  for(vector<TLorentzVector>::iterator it=_FatJet->smearP.begin(); it != _FatJet->smearP.end(); it++, i++) {
+  for(vector<TLorentzVector>::iterator it=_FatJet->begin(); it != _FatJet->end(); it++, i++) {
     TLorentzVector lvec = (*it);
     ///if else loop for central jet requirements
 
@@ -1144,7 +1144,7 @@ void Analyzer::getGoodRecoFatJets(CUTS ePos, const PartStats& stats) {
 //came ro decayed into those leptons
 bool Analyzer::isOverlaping(const TLorentzVector& lvec, Lepton& overlapper, CUTS ePos, double MatchingDeltaR) {
   for(vec_iter it=goodParts[ePos]->begin(); it != goodParts[ePos]->end(); it++) {
-    if(lvec.DeltaR(overlapper.smearP.at(*it)) < MatchingDeltaR) return true;
+    if(lvec.DeltaR(overlapper.p4(*it)) < MatchingDeltaR) return true;
   }
   return false;
 }
@@ -1173,7 +1173,7 @@ bool Analyzer::passedLooseJetID(int nobj) {
   if (_Jet->neutralEmEmEnergyFraction->at(nobj) >= 0.99) return false;
   if (_Jet->numberOfConstituents->at(nobj) <= 1) return false;
   if (_Jet->muonEnergyFraction->at(nobj) >= 0.80) return false;
-  if ( (fabs(_Jet->smearP.at(nobj).Eta()) < 2.4) &&
+  if ( (fabs(_Jet->p4(nobj).Eta()) < 2.4) &&
     ((_Jet->chargedHadronEnergyFraction->at(nobj) <= 0.0) ||
     (_Jet->chargedMultiplicity->at(nobj) <= 0.0) ||
     (_Jet->chargedEmEnergyFraction->at(nobj) >= 0.99) )) return false;
@@ -1199,8 +1199,8 @@ void Analyzer::VBFTopologyCut(const PartStats& stats) {
 
   if(goodParts[CUTS::eR1stJet]->at(0) == -1 || goodParts[CUTS::eR2ndJet]->at(0) == -1) return;
 
-  TLorentzVector ljet1 = _Jet->smearP.at(goodParts[CUTS::eR1stJet]->at(0));
-  TLorentzVector ljet2 = _Jet->smearP.at(goodParts[CUTS::eR2ndJet]->at(0));
+  TLorentzVector ljet1 = _Jet->p4(goodParts[CUTS::eR1stJet]->at(0));
+  TLorentzVector ljet2 = _Jet->p4(goodParts[CUTS::eR2ndJet]->at(0));
 
   if(!passCutRange("Mass", (ljet1 + ljet2).M(), stats)) return;
   if(!passCutRange("Pt", (ljet1 + ljet2).Pt(), stats)) return;
@@ -1307,8 +1307,8 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
   for(vec_iter i1=goodParts[ePos1]->begin(); i1 != goodParts[ePos1]->end(); i1++) {
     for(vec_iter i2=goodParts[ePos2]->begin(); i2 != goodParts[ePos2]->end(); i2++) {
       if(sameParticle && (*i2) <= (*i1)) continue;
-      part1 = lep1.smearP.at(*i1);
-      part2 = lep2.smearP.at(*i2);
+      part1 = lep1.p4(*i1);
+      part2 = lep2.p4(*i2);
 
       if(stats.bmap.at("DiscrByDeltaR") && (part1.DeltaR(part2)) < stats.dmap.at("DeltaRCut")) continue;
       if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge->at(*i1) * lep2.charge->at(*i2) <= 0)) continue;
@@ -1339,12 +1339,12 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
       ///////////////////
 
       if (stats.bmap.at("DiscrByDeltaPtDivSumPt")) {
-        double ptDiv = (lep1.smearP.at(*i1).Pt() - lep2.smearP.at(*i2).Pt()) / (lep1.smearP.at(*i1).Pt() + lep2.smearP.at(*i2).Pt());
+        double ptDiv = (lep1.p4(*i1).Pt() - lep2.p4(*i2).Pt()) / (lep1.p4(*i1).Pt() + lep2.p4(*i2).Pt());
         if( ptDiv < stats.pmap.at("DeltaPtDivSumPtCutValue").first || ptDiv > stats.pmap.at("DeltaPtDivSumPtCutValue").second) continue;
       }
 
       if (stats.bmap.at("DiscrByDeltaPt")) {
-        double deltaPt = lep1.smearP.at(*i1).Pt() - lep2.smearP.at(*i2).Pt();
+        double deltaPt = lep1.p4(*i1).Pt() - lep2.p4(*i2).Pt();
         if(deltaPt < stats.pmap.at("DeltaPtCutValue").first || deltaPt > stats.pmap.at("DeltaPtCutValue").second) continue;
       }
 
@@ -1366,9 +1366,9 @@ void Analyzer::getGoodDiJets(const PartStats& stats) {
   TLorentzVector jet1, jet2;
   // ----Separation cut between jets (remove overlaps)
   for(vec_iter ij2=goodParts[CUTS::eRJet2]->begin(); ij2 != goodParts[CUTS::eRJet2]->end(); ij2++) {
-    jet2 = _Jet->smearP.at(*ij2);
+    jet2 = _Jet->p4(*ij2);
     for(vec_iter ij1=goodParts[CUTS::eRJet1]->begin(); ij1 != goodParts[CUTS::eRJet1]->end() && (*ij1) < (*ij2); ij1++) {
-      jet1 = _Jet->smearP.at(*ij1);
+      jet1 = _Jet->p4(*ij1);
 
       if (stats.bmap.at("DiscrByDeltaR")) {
         if(jet1.DeltaR(jet2) < stats.dmap.at("DeltaRCut")) continue;
@@ -1390,7 +1390,7 @@ void Analyzer::getGoodDiJets(const PartStats& stats) {
       ///Particlesp that lead to good combo are totjet * part1 + part2
       /// final / totjet = part1 (make sure is integer)
       /// final % totjet = part2
-      goodParts[CUTS::eDiJet]->push_back((*ij1)*_Jet->smearP.size() + (*ij2));
+      goodParts[CUTS::eDiJet]->push_back((*ij1)*_Jet->size() + (*ij2));
     }
   }
 }
@@ -1405,7 +1405,7 @@ bool Analyzer::isZdecay(const TLorentzVector& theObject, const Lepton& lep) {
   float zmmPtAsymmetry = -10.;
 
   // if mass is within 3 sigmas of z or pt asymmetry is small set to true.
-  for(vector<TLorentzVector>::const_iterator lepit= lep.smearP.begin(); lepit != lep.smearP.end(); lepit++) {
+  for(vector<TLorentzVector>::const_iterator lepit= lep.begin(); lepit != lep.end(); lepit++) {
     if(theObject.DeltaR(*lepit) < 0.3) continue;
     if(theObject == (*lepit)) continue;
 
@@ -1506,17 +1506,17 @@ void Analyzer::fill_Folder(string group, const int max) {
     CUTS ePos = fillInfo[group]->ePos;
 
     for(vec_iter it=goodParts[ePos]->begin(); it!=goodParts[ePos]->end(); it++) {
-      histAddVal(part->smearP.at(*it).Energy(), "Energy");
-      histAddVal(part->smearP.at(*it).Pt(), "Pt");
-      histAddVal(part->smearP.at(*it).Eta(), "Eta");
-      histAddVal(part->smearP.at(*it).Phi(), "Phi");
+      histAddVal(part->p4(*it).Energy(), "Energy");
+      histAddVal(part->p4(*it).Pt(), "Pt");
+      histAddVal(part->p4(*it).Eta(), "Eta");
+      histAddVal(part->p4(*it).Phi(), "Phi");
       if(part->type == PType::Tau) {
         histAddVal(_Tau->nProngs->at(*it), "NumSignalTracks");
         histAddVal(_Tau->charge->at(*it), "Charge");
         histAddVal(_Tau->leadChargedCandPt->at(*it), "SeedTrackPt");
       }
       if(part->type != PType::Jet) {
-        histAddVal(calculateLeptonMetMt(part->smearP.at(*it)), "MetMt");
+        histAddVal(calculateLeptonMetMt(part->p4(*it)), "MetMt");
       }
       if(part->type == PType::FatJet ) {
         histAddVal(_FatJet->PrunedMass->at(*it), "PrunedMass");
@@ -1530,9 +1530,9 @@ void Analyzer::fill_Folder(string group, const int max) {
       double leadpt = 0;
       double leadeta = 0;
       for(vec_iter it=goodParts[ePos]->begin(); it!=goodParts[ePos]->end(); it++) {
-        if(part->smearP.at(*it).Pt() >= leadpt) {
-          leadpt = part->smearP.at(*it).Pt();
-          leadeta = part->smearP.at(*it).Eta();
+        if(part->p4(*it).Pt() >= leadpt) {
+          leadpt = part->p4(*it).Pt();
+          leadeta = part->p4(*it).Eta();
         }
       }
 
@@ -1553,19 +1553,19 @@ void Analyzer::fill_Folder(string group, const int max) {
   } else if(group == "FillLeadingJet" && goodParts[CUTS::eSusyCom]->size() == 0) {
 
     if(goodParts[CUTS::eR1stJet]->at(0) != -1) {
-      histAddVal(_Jet->smearP.at(goodParts[CUTS::eR1stJet]->at(0)).Pt(), "FirstPt");
-      histAddVal(_Jet->smearP.at(goodParts[CUTS::eR1stJet]->at(0)).Eta(), "FirstEta");
+      histAddVal(_Jet->p4(goodParts[CUTS::eR1stJet]->at(0)).Pt(), "FirstPt");
+      histAddVal(_Jet->p4(goodParts[CUTS::eR1stJet]->at(0)).Eta(), "FirstEta");
     }
     if(goodParts[CUTS::eR2ndJet]->at(0) != -1) {
-      histAddVal(_Jet->smearP.at(goodParts[CUTS::eR2ndJet]->at(0)).Pt(), "SecondPt");
-      histAddVal(_Jet->smearP.at(goodParts[CUTS::eR2ndJet]->at(0)).Eta(), "SecondEta");
+      histAddVal(_Jet->p4(goodParts[CUTS::eR2ndJet]->at(0)).Pt(), "SecondPt");
+      histAddVal(_Jet->p4(goodParts[CUTS::eR2ndJet]->at(0)).Eta(), "SecondEta");
     }
 
 
   } else if(group == "FillLeadingJet" && goodParts[CUTS::eSusyCom]->size() != 0) {
 
-    TLorentzVector first = _Jet->smearP.at(goodParts[CUTS::eR1stJet]->at(0));
-    TLorentzVector second = _Jet->smearP.at(goodParts[CUTS::eR2ndJet]->at(0));
+    TLorentzVector first = _Jet->p4(goodParts[CUTS::eR1stJet]->at(0));
+    TLorentzVector second = _Jet->p4(goodParts[CUTS::eR2ndJet]->at(0));
 
     histAddVal(first.Pt(), "FirstPt");
     histAddVal(second.Pt(), "SecondPt");
@@ -1611,10 +1611,10 @@ void Analyzer::fill_Folder(string group, const int max) {
     double leaddijetdeltaEta = 0;
     double etaproduct = 0;
     for(vec_iter it=goodParts[CUTS::eDiJet]->begin(); it!=goodParts[CUTS::eDiJet]->end(); it++) {
-      int p1 = (*it) / _Jet->smearP.size();
-      int p2 = (*it) % _Jet->smearP.size();
-      TLorentzVector jet1 = _Jet->smearP.at(p1);
-      TLorentzVector jet2 = _Jet->smearP.at(p2);
+      int p1 = (*it) / _Jet->size();
+      int p2 = (*it) % _Jet->size();
+      TLorentzVector jet1 = _Jet->p4(p1);
+      TLorentzVector jet2 = _Jet->p4(p2);
       TLorentzVector DiJet = jet1 + jet2;
 
       if(DiJet.M() > leaddijetmass) {
@@ -1656,8 +1656,8 @@ void Analyzer::fill_Folder(string group, const int max) {
       int p1= (*it) / BIG_NUM;
       int p2= (*it) % BIG_NUM;
 
-      part1 = lep1->smearP.at(p1);
-      part2 = lep2->smearP.at(p2);
+      part1 = lep1->p4(p1);
+      part2 = lep2->p4(p2);
 
       histAddVal2(part1.Pt(),part2.Pt(), "Part1PtVsPart2Pt");
       histAddVal(part1.DeltaR(part2), "DeltaR");
@@ -1692,7 +1692,7 @@ void Analyzer::fill_Folder(string group, const int max) {
       histAddVal((distats.at(digroup).dmap.at("PZetaCutCoefficient") * PZeta) + (distats.at(digroup).dmap.at("PZetaVisCutCoefficient") * PZetaVis), "Zeta1D");
 
       if ((goodParts[CUTS::eR1stJet]->size()>0 && goodParts[CUTS::eR1stJet]->at(0) != -1) && (goodParts[CUTS::eR2ndJet]->size()>0 && goodParts[CUTS::eR2ndJet]->at(0) != -1)) {
-        TLorentzVector TheLeadDiJetVect = _Jet->smearP.at(goodParts[CUTS::eR1stJet]->at(0)) + _Jet->smearP.at(goodParts[CUTS::eR2ndJet]->at(0));
+        TLorentzVector TheLeadDiJetVect = _Jet->p4(goodParts[CUTS::eR1stJet]->at(0)) + _Jet->p4(goodParts[CUTS::eR2ndJet]->at(0));
 
         histAddVal(absnormPhi(part1.Phi() - TheLeadDiJetVect.Phi()), "Part1DiJetDeltaPhi");
         histAddVal(absnormPhi(part2.Phi() - TheLeadDiJetVect.Phi()), "Part2DiJetDeltaPhi");
