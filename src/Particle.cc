@@ -6,6 +6,7 @@
 Particle::Particle(TTree* _BOOM, string _GenName, string filename) : BOOM(_BOOM), GenName(_GenName) {
   type = PType::None;
   getPartStats(filename);
+  smearP = new vector<TLorentzVector>();
   //set the pt to an empty vector if the branch does not exist
   if( _BOOM->GetListOfBranches()->FindObject((GenName+"_pt").c_str()) ==0){
     mpt=new vector<double>();
@@ -36,12 +37,13 @@ void Particle::addPtEtaPhiESyst(double ipt,double ieta, double iphi, double iene
 
 void Particle::init(){
     //cleanup of the particles
-    smearP->clear();
+  smearP->clear();
     for(auto &it: systVec){
         it.second.clear();
     }
     setSystematic("orig");
 }
+
 double Particle::pt(uint index)const         {return smearP->at(index).Pt();}
 double Particle::eta(uint index)const        {return smearP->at(index).Eta();}
 double Particle::phi(uint index)const        {return smearP->at(index).Phi();}
@@ -54,7 +56,7 @@ vector<TLorentzVector>::const_iterator Particle::end()const { return smearP->end
 
 
 TLorentzVector Particle::p4(uint index)const {return (smearP->at(index));}
-TLorentzVector& Particle::p4(uint index) {return &(smearP->at(index));}
+TLorentzVector& Particle::p4(uint index) {return smearP->at(index);}
 
 
 void Particle::setSystematic(string syst){

@@ -139,6 +139,7 @@ private:
   unordered_map<string, PartStats> distats;
   unordered_map<string, FillVals*> fillInfo;
   unordered_map<string, double> genMap;
+  unordered_map<CUTS, vector<int>*, EnumHash>* active_part;
   unordered_map<CUTS, vector<int>*, EnumHash> goodParts;
   unordered_map<CUTS, bool, EnumHash> need_cut;
   vector<Particle*> allParticles;
