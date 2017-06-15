@@ -13,6 +13,7 @@ Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string
   }
 
   //set the pt to an empty vector if the branch does not exist
+  //backward compatible yeah!!
   if( _BOOM->GetListOfBranches()->FindObject((GenName+"_pt").c_str()) ==0){
     mpt=new vector<double>();
   }else{
@@ -24,12 +25,12 @@ Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string
   activeSystematic="orig";
 }
 
-void Particle::setPtEtaPhiESyst(uint index,double ipt,double ieta, double iphi, double ienergy, string syst){
-  if(systVec[syst]->size()< index ){
-    cout<<"syst  "<<syst<<" at index "<<index<<" does not exist"<<"  size "<<systVec[syst]->size()<<endl;
-  }
-  systVec[syst]->at(index).SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
-}
+//void Particle::setPtEtaPhiESyst(uint index,double ipt,double ieta, double iphi, double ienergy, string syst){
+  //if(systVec[syst]->size()< index ){
+    //cout<<"syst  "<<syst<<" at index "<<index<<" does not exist"<<"  size "<<systVec[syst]->size()<<endl;
+  //}
+  //systVec[syst]->at(index).SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
+//}
 
 void Particle::addPtEtaPhiESyst(double ipt,double ieta, double iphi, double ienergy, string syst){
   TLorentzVector mp4;
@@ -37,6 +38,10 @@ void Particle::addPtEtaPhiESyst(double ipt,double ieta, double iphi, double iene
   systVec[syst]->push_back(mp4);
 }
 
+
+void Particle::addP4Syst(TLorentzVector mp4, string syst){
+  systVec[syst]->push_back(mp4);
+}
 
 
 void Particle::init(){
@@ -78,6 +83,44 @@ void Particle::unBranch() {
   BOOM->SetBranchStatus((GenName+"*").c_str(), 0);
 }
 
+
+void Particle::getPartStats(string filename) {
+  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+  ifstream info_file(filename);
+  boost::char_separator<char> sep(", \t");
+
+  if(!info_file) {
+    std::cout << "could not open file " << filename <<std::endl;
+    return;
+  }
+
+  vector<string> stemp;
+  string group,line;
+  while(getline(info_file, line)) {
+    tokenizer tokens(line, sep);
+    stemp.clear();
+    for(tokenizer::iterator iter = tokens.begin();iter != tokens.end(); iter++) {
+      if( ((*iter)[0] == '/' && (*iter)[0] == '/') || ((*iter)[0] == '#') ) break;
+      stemp.push_back(*iter);
+    }
+    if(stemp.size() == 0) continue;
+    else if(stemp.size() == 1) {
+      group = stemp[0];
+      continue;
+    } else if(group == "") {
+      cout << "error in " << filename << "; no groups specified for data" << endl;
+      exit(1);
+    } else if(stemp.size() == 2) {
+
+      if(stemp[1] == "1" || stemp[1] == "true" ) pstats[group].bmap[stemp[0]] = true;
+      else if(stemp[1] == "0"  || stemp[1] == "false" ) pstats[group].bmap[stemp[0]]=false;
+
+      else if(stemp[1].find_first_not_of("0123456789+-.") == string::npos) pstats[group].dmap[stemp[0]]=stod(stemp[1]);
+      else pstats[group].smap[stemp[0]] = stemp[1];
+    } else  pstats[group].pmap[stemp[0]] = make_pair(stod(stemp[1]), stod(stemp[2]));
+  }
+  info_file.close();
+}
 
 Photon::Photon(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Photon", filename, syst_names) {
   SetBranch("Photon_et", et);
@@ -300,47 +343,6 @@ void Taus::findExtraCuts() {
   extraCuts.push_back(CUTS::eRElec2);
 }
 
-void Particle::getPartStats(string filename) {
-  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-  ifstream info_file(filename);
-  boost::char_separator<char> sep(", \t");
-
-  if(!info_file) {
-    std::cout << "could not open file " << filename <<std::endl;
-    return;
-  }
-
-  vector<string> stemp;
-  string group,line;
-  while(getline(info_file, line)) {
-    tokenizer tokens(line, sep);
-    stemp.clear();
-    for(tokenizer::iterator iter = tokens.begin();iter != tokens.end(); iter++) {
-      if( ((*iter)[0] == '/' && (*iter)[0] == '/') || ((*iter)[0] == '#') ) break;
-      stemp.push_back(*iter);
-    }
-    if(stemp.size() == 0) continue;
-    else if(stemp.size() == 1) {
-      group = stemp[0];
-      continue;
-    } else if(group == "") {
-      cout << "error in " << filename << "; no groups specified for data" << endl;
-      exit(1);
-    } else if(stemp.size() == 2) {
-
-      if(stemp[1] == "1" || stemp[1] == "true" ) pstats[group].bmap[stemp[0]] = true;
-      else if(stemp[1] == "0"  || stemp[1] == "false" ) pstats[group].bmap[stemp[0]]=false;
-
-      else if(stemp[1].find_first_not_of("0123456789+-.") == string::npos) pstats[group].dmap[stemp[0]]=stod(stemp[1]);
-      else pstats[group].smap[stemp[0]] = stemp[1];
-    } else  pstats[group].pmap[stemp[0]] = make_pair(stod(stemp[1]), stod(stemp[2]));
-  }
-  info_file.close();
-
-
-}
-
-
 
 
 bool Electron::get_Iso(int index, double min, double max) const {
@@ -361,3 +363,5 @@ bool Taus::get_Iso(int index, double onetwo, double max) const {
   double minIsoval = (minIsotmp != 0) ? minIsotmp->at(index) : true;
   return (maxIsoval > 0.5 && minIsoval > 0.5);
 }
+
+

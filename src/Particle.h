@@ -57,6 +57,7 @@ public:
 
   void setPtEtaPhiESyst(uint, double, double, double, double, string);
   void addPtEtaPhiESyst(double, double, double, double, string);
+  void addP4Syst(TLorentzVector, string);
   void setCurrentP(string);
 
   PType type;
