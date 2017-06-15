@@ -318,7 +318,11 @@ Analyzer::~Analyzer() {
 void Analyzer::clear_values() {
   for(auto e: Enum<CUTS>()) {
     goodParts[e]->clear();
+    for(auto it: syst_parts) {
+      it[e]->clear();
+    }
   }
+
   deltaMEx=0;
   deltaMEy=0;
   sumpxForMht = 0.0;
@@ -332,20 +336,22 @@ void Analyzer::clear_values() {
 void Analyzer::preprocess(int event) {
   BOOM->GetEntry(event);
 
-  active_part = &goodParts;
 
-  theMETVector.SetPxPyPzE(Met[0], Met[1], Met[2], sqrt(pow(Met[0],2) + pow(Met[1],2)));
   for(Particle* ipart: allParticles){
     ipart->init();
   }
+
+  active_part = &goodParts;
+
+  theMETVector.SetPxPyPzE(Met[0], Met[1], Met[2], sqrt(pow(Met[0],2) + pow(Met[1],2)));
 
   pu_weight = (!isData && CalculatePUSystematics) ? hPU[(int)(nTruePU+1)] : 1.0;
 
   // SET NUMBER OF GEN PARTICLES
   if(!isData){
-    getGoodGen(_Gen->pstats["Gen"]);
-    //    getGoodTauNu();
     _Gen->cur_P = &_Gen->Reco;
+    getGoodGen(_Gen->pstats["Gen"]);
+    getGoodTauNu();
   }
 
 
@@ -991,7 +997,6 @@ TLorentzVector Analyzer::matchTauToGen(const TLorentzVector& lvec, double lDelta
 
 ////Calculates the number of gen particles.  Based on id number and status of each particle
 void Analyzer::getGoodGen(const PartStats& stats) {
-
   for(size_t j = 0; j < _Gen->size(); j++) {
     int id = abs(_Gen->pdg_id->at(j));
     if(genMaper[id] != nullptr && _Gen->status->at(j) == genMaper[id]->status) {
