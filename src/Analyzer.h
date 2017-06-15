@@ -28,6 +28,8 @@ struct CRTester;
 #include "Cut_enum.h"
 #include "FillInfo.h"
 #include "CRTest.h"
+#include "Systematics.h"
+#include "JetResolution.h"
 
 double normPhi(double phi);
 double absnormPhi(double phi);
@@ -77,11 +79,12 @@ private:
   void setCutNeeds();
 
   void smearLepton(Lepton&, CUTS, const PartStats&, string syst="orig");
-  void smearJet(Particle&, const PartStats&, string syst="orig");
+  void smearJet(Particle&, CUTS, const PartStats&, string syst="orig");
 
   bool JetMatchesLepton(const Lepton&, const TLorentzVector&, double, CUTS);
   TLorentzVector matchLeptonToGen(const TLorentzVector&, const PartStats&, CUTS);
   TLorentzVector matchTauToGen(const TLorentzVector&, double);
+  TLorentzVector matchJetToGen(const TLorentzVector&, const PartStats&, CUTS);
 
 
   void getGoodParticles(string);
@@ -134,6 +137,8 @@ private:
   Jet* _Jet;
   FatJet* _FatJet;
   Histogramer histo;
+  Systematics systematics;
+  JetResolution jetRes;
   PartStats genStat;
 
   unordered_map<string, PartStats> distats;
@@ -154,6 +159,8 @@ private:
   vector<int> cuts_per, cuts_cumul;
 
   TLorentzVector theMETVector;
+  unordered_map<string,TLorentzVector> theMETVectorSystMap;
+
   double deltaMEx, deltaMEy, sumpxForMht, sumpyForMht, sumptForHt, phiForMht;
 
   double maxIso, minIso;
@@ -165,12 +172,13 @@ private:
   float nTruePU = 0;
   int bestVertices = 0;
   double gen_weight = 0;
+  double rho =0;
   double Met[3] = {0, 0, 0};
 
 
   const static vector<CUTS> genCuts;
   const static vector<CUTS> jetCuts;
-  double pu_weight, wgt;
+  double pu_weight, wgt, backup_wgt;
   unordered_map<int, GenFill*> genMaper;
 
   vector<CRTester*> testVec;

@@ -1,4 +1,5 @@
 #include "Analyzer.h"
+
 //// Used to convert Enums to integers
 #define ival(x) static_cast<int>(x)
 //// BIG_NUM = sqrt(sizeof(int)) so can use diparticle convention of
@@ -26,7 +27,7 @@ const string PUSPACE = "Pileup/";
 const vector<CUTS> Analyzer::genCuts = {
   CUTS::eGTau, CUTS::eNuTau, CUTS::eGTop,
   CUTS::eGElec, CUTS::eGMuon, CUTS::eGZ,
-  CUTS::eGW, CUTS::eGHiggs
+  CUTS::eGW, CUTS::eGHiggs, CUTS::eGJet
 };
 
 const vector<CUTS> Analyzer::jetCuts = {
@@ -67,7 +68,7 @@ const unordered_map<string, CUTS> Analyzer::cut_num = {
   {"NGenTau", CUTS::eGTau},                             {"NGenTop", CUTS::eGTop},
   {"NGenElectron", CUTS::eGElec},                       {"NGenMuon", CUTS::eGMuon},
   {"NGenZ", CUTS::eGZ},                                 {"NGenW", CUTS::eGW},
-  {"NGenHiggs", CUTS::eGHiggs},                         {"NRecoVertex", CUTS::eRVertex},
+  {"NGenHiggs", CUTS::eGHiggs},                         {"NGenJet", CUTS::eGJet},
   {"NRecoMuon1", CUTS::eRMuon1},                        {"NRecoMuon2", CUTS::eRMuon2},
   {"NRecoElectron1", CUTS::eRElec1},                    {"NRecoElectron2",CUTS::eRElec2},
   {"NRecoTau1", CUTS::eRTau1},                          {"NRecoTau2", CUTS::eRTau2},
@@ -84,7 +85,7 @@ const unordered_map<string, CUTS> Analyzer::cut_num = {
   {"NMuon1Electron1Combinations", CUTS::eMuon1Elec1},   {"NMuon1Electron2Combinations", CUTS::eMuon1Elec2},
   {"NMuon2Electron1Combinations", CUTS::eMuon2Elec1},   {"NMuon2Electron2Combinations", CUTS::eMuon2Elec2},
   {"NLeadJetCombinations", CUTS::eSusyCom},             {"METCut", CUTS::eMET},
-  {"NRecoWJet", CUTS::eRWjet}
+  {"NRecoWJet", CUTS::eRWjet},                          {"NRecoVertex", CUTS::eRVertex}
 };
 
 
@@ -181,6 +182,9 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   }
 
   histo = Histogramer(1, filespace+"Hist_entries.in", filespace+"Cuts.in", outfile, isData, cr_variables);
+  systematics = Systematics(distats);
+  jetRes = JetResolution(distats);
+
 
   if(setCR) {
     cuts_per.resize(histo.get_folders()->size());
@@ -311,6 +315,7 @@ Analyzer::~Analyzer() {
 ///resets values so analysis can start
 void Analyzer::clear_values() {
   for(auto e: Enum<CUTS>()) {
+    cout<<"jnkjnkjnkjnK"<<int(e)<<endl;
     goodParts[e]->clear();
   }
   deltaMEx=0;
@@ -346,8 +351,8 @@ void Analyzer::preprocess(int event) {
   smearLepton(*_Muon, CUTS::eGMuon, _Muon->pstats["Smear"]);
   smearLepton(*_Tau, CUTS::eGTau, _Tau->pstats["Smear"]);
 
-  smearJet(*_Jet,_Jet->pstats["Smear"]);
-  smearJet(*_FatJet,_FatJet->pstats["Smear"]);
+  smearJet(*_Jet, CUTS::eGJet,_Jet->pstats["Smear"]);
+  smearJet(*_FatJet, CUTS::eGJet,_FatJet->pstats["Smear"]);
 
   //////Triggers and Vertices
   active_part->at(CUTS::eRVertex)->resize(bestVertices);
@@ -643,6 +648,7 @@ void Analyzer::setupGeneral(TTree* BOOM) {
   SetBranch("Met_type1PF_px", Met[0]);
   SetBranch("Met_type1PF_py", Met[1]);
   SetBranch("Met_type1PF_pz", Met[2]);
+  //SetBranch("rho", rho);
 
   read_info(filespace + "ElectronTau_info.in");
   read_info(filespace + "MuonTau_info.in");
@@ -826,6 +832,7 @@ void Analyzer::setCutNeeds() {
   else {
     if(need_cut[CUTS::eGTau]) genMaper[15] = new GenFill(2, CUTS::eGTau);
     if(need_cut[CUTS::eGTop]) genMaper[6] = new GenFill(2, CUTS::eGTop);
+    if(need_cut[CUTS::eGJet]) genMaper[5] = new GenFill(2, CUTS::eGJet);
     if(need_cut[CUTS::eGElec]) genMaper[11] = new GenFill(1, CUTS::eGElec);
     if(need_cut[CUTS::eGMuon]) genMaper[13] = new GenFill(1, CUTS::eGMuon);
     if(need_cut[CUTS::eGZ]) genMaper[23] = new GenFill(2, CUTS::eGZ);
@@ -873,8 +880,8 @@ void Analyzer::smearLepton(Lepton& lepton, CUTS eGenPos, const PartStats& stats,
 }
 
 ///Same as smearlepton, just jet specific
-void Analyzer::smearJet(Particle& jet,const PartStats& stats, string syst) {
-  //jet.init();
+void Analyzer::smearJet(Particle& jet, CUTS eGenPos,const PartStats& stats, string syst) {
+
 
   for(size_t i=0; i< jet.size(); i++) {
 
@@ -888,13 +895,19 @@ void Analyzer::smearJet(Particle& jet,const PartStats& stats, string syst) {
       continue;
     }
 
+    double sf=1.;
     //only apply corrections for jets not for FatJets
     if(jet.type == PType::Jet){
-      deltaMEx += (1 - stats.dmap.at("JetEnergyScaleOffset"))*jet.p4(i).Px();
-      deltaMEy += (1 -stats.dmap.at("JetEnergyScaleOffset"))*jet.p4(i).Py();
+      TLorentzVector genJet=matchJetToGen(jet.p4(i), jet.pstats["Smear"],eGenPos);
+      if(syst=="orig"){
+        sf=jetRes.getJetResolutionCorrFactor(jet.p4(i),genJet,bestVertices,rho,0);
+      }else if(syst=="JER_Up"){
+        sf=jetRes.getJetResolutionCorrFactor(jet.p4(i),genJet,bestVertices,rho,1);
+      }else if(syst=="JER_Down"){
+        sf=jetRes.getJetResolutionCorrFactor(jet.p4(i),genJet,bestVertices,rho,-1);
+      }
     }
-
-    jet.p4(i)*=stats.dmap.at("JetEnergyScaleOffset");
+    systematics.shiftParticle(jet, jet.p4(i), sf, deltaMEx, deltaMEy, syst);
   }
 }
 
@@ -938,7 +951,20 @@ TLorentzVector Analyzer::matchTauToGen(const TLorentzVector& lvec, double lDelta
     }
   }
   return TLorentzVector(0,0,0,0);
+}
 
+
+////checks if reco object matchs a gen object.  If so, then reco object is for sure a correctly identified particle
+TLorentzVector Analyzer::matchJetToGen(const TLorentzVector& lvec, const PartStats& stats, CUTS ePos) {
+  //for the future store gen jets
+  for(auto it : *active_part->at(ePos)) {
+    if(lvec.DeltaR(_Gen->p4(it)) <= stats.dmap.at("GenMatchingDeltaR")) {
+      //nothing more than b quark or gluon
+      if( !(abs(_Gen->pdg_id->at(it))<5 || _Gen->pdg_id->at(it)==9 ||  _Gen->pdg_id->at(it)==21) ) continue;
+      return _Gen->p4(it);
+    }
+  }
+  return TLorentzVector(0,0,0,0);
 }
 
 
@@ -950,6 +976,11 @@ void Analyzer::getGoodGen(const PartStats& stats) {
     if(genMaper[id] != nullptr && _Gen->status->at(j) == genMaper[id]->status) {
       if(id == 15 && (_Gen->pt(j) < stats.pmap.at("TauPtCut").first || _Gen->pt(j) > stats.pmap.at("TauPtCut").second || abs(_Gen->eta(j)) > stats.dmap.at("TauEtaCut"))) continue;
       active_part->at(genMaper[id]->ePos)->push_back(j);
+    }
+    //something special for jet
+    if( (id<5 || id==9 ||  id==21) && _Gen->status->at(j) == genMaper[5]->status ){
+      cout<<" kjkjk"<<endl;
+      active_part->at(genMaper[5]->ePos)->push_back(j);
     }
   }
 
@@ -1437,6 +1468,8 @@ void Analyzer::fill_histogram() {
   const vector<string>* groups = histo.get_groups();
   wgt = pu_weight;
   if(distats["Run"].bmap["ApplyGenWeight"]) wgt *= (gen_weight > 0) ? 1.0 : -1.0;
+  //backup current weight
+  backup_wgt=wgt;
 
   for(auto it: *groups) {
     fill_Folder(it, maxCut);
