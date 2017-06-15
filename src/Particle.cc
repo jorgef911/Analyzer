@@ -3,10 +3,15 @@
 #define SetBranch(name, variable) BOOM->SetBranchStatus(name, 1);  BOOM->SetBranchAddress(name, &variable);
 
 //particle is a objet that stores multiple versions of the particle candidates
-Particle::Particle(TTree* _BOOM, string _GenName, string filename) : BOOM(_BOOM), GenName(_GenName) {
+Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string> syst_names) : BOOM(_BOOM), GenName(_GenName) {
   type = PType::None;
   getPartStats(filename);
-  smearP = new vector<TLorentzVector>();
+
+  systVec["orig"] = new vector<TLorentzVector>();
+  for( auto name : syst_names) {
+    systVec[name] = new vector<TLorentzVector>();
+  }
+
   //set the pt to an empty vector if the branch does not exist
   if( _BOOM->GetListOfBranches()->FindObject((GenName+"_pt").c_str()) ==0){
     mpt=new vector<double>();
@@ -20,55 +25,51 @@ Particle::Particle(TTree* _BOOM, string _GenName, string filename) : BOOM(_BOOM)
 }
 
 void Particle::setPtEtaPhiESyst(uint index,double ipt,double ieta, double iphi, double ienergy, string syst){
-  if(systVec[syst].size()< index ){
-    cout<<"syst  "<<syst<<" at index "<<index<<" does not exist"<<"  size "<<systVec[syst].size()<<endl;
+  if(systVec[syst]->size()< index ){
+    cout<<"syst  "<<syst<<" at index "<<index<<" does not exist"<<"  size "<<systVec[syst]->size()<<endl;
   }
-  systVec[syst][index].SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
+  systVec[syst]->at(index).SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
 }
 
 void Particle::addPtEtaPhiESyst(double ipt,double ieta, double iphi, double ienergy, string syst){
-  //if(systVec.find(syst)==systVec.end()){
-    //systVec[syst]=vector<TLorentzVector>;
-  //}
   TLorentzVector mp4;
   mp4.SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
-  systVec[syst].push_back(mp4);
+  systVec[syst]->push_back(mp4);
 }
+
+
 
 void Particle::init(){
     //cleanup of the particles
-  smearP->clear();
-    for(auto &it: systVec){
-        it.second.clear();
-    }
-    setSystematic("orig");
+  Reco.clear();
+  for(auto &it: systVec){
+    it.second->clear();
+  }
+  TLorentzVector tmp;
+  for(uint i=0; i < mpt->size(); i++) {
+    tmp.SetPtEtaPhiE(mpt->at(i),meta->at(i),mphi->at(i),menergy->at(i));
+    Reco.push_back(tmp);
+  }
 }
 
-double Particle::pt(uint index)const         {return smearP->at(index).Pt();}
-double Particle::eta(uint index)const        {return smearP->at(index).Eta();}
-double Particle::phi(uint index)const        {return smearP->at(index).Phi();}
-double Particle::energy(uint index)const     {return smearP->at(index).E();}
-uint Particle::size()const                   {return smearP->size();}
-vector<TLorentzVector>::iterator Particle::begin(){ return smearP->begin();}
-vector<TLorentzVector>::iterator Particle::end(){ return smearP->end();}
-vector<TLorentzVector>::const_iterator Particle::begin()const { return smearP->begin();}
-vector<TLorentzVector>::const_iterator Particle::end()const { return smearP->end();}
+double Particle::pt(uint index)const         {return cur_P->at(index).Pt();}
+double Particle::eta(uint index)const        {return cur_P->at(index).Eta();}
+double Particle::phi(uint index)const        {return cur_P->at(index).Phi();}
+double Particle::energy(uint index)const     {return cur_P->at(index).E();}
+uint Particle::size()const                   {return Reco.size();}
+vector<TLorentzVector>::iterator Particle::begin(){ return cur_P->begin();}
+vector<TLorentzVector>::iterator Particle::end(){ return cur_P->end();}
+vector<TLorentzVector>::const_iterator Particle::begin()const { return cur_P->begin();}
+vector<TLorentzVector>::const_iterator Particle::end()const { return cur_P->end();}
 
 
-TLorentzVector Particle::p4(uint index)const {return (smearP->at(index));}
-TLorentzVector& Particle::p4(uint index) {return smearP->at(index);}
+TLorentzVector Particle::p4(uint index)const {return (cur_P->at(index));}
+TLorentzVector& Particle::p4(uint index) {return cur_P->at(index);}
 
 
-void Particle::setSystematic(string syst){
-  //original vector has to be backed up!!
-  //just as a precaution
-  if( activeSystematic=="orig" && syst=="orig"){
+void Particle::setCurrentP(string syst){
+  cur_P = systVec[syst];
 
-    for(uint i=0;i<mpt->size();i++){
-      addPtEtaPhiESyst(mpt->at(i),meta->at(i),mphi->at(i),menergy->at(i),"orig");
-    }
-  }
-  smearP  = &(systVec[syst]);
   activeSystematic=syst;
 }
 
@@ -78,7 +79,7 @@ void Particle::unBranch() {
 }
 
 
-Photon::Photon(TTree* _BOOM, string filename) : Particle(_BOOM, "Photon", filename) {
+Photon::Photon(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Photon", filename, syst_names) {
   SetBranch("Photon_et", et);
   SetBranch("Photon_HoverE", hoverE);
   SetBranch("Photon_phoR9", phoR);
@@ -91,7 +92,7 @@ Photon::Photon(TTree* _BOOM, string filename) : Particle(_BOOM, "Photon", filena
   SetBranch("Photon_hasPixelSeed", hasPixelSeed);
 }
 
-Generated::Generated(TTree* _BOOM, string filename) : Particle(_BOOM, "Gen", filename) {
+Generated::Generated(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Gen", filename, syst_names) {
 
   SetBranch("Gen_pdg_id", pdg_id);
   SetBranch("Gen_motherpdg_id", motherpdg_id);
@@ -99,7 +100,7 @@ Generated::Generated(TTree* _BOOM, string filename) : Particle(_BOOM, "Gen", fil
   SetBranch("Gen_BmotherIndex", BmotherIndex);
 }
 
-Jet::Jet(TTree* _BOOM, string filename) : Particle(_BOOM, "Jet", filename) {
+Jet::Jet(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Jet", filename, syst_names) {
   type = PType::Jet;
   SetBranch("Jet_neutralHadEnergyFraction", neutralHadEnergyFraction);
   SetBranch("Jet_neutralEmEmEnergyFraction", neutralEmEmEnergyFraction);
@@ -135,7 +136,7 @@ vector<CUTS> Jet::overlapCuts(CUTS ePos) {
 }
 
 
-FatJet::FatJet(TTree* _BOOM, string filename) : Particle(_BOOM, "Jet_toptag", filename) {
+FatJet::FatJet(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Jet_toptag", filename, syst_names) {
   type = PType::FatJet;
   SetBranch("Jet_toptag_tau1", tau1);
   SetBranch("Jet_toptag_tau2", tau2);
@@ -166,7 +167,7 @@ vector<CUTS> FatJet::overlapCuts(CUTS ePos) {
 }
 
 
-Lepton::Lepton(TTree* _BOOM, string GenName, string EndName) : Particle(_BOOM, GenName, EndName) {
+Lepton::Lepton(TTree* _BOOM, string GenName, string EndName, vector<string> syst_names) : Particle(_BOOM, GenName, EndName, syst_names) {
   SetBranch((GenName+"_charge").c_str(), charge);
 }
 
@@ -176,7 +177,7 @@ void Lepton::findExtraCuts() {
   }
 }
 
-Electron::Electron(TTree* _BOOM, string filename) : Lepton(_BOOM, "patElectron", filename) {
+Electron::Electron(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "patElectron", filename, syst_names) {
   type = PType::Electron;
   if(pstats["Elec1"].bmap["DoDiscrByIsolation"] || pstats["Elec2"].bmap["DoDiscrByIsolation"]) {
     SetBranch("patElectron_isoChargedHadrons", isoChargedHadrons);
@@ -201,7 +202,7 @@ Electron::Electron(TTree* _BOOM, string filename) : Lepton(_BOOM, "patElectron",
   }
 }
 
-Muon::Muon(TTree* _BOOM, string filename) : Lepton(_BOOM, "Muon", filename) {
+Muon::Muon(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "Muon", filename, syst_names) {
   type = PType::Muon;
 
   if(pstats["Muon1"].bmap["DoDiscrByTightID"] || pstats["Muon2"].bmap["DoDiscrByTightID"]) {
@@ -219,7 +220,7 @@ Muon::Muon(TTree* _BOOM, string filename) : Lepton(_BOOM, "Muon", filename) {
 }
 
 ///////fix against stuff
-Taus::Taus(TTree* _BOOM, string filename) : Lepton(_BOOM, "Tau", filename) {
+Taus::Taus(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "Tau", filename, syst_names) {
   type = PType::Tau;
 
   ////Electron discrimination
@@ -344,13 +345,13 @@ void Particle::getPartStats(string filename) {
 
 bool Electron::get_Iso(int index, double min, double max) const {
   double maxIsoval = std::max(0.0, isoNeutralHadrons->at(index) + isoPhotons->at(index) - 0.5 * isoPU->at(index));
-  double isoSum = (isoChargedHadrons->at(index) + maxIsoval) / smearP->at(index).Pt();
+  double isoSum = (isoChargedHadrons->at(index) + maxIsoval) / cur_P->at(index).Pt();
   return (isoSum >= min && isoSum < max);
 }
 
 bool Muon::get_Iso(int index, double min, double max) const {
   double maxIsoval = std::max(0.0, isoNeutralHadron->at(index) + isoPhoton->at(index) - 0.5 * isoPU->at(index));
-  double isoSum = (isoCharged->at(index) + maxIsoval) / smearP->at(index).Pt();
+  double isoSum = (isoCharged->at(index) + maxIsoval) / cur_P->at(index).Pt();
   return (isoSum >= min && isoSum < max);
 }
 

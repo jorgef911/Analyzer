@@ -36,7 +36,7 @@ class Particle {
 
 public:
   Particle();
-  Particle(TTree*, string, string);
+  Particle(TTree*, string, string, vector<string>);
   virtual ~Particle() {}
 
   virtual void findExtraCuts() {}
@@ -57,7 +57,7 @@ public:
 
   void setPtEtaPhiESyst(uint, double, double, double, double, string);
   void addPtEtaPhiESyst(double, double, double, double, string);
-  void setSystematic(string);
+  void setCurrentP(string);
 
   PType type;
   vector<CUTS> extraCuts;
@@ -68,9 +68,10 @@ public:
   vector<double>* mphi = 0;
   vector<double>* menergy = 0;
   unordered_map<string, PartStats> pstats;
-  vector<TLorentzVector> *smearP;
-  //unordered_map<string, *vector<TLorentzVector> > systVec;
-  unordered_map<string, vector<TLorentzVector> > systVec;
+  vector<TLorentzVector> Reco;
+  vector<TLorentzVector> *cur_P;
+
+  unordered_map<string, vector<TLorentzVector>* > systVec;
   string activeSystematic;
 
 protected:
@@ -83,7 +84,7 @@ protected:
 class Photon : public Particle {
 public:
   Photon();
-  Photon(TTree*, string);
+  Photon(TTree*, string, vector<string>);
 
   vector<double>* et = 0;
   vector<double>* hoverE = 0;
@@ -103,7 +104,7 @@ class Generated : public Particle {
 
 public:
   Generated();
-  Generated(TTree*, string);
+  Generated(TTree*, string, vector<string>);
 
   vector<double>  *pdg_id = 0;
   vector<double>  *motherpdg_id = 0;
@@ -116,7 +117,7 @@ public:
 class Jet : public Particle {
 
 public:
-  Jet(TTree*, string);
+  Jet(TTree*, string, vector<string>);
 
   unordered_map<CUTS, string, EnumHash> jetNameMap = {
     {CUTS::eRJet1, "Jet1"},               {CUTS::eRJet2, "Jet2"},
@@ -146,7 +147,7 @@ public:
 class FatJet : public Particle {
 
 public:
-  FatJet(TTree*, string);
+  FatJet(TTree*, string, vector<string>);
 
   unordered_map<CUTS, string, EnumHash> jetNameMap = {
     {CUTS::eRWjet, "Wjet"}
@@ -165,7 +166,7 @@ public:
 class Lepton : public Particle {
 
 public:
-  Lepton(TTree*, string, string);
+  Lepton(TTree*, string, string, vector<string>);
 
   void findExtraCuts();
 
@@ -177,7 +178,7 @@ public:
 class Electron : public Lepton {
 
 public:
-  Electron(TTree*, string);
+  Electron(TTree*, string, vector<string>);
 
   bool get_Iso(int, double, double) const;
 
@@ -197,7 +198,7 @@ public:
 class Muon : public Lepton {
 
 public:
-  Muon(TTree*, string);
+  Muon(TTree*, string, vector<string>);
 
   bool get_Iso(int, double, double) const;
 
@@ -212,7 +213,7 @@ public:
 class Taus : public Lepton {
 
 public:
-  Taus(TTree*, string);
+  Taus(TTree*, string, vector<string>);
 
   void findExtraCuts();
 

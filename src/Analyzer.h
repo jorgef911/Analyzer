@@ -84,7 +84,7 @@ private:
   TLorentzVector matchTauToGen(const TLorentzVector&, double);
 
 
-  void getGoodParticles(string);
+  void getGoodParticles(int);
   void getGoodTauNu();
   void getGoodGen(const PartStats&);
   void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&);
@@ -141,8 +141,11 @@ private:
   unordered_map<string, double> genMap;
   unordered_map<CUTS, vector<int>*, EnumHash>* active_part;
   unordered_map<CUTS, vector<int>*, EnumHash> goodParts;
+  vector<unordered_map<CUTS, vector<int>*, EnumHash>> syst_parts;
   unordered_map<CUTS, bool, EnumHash> need_cut;
   vector<Particle*> allParticles;
+  vector<string> syst_names;
+
 
   static const unordered_map<string, CUTS> cut_num;
   static const unordered_map<CUTS, vector<CUTS>, EnumHash> adjList;

@@ -130,17 +130,24 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   isData = distats["Run"].bmap.at("isData");
   CalculatePUSystematics = distats["Run"].bmap.at("CalculatePUSystematics");
   initializePileupInfo(distats["Run"].smap.at("MCHistos"), distats["Run"].smap.at("DataHistos"),distats["Run"].smap.at("DataPUHistName"),distats["Run"].smap.at("MCPUHistName"));
-  doSystematics=distats["Systematics"].bmap.at("useSystematics");
 
+  for(auto &it : distats["Systematics"].bmap) {
+    if( it.first == "useSystematics") 
+      doSystematics= it.second;
+    else if( it.second) {
+      syst_names.push_back(it.first);
+      syst_parts.push_back(getArray());
+    }
+  }
 
   if(!isData) {
-    _Gen = new Generated(BOOM, filespace + "Gen_info.in");
+    _Gen = new Generated(BOOM, filespace + "Gen_info.in", syst_names);
   }
-  _Electron = new Electron(BOOM, filespace + "Electron_info.in");
-  _Muon = new Muon(BOOM, filespace + "Muon_info.in");
-  _Tau = new Taus(BOOM, filespace + "Tau_info.in");
-  _Jet = new Jet(BOOM, filespace + "Jet_info.in");
-  _FatJet = new FatJet(BOOM, filespace + "FatJet_info.in");
+  _Electron = new Electron(BOOM, filespace + "Electron_info.in", syst_names);
+  _Muon = new Muon(BOOM, filespace + "Muon_info.in", syst_names);
+  _Tau = new Taus(BOOM, filespace + "Tau_info.in", syst_names);
+  _Jet = new Jet(BOOM, filespace + "Jet_info.in", syst_names);
+  _FatJet = new FatJet(BOOM, filespace + "FatJet_info.in", syst_names);
 
   _Electron->findExtraCuts();
   _Muon->findExtraCuts();
@@ -197,7 +204,6 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   }
 
   setCutNeeds();
-  //  exit(1);
 
   std::cout << "setup complete" << std::endl << endl;
   start_time = clock();
@@ -338,10 +344,19 @@ void Analyzer::preprocess(int event) {
   // SET NUMBER OF GEN PARTICLES
   if(!isData){
     getGoodGen(_Gen->pstats["Gen"]);
-    getGoodTauNu();
+    //    getGoodTauNu();
+    _Gen->cur_P = &_Gen->Reco;
   }
 
-  //////Smearing
+
+
+  //////Triggers and Vertices
+  active_part->at(CUTS::eRVertex)->resize(bestVertices);
+  TriggerCuts(*(trigPlace[0]), *(trigName[0]), CUTS::eRTrig1);
+  TriggerCuts(*(trigPlace[1]), *(trigName[1]), CUTS::eRTrig2);
+
+
+
   smearLepton(*_Electron, CUTS::eGElec, _Electron->pstats["Smear"]);
   smearLepton(*_Muon, CUTS::eGMuon, _Muon->pstats["Smear"]);
   smearLepton(*_Tau, CUTS::eGTau, _Tau->pstats["Smear"]);
@@ -349,30 +364,38 @@ void Analyzer::preprocess(int event) {
   smearJet(*_Jet,_Jet->pstats["Smear"]);
   smearJet(*_FatJet,_FatJet->pstats["Smear"]);
 
-  //////Triggers and Vertices
-  active_part->at(CUTS::eRVertex)->resize(bestVertices);
-  TriggerCuts(*(trigPlace[0]), *(trigName[0]), CUTS::eRTrig1);
-  TriggerCuts(*(trigPlace[1]), *(trigName[1]), CUTS::eRTrig2);
+  // for(auto name : syst_names) {
+  //   //////Smearing
+  //   smearLepton(*_Electron, CUTS::eGElec, _Electron->pstats["Smear"], name);
+  //   smearLepton(*_Muon, CUTS::eGMuon, _Muon->pstats["Smear"], name);
+  //   smearLepton(*_Tau, CUTS::eGTau, _Tau->pstats["Smear"], name);
+
+  //   smearJet(*_Jet,_Jet->pstats["Smear"], name);
+  //   smearJet(*_FatJet,_FatJet->pstats["Smear"], name);
+  // }
 
   updateMet();
 
-  getGoodParticles("");
+  getGoodParticles(-1);
 
-  // if(doSystematics){
-  //   getGoodParticles("Muon_scale");
-  // }
+  for(size_t i=0; i < syst_names.size(); i++) {
+    cout << "in loop, bad" << endl;
+    getGoodParticles(i);
+  }
 
   if( event < 10 || ( event < 100 && event % 10 == 0 ) ||
     ( event < 1000 && event % 100 == 0 ) ||
     ( event < 10000 && event % 1000 == 0 ) ||
     ( event >= 10000 && event % 10000 == 0 ) ) {
        cout << event << " Events analyzed\n";
-    }
+  }
 }
 
 
-void Analyzer::getGoodParticles(string syst){
+void Analyzer::getGoodParticles(int syst_num){
 
+  if(syst_num != -1) 
+    active_part=&syst_parts.at(syst_num);
 
   // // SET NUMBER OF RECO PARTICLES
   // // MUST BE IN ORDER: Muon/Electron, Tau, Jet
@@ -608,10 +631,10 @@ void Analyzer::treatMuons_Met() {
 
       TLorentzVector Emu_Tau;
       Emu_Tau.SetPtEtaPhiE(ETau_Pt, ETau_Eta, ETau_Phi, ETau_Energy);
-      _Muon->smearP->clear();
+      _Muon->cur_P->clear();
 
       if (ETau_Pt >= _Muon->pstats["Muon1"].pmap.at("PtCut").first ){
-        _Muon->smearP->push_back(Emu_Tau);
+        _Muon->cur_P->push_back(Emu_Tau);
         deltaMEx += (_Muon->p4(muon).Px()-Emu_Tau.Px());
         deltaMEy += (_Muon->p4(muon).Py()-Emu_Tau.Py());
 
@@ -837,64 +860,88 @@ void Analyzer::setCutNeeds() {
 }
 
 
+
+
+/////////////////TODO ////////
+////// make func for setting cur_P
+////// get rid of continues
+
+
 ///Smears lepton only if specified and not a data file.  Otherwise, just filles up lorentz vectors
 //of the data into the vector container smearP with is in each lepton object.
 void Analyzer::smearLepton(Lepton& lepton, CUTS eGenPos, const PartStats& stats, string syst) {
 
+  if(syst == "shift") {
+    ///shift code
+    cout << "here shift" << endl;
 
-  for(size_t i = 0; i < lepton.size(); i++) {
+  } else if(syst != "orig") {
+    cout << "other" << endl;
+    lepton.setCurrentP("orig");
+
+  } else if(syst == "orig") {
     if(isData || !stats.bmap.at("SmearTheParticle")) {
-      continue;
+      lepton.systVec["orig"] = &lepton.Reco;
+    } else {
+      for(size_t i = 0; i < lepton.size(); i++) {
+	TLorentzVector genVec =  matchLeptonToGen(lepton.Reco.at(i), lepton.pstats["Smear"],eGenPos);
+	if(genVec == TLorentzVector(0,0,0,0)) {
+	  lepton.cur_P->push_back(lepton.Reco[i]);
+	}
+
+	double smearedPt = (genVec.Pt()*stats.dmap.at("PtScaleOffset")) + (lepton.Reco[i].Pt() - genVec.Pt())*stats.dmap.at("PtSigmaOffset");
+	double smearedEta =(genVec.Eta()*stats.dmap.at("EtaScaleOffset")) + (lepton.Reco[i].Eta() - genVec.Eta())*stats.dmap.at("EtaSigmaOffset");
+	double smearedPhi = (genVec.Phi() * stats.dmap.at("PhiScaleOffset")) + (lepton.Reco[i].Phi() - genVec.Phi())*stats.dmap.at("PhiSigmaOffset");
+	double smearedEnergy = (genVec.Energy()*stats.dmap.at("EnergyScaleOffset")) + (lepton.Reco[i].Energy() - genVec.Energy())*stats.dmap.at("EnergySigmaOffset");
+
+	TLorentzVector tmpSmear=lepton.Reco[i];
+	//cout<<"before"<<tmpSmear.Pt()<<"   "<<smearedPt<<endl;
+
+	lepton.addPtEtaPhiESyst(smearedPt, smearedEta, smearedPhi, smearedEnergy,syst);
+	//cout<<"after"<<tmpSmear.Pt()<<"   "<< lepton.p4(i).Pt() <<endl;
+
+	deltaMEx += tmpSmear.Px() - lepton.p4(i).Px();
+	deltaMEy += tmpSmear.Py() - lepton.p4(i).Py();
+	
+      }
     }
-
-    TLorentzVector genVec =  matchLeptonToGen(lepton.p4(i), lepton.pstats["Smear"],eGenPos);
-    if(genVec == TLorentzVector(0,0,0,0)) {
-      continue;
-    }
-
-    double smearedPt = (genVec.Pt()*stats.dmap.at("PtScaleOffset")) + (lepton.pt(i) - genVec.Pt())*stats.dmap.at("PtSigmaOffset");
-    double smearedEta =(genVec.Eta()*stats.dmap.at("EtaScaleOffset")) + (lepton.eta(i) - genVec.Eta())*stats.dmap.at("EtaSigmaOffset");
-    double smearedPhi = (genVec.Phi() * stats.dmap.at("PhiScaleOffset")) + (lepton.phi(i) - genVec.Phi())*stats.dmap.at("PhiSigmaOffset");
-    double smearedEnergy = (genVec.Energy()*stats.dmap.at("EnergyScaleOffset")) + (lepton.energy(i) - genVec.Energy())*stats.dmap.at("EnergySigmaOffset");
-
-    TLorentzVector tmpSmear=lepton.p4(i);
-    //cout<<"before"<<tmpSmear.Pt()<<"   "<<smearedPt<<endl;
-
-    lepton.setPtEtaPhiESyst(i,smearedPt, smearedEta, smearedPhi, smearedEnergy,syst);
-
-    //cout<<"after"<<tmpSmear.Pt()<<"   "<< lepton.p4(i).Pt() <<endl;
-
-    deltaMEx += tmpSmear.Px() - lepton.p4(i).Px();
-    deltaMEy += tmpSmear.Py() - lepton.p4(i).Py();
-
-
+    lepton.setCurrentP(syst);
   }
-
 }
 
 ///Same as smearlepton, just jet specific
 void Analyzer::smearJet(Particle& jet,const PartStats& stats, string syst) {
   //jet.init();
 
-  for(size_t i=0; i< jet.size(); i++) {
 
+  if(syst == "shift") {
+    ///shift code
+  } else if(syst == "weight") {
+    //weight
+  } else if(syst != "orig") {
+    jet.setCurrentP("orig");
+
+  } else if(syst == "orig") {
     if(isData || !stats.bmap.at("SmearTheJet")) {
-      continue;
-    }
+      jet.systVec["orig"] = &jet.Reco;
+    } else {
+      for(size_t i=0; i< jet.size(); i++) {
+	if(JetMatchesLepton(*_Muon, jet.Reco[i], stats.dmap.at("MuonMatchingDeltaR"), CUTS::eGMuon) ||
+	   JetMatchesLepton(*_Tau, jet.Reco[i], stats.dmap.at("TauMatchingDeltaR"), CUTS::eGTau) ||
+	   JetMatchesLepton(*_Electron, jet.Reco[i],stats.dmap.at("ElectronMatchingDeltaR"), CUTS::eGElec)){
+	  jet.cur_P->push_back(jet.Reco[i]);
+	}
 
-    if(JetMatchesLepton(*_Muon, jet.p4(i), stats.dmap.at("MuonMatchingDeltaR"), CUTS::eGMuon) ||
-      JetMatchesLepton(*_Tau, jet.p4(i), stats.dmap.at("TauMatchingDeltaR"), CUTS::eGTau) ||
-      JetMatchesLepton(*_Electron, jet.p4(i),stats.dmap.at("ElectronMatchingDeltaR"), CUTS::eGElec)){
-      continue;
+	//only apply corrections for jets not for FatJets
+	if(jet.type == PType::Jet){
+	  deltaMEx += (1 - stats.dmap.at("JetEnergyScaleOffset"))*jet.Reco[i].Px();
+	  deltaMEy += (1 -stats.dmap.at("JetEnergyScaleOffset"))*jet.Reco[i].Py();
+	}
+	//////prob line
+	jet.p4(i)*=stats.dmap.at("JetEnergyScaleOffset");
+      }
     }
-
-    //only apply corrections for jets not for FatJets
-    if(jet.type == PType::Jet){
-      deltaMEx += (1 - stats.dmap.at("JetEnergyScaleOffset"))*jet.p4(i).Px();
-      deltaMEy += (1 -stats.dmap.at("JetEnergyScaleOffset"))*jet.p4(i).Py();
-    }
-
-    jet.p4(i)*=stats.dmap.at("JetEnergyScaleOffset");
+    jet.setCurrentP(syst);
   }
 }
 
@@ -902,7 +949,7 @@ void Analyzer::smearJet(Particle& jet,const PartStats& stats, string syst) {
 //this jet isn't smeared
 bool Analyzer::JetMatchesLepton(const Lepton& lepton, const TLorentzVector& jetV, double partDeltaR, CUTS eGenPos) {
   for(size_t j = 0; j < lepton.size(); j++) {
-    if(jetV.DeltaR(lepton.p4(j)) < partDeltaR && matchLeptonToGen(lepton.p4(j), lepton.pstats.at("Smear"), eGenPos) != TLorentzVector(0,0,0,0)) return true;
+    if(jetV.DeltaR(lepton.Reco[j]) < partDeltaR && matchLeptonToGen(lepton.Reco[j], lepton.pstats.at("Smear"), eGenPos) != TLorentzVector(0,0,0,0)) return true;
   }
   return false;
 }
@@ -957,7 +1004,6 @@ void Analyzer::getGoodGen(const PartStats& stats) {
 
 ////Tau neutrino specific function used for calculating the number of hadronic taus
 void Analyzer::getGoodTauNu() {
-
   for(auto it : *active_part->at(CUTS::eGTau)) {
     bool leptonDecay = false;
     int nu = -1;
@@ -1089,9 +1135,9 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats) {
     int potential = -1;
     double prevPt = -1;
     for(auto leadit : *active_part->at(ePos)) {
-      if(((ePos == CUTS::eR2ndJet && (leadit) != leadIndex) || ePos == CUTS::eR1stJet) && _Jet->p4(leadit).Pt() > prevPt) {
+      if(((ePos == CUTS::eR2ndJet && (leadit) != leadIndex) || ePos == CUTS::eR1stJet) && _Jet->pt(leadit) > prevPt) {
         potential = leadit;
-        prevPt = _Jet->p4(leadit).Pt();
+        prevPt = _Jet->pt(leadit);
       }
     }
     active_part->at(ePos)->clear();
@@ -1292,8 +1338,6 @@ bool Analyzer::passDiParticleApprox(const TLorentzVector& Tobj1, const TLorentzV
 }
 
 
-
-
 /////abs for values
 ///Find the number of lepton combos that pass the dilepton cuts
 void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS ePos2, CUTS ePosFin, const PartStats& stats) {
@@ -1383,6 +1427,13 @@ void Analyzer::getGoodDiJets(const PartStats& stats) {
     }
   }
 }
+
+
+
+ 
+// bool Analyzer::passCutRange(string CutName, double value, const PartStats& stats) {
+//    return ( !(stats.bmap.at("DiscrBy" + CutName)) || (value > stats.pmap.at(CutName + "Cut").first && value < stats.pmap.at(CutName + "Cut").second) );
+//  }
 
 
 ///////Only tested for if is Zdecay, can include massptasymmpair later?
