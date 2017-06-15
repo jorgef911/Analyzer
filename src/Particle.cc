@@ -161,6 +161,7 @@ void Jet::findExtraCuts() {
     extraCuts.push_back(CUTS::eGMuon);
     extraCuts.push_back(CUTS::eGElec);
     extraCuts.push_back(CUTS::eGTau);
+    extraCuts.push_back(CUTS::eGJet);
   }
 
 }

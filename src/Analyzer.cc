@@ -914,7 +914,7 @@ void Analyzer::smearLepton(Lepton& lepton, CUTS eGenPos, const PartStats& stats,
 }
 
 ///Same as smearlepton, just jet specific
-void Analyzer::smearJet(Particle& jet,const PartStats& stats, string syst) {
+void Analyzer::smearJet(Particle& jet, const CUTS eGenPos, const PartStats& stats, string syst) {
   //if(syst == "shift") {
     /////shift code
     //cout << "here shift" << endl;
@@ -950,15 +950,7 @@ void Analyzer::smearJet(Particle& jet,const PartStats& stats, string syst) {
       systematics.shiftParticle(jet, jet.Reco[i], sf, deltaMEx, deltaMEy, syst);
     }
   }
-}
-
-/////checks if jet is close to a lepton and the lepton is a gen particle, then the jet is a lepton object, so
-//this jet isn't smeared
-bool Analyzer::JetMatchesLepton(const Lepton& lepton, const TLorentzVector& jetV, double partDeltaR, CUTS eGenPos) {
-  for(size_t j = 0; j < lepton.size(); j++) {
-    if(jetV.DeltaR(lepton.Reco[j]) < partDeltaR && matchLeptonToGen(lepton.Reco[j], lepton.pstats.at("Smear"), eGenPos) != TLorentzVector(0,0,0,0)) return true;
-  }
-  return false;
+  jet.setCurrentP(syst);
 }
 
 
@@ -1028,8 +1020,7 @@ void Analyzer::getGoodGen(const PartStats& stats) {
       active_part->at(genMaper[id]->ePos)->push_back(j);
     }
     //something special for jet
-    if( (id<5 || id==9 ||  id==21) && _Gen->status->at(j) == genMaper[5]->status ){
-      cout<<" kjkjk"<<endl;
+    if( (id<5 || id==9 ||  id==21) && genMaper[5] != nullptr && _Gen->status->at(j) == genMaper[5]->status) {
       active_part->at(genMaper[5]->ePos)->push_back(j);
     }
   }

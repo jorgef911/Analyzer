@@ -25,6 +25,9 @@ class JetResolution{
     public:
         JetResolution();
         JetResolution( std::unordered_map<string, PartStats> &distats );
+	JetResolution(JetResolution& other);
+	JetResolution& operator=(const JetResolution& rhs);
+
         ~JetResolution() {}
 
         double getJetResolutionCorrFactor(  TLorentzVector& recJet,
@@ -40,8 +43,8 @@ class JetResolution{
 
         TRandom3 m_rand;
 
-        JME::JetResolution m_resolutionPt;
-        JME::JetResolutionScaleFactor m_resolutionPt_sf;
+        JME::JetResolution *m_resolutionPt;
+        JME::JetResolutionScaleFactor *m_resolutionPt_sf;
 };
 
 #endif /*JETRESOLUTION*/

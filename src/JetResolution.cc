@@ -4,12 +4,22 @@
 
 
 JetResolution::JetResolution( std::unordered_map<string, PartStats> &distats ) :
-    m_rand( 0 ),
-    //m_resolutionPt( distats["Jet_systematics"].smap["jetResolutionFileUnmatched"] ),
-    //m_resolutionPt_sf( distats["Jet_systematics"].smap["jetResolutionSFFile" ]  )
-    m_resolutionPt( "Pileup/Spring16_25nsV6_MC_PtResolution_AK4PFchs.txt" ),
-    m_resolutionPt_sf( "Pileup/Spring16_25nsV6_MC_SF_AK4PFchs.txt"  )
+  m_rand( 0 ), m_resolutionPt(new JME::JetResolution( "Pileup/Spring16_25nsV6_MC_PtResolution_AK4PFchs.txt" )),
+  m_resolutionPt_sf(new JME::JetResolutionScaleFactor( "Pileup/Spring16_25nsV6_MC_SF_AK4PFchs.txt"  ))
 {
+}
+
+JetResolution::JetResolution( JetResolution& other) : 
+  m_rand(other.m_rand), m_resolutionPt(new JME::JetResolution(*other.m_resolutionPt->getResolutionObject())), m_resolutionPt_sf(new JME::JetResolutionScaleFactor(*other.m_resolutionPt_sf->getResolutionObject())) 
+{
+}
+
+JetResolution& JetResolution::operator=(const JetResolution& rhs) {
+  if(this == &rhs) return *this;
+  m_rand = rhs.m_rand;
+  m_resolutionPt = new JME::JetResolution(*rhs.m_resolutionPt->getResolutionObject());
+  m_resolutionPt_sf = new JME::JetResolutionScaleFactor(*rhs.m_resolutionPt_sf->getResolutionObject());
+  return *this;
 }
 
 
@@ -19,7 +29,7 @@ double JetResolution::getResolution( double const pt, double const eta, double c
    parameters.setJetEta( eta );
    parameters.setRho( rho );
    parameters.setNPV( npv );
-   return m_resolutionPt.getResolution( parameters );
+   return m_resolutionPt->getResolution( parameters );
 }
 
 double JetResolution::getResolutionSF( double const pt, double const eta, double const rho, double const npv, int const updown ) const {
@@ -29,11 +39,11 @@ double JetResolution::getResolutionSF( double const pt, double const eta, double
    parameters.setRho( rho );
    parameters.setNPV( npv );
    if ( updown == 0 )
-      return m_resolutionPt_sf.getScaleFactor( parameters );
+      return m_resolutionPt_sf->getScaleFactor( parameters );
    else if ( updown == -1 )
-      return m_resolutionPt_sf.getScaleFactor( parameters, Variation::UP );
+      return m_resolutionPt_sf->getScaleFactor( parameters, Variation::UP );
    else if ( updown == 1 )
-      return m_resolutionPt_sf.getScaleFactor( parameters, Variation::DOWN );
+      return m_resolutionPt_sf->getScaleFactor( parameters, Variation::DOWN );
    else {
         std::stringstream err;
         err << "In file " << __FILE__ << ", function " << __func__ << ", line " << __LINE__ << std::endl;
