@@ -59,6 +59,7 @@ public:
   void addPtEtaPhiESyst(double, double, double, double, string);
   void addP4Syst(TLorentzVector, string);
   void setCurrentP(string);
+  string getName() {return GenName;};
 
   PType type;
   vector<CUTS> extraCuts;

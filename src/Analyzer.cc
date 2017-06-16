@@ -654,7 +654,7 @@ void Analyzer::treatMuons_Met() {
 
   // recalculate MET
   theMETVector.SetPxPyPzE(theMETVector.Px()+deltaMEx, theMETVector.Py()+deltaMEy, theMETVector.Pz(),
-  			  TMath::Sqrt(pow(theMETVector.Px()+deltaMEx,2) + pow(theMETVector.Py()+deltaMEy,2)));
+                          TMath::Sqrt(pow(theMETVector.Px()+deltaMEx,2) + pow(theMETVector.Py()+deltaMEy,2)));
 
   /////MET CUTS
   active_part->at(CUTS::eMET)->clear();
@@ -891,21 +891,17 @@ void Analyzer::smearLepton(Lepton& lepton, CUTS eGenPos, const PartStats& stats,
         TLorentzVector genVec =  matchLeptonToGen(lepton.Reco.at(i), lepton.pstats["Smear"],eGenPos);
         if(genVec == TLorentzVector(0,0,0,0)) {
           lepton.cur_P->push_back(lepton.Reco[i]);
+        }else{
+
+          //double smearedPt = (genVec.Pt()*stats.dmap.at("PtScaleOffset")) + (lepton.Reco[i].Pt() - genVec.Pt())*stats.dmap.at("PtSigmaOffset");
+          //double smearedEta =(genVec.Eta()*stats.dmap.at("EtaScaleOffset")) + (lepton.Reco[i].Eta() - genVec.Eta())*stats.dmap.at("EtaSigmaOffset");
+          //double smearedPhi = (genVec.Phi() * stats.dmap.at("PhiScaleOffset")) + (lepton.Reco[i].Phi() - genVec.Phi())*stats.dmap.at("PhiSigmaOffset");
+          //double smearedEnergy = (genVec.Energy()*stats.dmap.at("EnergyScaleOffset")) + (lepton.Reco[i].Energy() - genVec.Energy())*stats.dmap.at("EnergySigmaOffset");
+
+          //TODO add resolution
+
+          systematics.shiftParticle(lepton, lepton.Reco[i], stats.dmap.at("PtScaleOffset"), deltaMEx, deltaMEy, syst);
         }
-
-        double smearedPt = (genVec.Pt()*stats.dmap.at("PtScaleOffset")) + (lepton.Reco[i].Pt() - genVec.Pt())*stats.dmap.at("PtSigmaOffset");
-        double smearedEta =(genVec.Eta()*stats.dmap.at("EtaScaleOffset")) + (lepton.Reco[i].Eta() - genVec.Eta())*stats.dmap.at("EtaSigmaOffset");
-        double smearedPhi = (genVec.Phi() * stats.dmap.at("PhiScaleOffset")) + (lepton.Reco[i].Phi() - genVec.Phi())*stats.dmap.at("PhiSigmaOffset");
-        double smearedEnergy = (genVec.Energy()*stats.dmap.at("EnergyScaleOffset")) + (lepton.Reco[i].Energy() - genVec.Energy())*stats.dmap.at("EnergySigmaOffset");
-
-        TLorentzVector tmpSmear=lepton.Reco[i];
-        //cout<<"before"<<tmpSmear.Pt()<<"   "<<smearedPt<<endl;
-
-        lepton.addPtEtaPhiESyst(smearedPt, smearedEta, smearedPhi, smearedEnergy,syst);
-        //cout<<"after"<<tmpSmear.Pt()<<"   "<< lepton.p4(i).Pt() <<endl;
-
-        deltaMEx += tmpSmear.Px() - lepton.p4(i).Px();
-        deltaMEy += tmpSmear.Py() - lepton.p4(i).Py();
 
       }
     }
@@ -915,24 +911,18 @@ void Analyzer::smearLepton(Lepton& lepton, CUTS eGenPos, const PartStats& stats,
 
 ///Same as smearlepton, just jet specific
 void Analyzer::smearJet(Particle& jet, const CUTS eGenPos, const PartStats& stats, string syst) {
-  //if(syst == "shift") {
-    /////shift code
-    //cout << "here shift" << endl;
 
-  //} else if(syst != "orig") {
-    //cout << "other" << endl;
-    //jet.setCurrentP("orig");
 
-  //} else if(syst == "orig") {
+  //add energy scale uncertainty
   if(isData || !stats.bmap.at("SmearTheJet")) {
     jet.systVec["orig"] = &jet.Reco;
   }else{
     for(size_t i=0; i< jet.size(); i++) {
-
       if(JetMatchesLepton(*_Muon, jet.Reco[i], stats.dmap.at("MuonMatchingDeltaR"), CUTS::eGMuon) ||
         JetMatchesLepton(*_Tau, jet.Reco[i], stats.dmap.at("TauMatchingDeltaR"), CUTS::eGTau) ||
         JetMatchesLepton(*_Electron, jet.Reco[i],stats.dmap.at("ElectronMatchingDeltaR"), CUTS::eGElec)){
         jet.addP4Syst(jet.Reco[i],syst);
+        continue;
       }
 
       double sf=1.;
