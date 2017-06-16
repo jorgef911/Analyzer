@@ -27,21 +27,17 @@ CMSSW_INC_PATHS += -isystem$(CMSSW_RELEASE_BASE)/src
 CMSSW_INC_PATHS += -isystem$(CMSSW_BOOST_BASE)/include
 
 CXX = g++
-CXXFLAGS += -Wall $(ROOTCFLAGS) -I./ 
+CXXFLAGS += -Wall $(ROOTCFLAGS) -I./
 CXXSPEED = -O3
 
 LD = g++
 LDFLAGS += -Wall $(ROOTLIBS) -lGenVector
-LDSPEED = -03
+LDSPEED = -O3
 
 # Gather all additional flags
 EXTRA_CFLAGS  := $(CMSSW_INC_PATHS)
 EXTRA_LDFLAGS := $(CMSSW_LIB_PATHS) $(CMSSW_LIBS)
 
-ifdef DEBUG
-CXXFLAGS = -O0 -g -pg -Wall $(ROOTCFLAGS) -I./
-LDFLAGS = -O0 -g -Wall $(ROOTLIBS) -lGenVector
-endif
 
 ifdef FAST
 CXXSPEED= -Ofast
@@ -49,11 +45,16 @@ LDSPEED= -Ofast
 endif
 
 
-CXXFLAGS+=$(CXXSPEED) $(EXTRA_CFLAGS)
-LDFLAGS+=$(LDSPEED) $(EXTRA_LDFLAGS)
+CXXFLAGS+=$(CXXSPEED)
+LDFLAGS+=$(LDSPEED)
 
+ifdef DEBUG
+CXXFLAGS = -O0 -g -pg -Wall $(ROOTCFLAGS) -I./
+LDFLAGS = -O0 -g -Wall $(ROOTLIBS) -lGenVector
+endif
 
-
+CXXFLAGS+=$(EXTRA_CFLAGS)
+LDFLAGS+=$(EXTRA_LDFLAGS)
 LIBS=
 
 SRCDIR = src
