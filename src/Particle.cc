@@ -1,4 +1,5 @@
 #include "Particle.h"
+#include <signal.h>
 
 #define SetBranch(name, variable) BOOM->SetBranchStatus(name, 1);  BOOM->SetBranchAddress(name, &variable);
 
@@ -33,6 +34,9 @@ Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string
 //}
 
 void Particle::addPtEtaPhiESyst(double ipt,double ieta, double iphi, double ienergy, string syst){
+  if(systVec[syst]->size()==Reco.size()){
+    systVec[syst]->clear();
+  }
   TLorentzVector mp4;
   mp4.SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
   systVec[syst]->push_back(mp4);
@@ -40,6 +44,12 @@ void Particle::addPtEtaPhiESyst(double ipt,double ieta, double iphi, double iene
 
 
 void Particle::addP4Syst(TLorentzVector mp4, string syst){
+  //if(systVec[syst]->size()==Reco.size()){
+    //cout<<"Something is rotten in the state of Denmark."<<endl;
+    //cout<<systVec[syst]->size()<<"  "<<Reco.size()<<"  for "<< syst<<endl;
+    //raise(SIGSEGV);
+    //systVec[syst]->clear();
+  //}
   systVec[syst]->push_back(mp4);
 }
 
@@ -55,6 +65,8 @@ void Particle::init(){
     tmp.SetPtEtaPhiE(mpt->at(i),meta->at(i),mphi->at(i),menergy->at(i));
     Reco.push_back(tmp);
   }
+  systVec["orig"]=&Reco;
+  setCurrentP("orig");
 }
 
 double Particle::pt(uint index)const         {return cur_P->at(index).Pt();}
@@ -73,8 +85,11 @@ TLorentzVector& Particle::p4(uint index) {return cur_P->at(index);}
 
 
 void Particle::setCurrentP(string syst){
+  //if (systVec[syst]->size()!=Reco.size()){
+    //cout<<"Rebel on. This does not work"<<endl;
+    //cout<<syst<<" vector has not been filled for "<<GenName<<endl;
+  //}
   cur_P = systVec[syst];
-
   activeSystematic=syst;
 }
 
@@ -142,6 +157,7 @@ Generated::Generated(TTree* _BOOM, string filename, vector<string> syst_names) :
   SetBranch("Gen_status", status);
   SetBranch("Gen_BmotherIndex", BmotherIndex);
 }
+
 
 Jet::Jet(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Jet", filename, syst_names) {
   type = PType::Jet;

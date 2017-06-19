@@ -24,6 +24,7 @@ struct CRTester;
 #include <TH1.h>
 
 #include "Particle.h"
+#include "MET.h"
 #include "Histo.h"
 #include "Cut_enum.h"
 #include "FillInfo.h"
@@ -54,9 +55,9 @@ public:
   void setControlRegions() { histo.setControlRegions();}
 
   vector<int>* getList(CUTS ePos) {return goodParts[ePos];}
-  double getMet() {return theMETVector.Pt();}
-  double getHT() {return sumptForHt;}
-  double getMHT() {return sqrt((sumpxForMht * sumpxForMht) + (sumpyForMht * sumpyForMht));}
+  double getMet() {return _MET->pt();}
+  double getHT() {return _MET->HT();}
+  double getMHT() {return _MET->MHT();}
   double getMass(const TLorentzVector& Tobj1, const TLorentzVector& Tobj2, string partName) {
     return diParticleMass(Tobj1, Tobj2, distats[partName].smap.at("HowCalculateMassReco"));
   }
@@ -116,8 +117,8 @@ private:
 
   inline bool passCutRange(string, double, const PartStats&);
 
-  void updateMet();
-  void treatMuons_Met();
+  void updateMet(string syst="orig");
+  void treatMuons_Met(string syst="orig");
   double getPileupWeight(float);
   unordered_map<CUTS, vector<int>*, EnumHash> getArray();
 
@@ -136,6 +137,7 @@ private:
   Taus* _Tau;
   Jet* _Jet;
   FatJet* _FatJet;
+  Met* _MET;
   Histogramer histo;
   Systematics systematics;
   JetResolution jetRes;
@@ -161,11 +163,6 @@ private:
 
   vector<int> cuts_per, cuts_cumul;
 
-  TLorentzVector theMETVector;
-  unordered_map<string,TLorentzVector> theMETVectorSystMap;
-
-  double deltaMEx, deltaMEy, sumpxForMht, sumpyForMht, sumptForHt, phiForMht;
-
   double maxIso, minIso;
   int leadIndex, maxCut, crbins=1;
   bool isData, CalculatePUSystematics, doSystematics;
@@ -176,8 +173,6 @@ private:
   int bestVertices = 0;
   double gen_weight = 0;
   double rho =0;
-  double Met[3] = {0, 0, 0};
-
 
   const static vector<CUTS> genCuts;
   const static vector<CUTS> jetCuts;
