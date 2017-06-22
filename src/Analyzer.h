@@ -96,14 +96,14 @@ private:
   void getGoodParticles(int);
   void getGoodTauNu();
   void getGoodGen(const PartStats&);
-  void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&);
-  void getGoodRecoJets(CUTS, const PartStats&);
-  void getGoodRecoFatJets(CUTS, const PartStats&);
+  void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&, const string&);
+  void getGoodRecoJets(CUTS, const PartStats&, const string&);
+  void getGoodRecoFatJets(CUTS, const PartStats&, const string&);
 
-  void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&);
-  void getGoodDiJets(const PartStats&);
+  void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&, const string&);
+  void getGoodDiJets(const PartStats&, const string&);
 
-  void VBFTopologyCut(const PartStats&);
+  void VBFTopologyCut(const PartStats&, const string&);
   void TriggerCuts(vector<int>&, const vector<string>&, CUTS);
 
 

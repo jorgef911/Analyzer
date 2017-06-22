@@ -330,9 +330,14 @@ Analyzer::~Analyzer() {
 
 ///resets values so analysis can start
 void Analyzer::clear_values() {
+
   for(auto e: Enum<CUTS>()) {
     goodParts[e]->clear();
-    for(auto it: syst_parts) {
+
+  }
+  //faster!!
+  for(auto it: syst_parts) {
+    for(auto e: Enum<CUTS>()) {
       it[e]->clear();
     }
   }
@@ -416,54 +421,57 @@ void Analyzer::preprocess(int event) {
 
 void Analyzer::getGoodParticles(int syst_num){
 
-  if(syst_num != -1)
+  string syst="";
+  if(syst_num != -1){
     active_part=&syst_parts.at(syst_num);
+    syst=syst_names[syst_num];
+  }
 
   // // SET NUMBER OF RECO PARTICLES
   // // MUST BE IN ORDER: Muon/Electron, Tau, Jet
-  getGoodRecoLeptons(*_Electron, CUTS::eRElec1, CUTS::eGElec, _Electron->pstats["Elec1"]);
-  getGoodRecoLeptons(*_Electron, CUTS::eRElec2, CUTS::eGElec, _Electron->pstats["Elec2"]);
-  getGoodRecoLeptons(*_Muon, CUTS::eRMuon1, CUTS::eGMuon, _Muon->pstats["Muon1"]);
-  getGoodRecoLeptons(*_Muon, CUTS::eRMuon2, CUTS::eGMuon, _Muon->pstats["Muon2"]);
-  getGoodRecoLeptons(*_Tau, CUTS::eRTau1, CUTS::eGTau, _Tau->pstats["Tau1"]);
-  getGoodRecoLeptons(*_Tau, CUTS::eRTau2, CUTS::eGTau, _Tau->pstats["Tau2"]);
+  getGoodRecoLeptons(*_Electron, CUTS::eRElec1, CUTS::eGElec, _Electron->pstats["Elec1"],syst);
+  getGoodRecoLeptons(*_Electron, CUTS::eRElec2, CUTS::eGElec, _Electron->pstats["Elec2"],syst);
+  getGoodRecoLeptons(*_Muon, CUTS::eRMuon1, CUTS::eGMuon, _Muon->pstats["Muon1"],syst);
+  getGoodRecoLeptons(*_Muon, CUTS::eRMuon2, CUTS::eGMuon, _Muon->pstats["Muon2"],syst);
+  getGoodRecoLeptons(*_Tau, CUTS::eRTau1, CUTS::eGTau, _Tau->pstats["Tau1"],syst);
+  getGoodRecoLeptons(*_Tau, CUTS::eRTau2, CUTS::eGTau, _Tau->pstats["Tau2"],syst);
 
-  getGoodRecoJets(CUTS::eRJet1, _Jet->pstats["Jet1"]);
-  getGoodRecoJets(CUTS::eRJet2, _Jet->pstats["Jet2"]);
-  getGoodRecoJets(CUTS::eRCenJet, _Jet->pstats["CentralJet"]);
-  getGoodRecoJets(CUTS::eRBJet, _Jet->pstats["BJet"]);
-  getGoodRecoJets(CUTS::eR1stJet, _Jet->pstats["FirstLeadingJet"]);
-  getGoodRecoJets(CUTS::eR2ndJet, _Jet->pstats["SecondLeadingJet"]);
+  getGoodRecoJets(CUTS::eRJet1, _Jet->pstats["Jet1"],syst);
+  getGoodRecoJets(CUTS::eRJet2, _Jet->pstats["Jet2"],syst);
+  getGoodRecoJets(CUTS::eRCenJet, _Jet->pstats["CentralJet"],syst);
+  getGoodRecoJets(CUTS::eRBJet, _Jet->pstats["BJet"],syst);
+  getGoodRecoJets(CUTS::eR1stJet, _Jet->pstats["FirstLeadingJet"],syst);
+  getGoodRecoJets(CUTS::eR2ndJet, _Jet->pstats["SecondLeadingJet"],syst);
 
-  getGoodRecoFatJets(CUTS::eRWjet, _FatJet->pstats["Wjet"]);
-  treatMuons_Met();
+  getGoodRecoFatJets(CUTS::eRWjet, _FatJet->pstats["Wjet"],syst);
+  treatMuons_Met(syst);
 
   ///VBF Susy cut on leadin jets
-  VBFTopologyCut(distats["VBFSUSY"]);
+  VBFTopologyCut(distats["VBFSUSY"],syst);
 
   /////lepton lepton topology cuts
-  getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec1,CUTS::eRTau1, CUTS::eElec1Tau1, distats["Electron1Tau1"]);
-  getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec2, CUTS::eRTau1, CUTS::eElec2Tau1, distats["Electron2Tau1"]);
-  getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec1, CUTS::eRTau2, CUTS::eElec1Tau2, distats["Electron1Tau2"]);
-  getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec2, CUTS::eRTau2, CUTS::eElec2Tau2, distats["Electron2Tau2"]);
+  getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec1,CUTS::eRTau1, CUTS::eElec1Tau1, distats["Electron1Tau1"],syst);
+  getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec2, CUTS::eRTau1, CUTS::eElec2Tau1, distats["Electron2Tau1"],syst);
+  getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec1, CUTS::eRTau2, CUTS::eElec1Tau2, distats["Electron1Tau2"],syst);
+  getGoodLeptonCombos(*_Electron, *_Tau, CUTS::eRElec2, CUTS::eRTau2, CUTS::eElec2Tau2, distats["Electron2Tau2"],syst);
 
-  getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon1, CUTS::eRTau1, CUTS::eMuon1Tau1, distats["Muon1Tau1"]);
-  getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon1, CUTS::eRTau2, CUTS::eMuon1Tau2, distats["Muon1Tau2"]);
-  getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon2, CUTS::eRTau1, CUTS::eMuon2Tau1, distats["Muon2Tau1"]);
-  getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon2, CUTS::eRTau2, CUTS::eMuon2Tau2, distats["Muon2Tau2"]);
+  getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon1, CUTS::eRTau1, CUTS::eMuon1Tau1, distats["Muon1Tau1"],syst);
+  getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon1, CUTS::eRTau2, CUTS::eMuon1Tau2, distats["Muon1Tau2"],syst);
+  getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon2, CUTS::eRTau1, CUTS::eMuon2Tau1, distats["Muon2Tau1"],syst);
+  getGoodLeptonCombos(*_Muon, *_Tau, CUTS::eRMuon2, CUTS::eRTau2, CUTS::eMuon2Tau2, distats["Muon2Tau2"],syst);
 
-  getGoodLeptonCombos(*_Muon, *_Electron, CUTS::eRMuon1, CUTS::eRElec1, CUTS::eMuon1Elec1, distats["Muon1Electron1"]);
-  getGoodLeptonCombos(*_Muon, *_Electron, CUTS::eRMuon1, CUTS::eRElec2, CUTS::eMuon1Elec2, distats["Muon1Electron2"]);
-  getGoodLeptonCombos(*_Muon, *_Electron, CUTS::eRMuon2, CUTS::eRElec1, CUTS::eMuon2Elec1, distats["Muon2Electron1"]);
-  getGoodLeptonCombos(*_Muon, *_Electron, CUTS::eRMuon2, CUTS::eRElec2, CUTS::eMuon2Elec2, distats["Muon2Electron2"]);
+  getGoodLeptonCombos(*_Muon, *_Electron, CUTS::eRMuon1, CUTS::eRElec1, CUTS::eMuon1Elec1, distats["Muon1Electron1"],syst);
+  getGoodLeptonCombos(*_Muon, *_Electron, CUTS::eRMuon1, CUTS::eRElec2, CUTS::eMuon1Elec2, distats["Muon1Electron2"],syst);
+  getGoodLeptonCombos(*_Muon, *_Electron, CUTS::eRMuon2, CUTS::eRElec1, CUTS::eMuon2Elec1, distats["Muon2Electron1"],syst);
+  getGoodLeptonCombos(*_Muon, *_Electron, CUTS::eRMuon2, CUTS::eRElec2, CUTS::eMuon2Elec2, distats["Muon2Electron2"],syst);
 
   ////DIlepton topology cuts
-  getGoodLeptonCombos(*_Tau, *_Tau, CUTS::eRTau1, CUTS::eRTau2, CUTS::eDiTau, distats["DiTau"]);
-  getGoodLeptonCombos(*_Electron, *_Electron, CUTS::eRElec1, CUTS::eRElec2, CUTS::eDiElec, distats["DiElectron"]);
-  getGoodLeptonCombos(*_Muon, *_Muon, CUTS::eRMuon1, CUTS::eRMuon2, CUTS::eDiMuon, distats["DiMuon"]);
+  getGoodLeptonCombos(*_Tau, *_Tau, CUTS::eRTau1, CUTS::eRTau2, CUTS::eDiTau, distats["DiTau"],syst);
+  getGoodLeptonCombos(*_Electron, *_Electron, CUTS::eRElec1, CUTS::eRElec2, CUTS::eDiElec, distats["DiElectron"],syst);
+  getGoodLeptonCombos(*_Muon, *_Muon, CUTS::eRMuon1, CUTS::eRMuon2, CUTS::eDiMuon, distats["DiMuon"],syst);
 
   ////Dijet cuts
-  getGoodDiJets(distats["DiJet"]);
+  getGoodDiJets(distats["DiJet"],syst);
 }
 
 
@@ -569,8 +577,8 @@ void Analyzer::printCuts() {
   //write all the histograms
   //attention this is not the fill_histogram method from the Analyser
   histo.fill_histogram();
-  //if(doSystematics)
-    //syst_histo.fill_histogram();
+  if(doSystematics)
+    syst_histo.fill_histogram();
 }
 
 /////////////PRIVATE FUNCTIONS////////////////
@@ -1061,8 +1069,21 @@ void Analyzer::getGoodTauNu() {
 
 ///Function used to find the number of reco leptons that pass the various cuts.
 ///Divided into if blocks for the different lepton requirements.
-void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS eGenPos, const PartStats& stats) {
+void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS eGenPos, const PartStats& stats, const string &syst) {
   if(! need_cut[ePos]) return;
+  if(syst!=""){
+    //save time to not rerun stuff
+    if( syst.find("Muon")==string::npos && lep.type == PType::Muon){
+      active_part->at(ePos)=goodParts[ePos];
+      return;
+    }else if( syst.find("Ele")==string::npos && lep.type == PType::Electron){
+      active_part->at(ePos)=goodParts[ePos];
+      return;
+    }else if( syst.find("Tau")==string::npos && lep.type == PType::Tau){
+      active_part->at(ePos)=goodParts[ePos];
+      return;
+    }
+  }
   int i = 0;
 
   for(vector<TLorentzVector>::const_iterator it=lep.begin(); it != lep.end(); it++, i++) {
@@ -1135,8 +1156,15 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
 
 ////Jet specific function for finding the number of jets that pass the cuts.
 //used to find the nubmer of good jet1, jet2, central jet, 1st and 2nd leading jets and bjet.
-void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats) {
+void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats, const string &syst) {
   if(! need_cut[ePos]) return;
+  if(syst!=""){
+    //save time to not rerun stuff
+    if( syst.find("Jet")==string::npos){
+      active_part->at(ePos)=goodParts[ePos];
+      return;
+    }
+  }
   int i=0;
 
   for(vector<TLorentzVector>::iterator it=_Jet->begin(); it != _Jet->end(); it++, i++) {
@@ -1199,8 +1227,15 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats) {
 
 
 ////FatJet specific function for finding the number of V-jets that pass the cuts.
-void Analyzer::getGoodRecoFatJets(CUTS ePos, const PartStats& stats) {
+void Analyzer::getGoodRecoFatJets(CUTS ePos, const PartStats& stats, const string &syst) {
   if(! need_cut[ePos]) return;
+  if(syst!=""){
+    //save time to not rerun stuff
+    if( syst.find("Jet")==string::npos){
+      active_part->at(ePos)=goodParts[ePos];
+      return;
+    }
+  }
   int i=0;
 
   for(vector<TLorentzVector>::iterator it=_FatJet->begin(); it != _FatJet->end(); it++, i++) {
@@ -1287,8 +1322,16 @@ void Analyzer::TriggerCuts(vector<int>& prevTrig, const vector<string>& trigvec,
 
 
 ////VBF specific cuts dealing with the leading jets.
-void Analyzer::VBFTopologyCut(const PartStats& stats) {
+void Analyzer::VBFTopologyCut(const PartStats& stats, const string &syst) {
   if(! need_cut[CUTS::eSusyCom]) return;
+  if(syst!=""){
+    //only jet stuff is affected
+    //save time to not rerun stuff
+    if( syst.find("Jet")==string::npos){
+      active_part->at(CUTS::eSusyCom)=goodParts[CUTS::eSusyCom];
+      return;
+    }
+  }
 
   if(active_part->at(CUTS::eR1stJet)->at(0) == -1 || active_part->at(CUTS::eR2ndJet)->at(0) == -1) return;
 
@@ -1390,8 +1433,22 @@ bool Analyzer::passDiParticleApprox(const TLorentzVector& Tobj1, const TLorentzV
 
 /////abs for values
 ///Find the number of lepton combos that pass the dilepton cuts
-void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS ePos2, CUTS ePosFin, const PartStats& stats) {
+void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS ePos2, CUTS ePosFin, const PartStats& stats, const string & syst) {
   if(! need_cut[ePosFin]) return;
+  if(syst!=""){
+    //save time to not rerun stuff
+    if( syst.find("Muon")==string::npos && !(lep1.type == PType::Muon || lep2.type == PType::Muon) ){
+      active_part->at(ePosFin)=goodParts[ePosFin];
+      return;
+    }else if( syst.find("Ele")==string::npos && !(lep1.type == PType::Electron || lep2.type == PType::Electron) ){
+      active_part->at(ePosFin)=goodParts[ePosFin];
+      return;
+    }else if( syst.find("Tau")==string::npos && !(lep1.type == PType::Tau || lep2.type == PType::Tau) ){
+      active_part->at(ePosFin)=goodParts[ePosFin];
+      return;
+    }
+  }
+
   bool sameParticle = (&lep1 == &lep2);
   TLorentzVector part1, part2;
 
@@ -1444,8 +1501,15 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
 ///////HOW TO GET RID OF REDUNCENCIES??
 
 /////Same as gooddilepton, just jet specific
-void Analyzer::getGoodDiJets(const PartStats& stats) {
+void Analyzer::getGoodDiJets(const PartStats& stats, const string & syst) {
   if(! need_cut[CUTS::eDiJet]) return;
+  if(syst!=""){
+    //save time to not rerun stuff
+    if( syst.find("Jet")==string::npos){
+      active_part->at(CUTS::eDiJet)=goodParts[CUTS::eDiJet];
+      return;
+    }
+  }
   TLorentzVector jet1, jet2;
   // ----Separation cut between jets (remove overlaps)
   for(auto ij2 : *active_part->at(CUTS::eRJet2)) {
@@ -1550,9 +1614,9 @@ void Analyzer::fill_histogram() {
       active_part =&syst_parts.at(isyst);
 
       //get the systematics for the last folder:
-      //for(auto it: *syst_groups) {
-        //fill_Folder(it, maxCut, syst_histo, isyst);
-      //}
+      for(auto it: *syst_groups) {
+        fill_Folder(it, maxCut, syst_histo, isyst);
+      }
       isyst++;
     }
     for(Particle* ipart: allParticles){
