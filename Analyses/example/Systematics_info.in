@@ -1,0 +1,28 @@
+####################################
+          Systematics
+####################################
+
+useSystematics 1
+
+################################
+        Muon_systematics
+################################
+#minimal pt and maximal eta
+
+pt_min  30
+eta_max 2.8
+scale 0.05
+res  0.032
+
+################################
+        Jet_systematics
+################################
+#minimal pt and maximal eta
+
+pt_min  30
+eta_max 2.8
+scale 0.05
+res  0.032
+#from https://github.com/cms-jet/JRDatabase
+jetResolutionFileUnmatched Pileup/Spring16_25nsV6_MC_PtResolution_AK4PFchs.txt
+jetResolutionSFFile Pileup/Spring16_25nsV6_MC_SF_AK4PFchs.txt

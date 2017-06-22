@@ -24,6 +24,7 @@ struct CRTester;
 #include <TH1.h>
 
 #include "Particle.h"
+#include "MET.h"
 #include "Histo.h"
 
 /////fix
@@ -32,6 +33,8 @@ struct CRTester;
 #include "Cut_enum.h"
 #include "FillInfo.h"
 #include "CRTest.h"
+#include "Systematics.h"
+#include "JetScaleResolution.h"
 
 double normPhi(double phi);
 double absnormPhi(double phi);
@@ -56,9 +59,9 @@ public:
   void setControlRegions() { histo.setControlRegions();}
 
   vector<int>* getList(CUTS ePos) {return goodParts[ePos];}
-  double getMet() {return theMETVector.Pt();}
-  double getHT() {return sumptForHt;}
-  double getMHT() {return sqrt((sumpxForMht * sumpxForMht) + (sumpyForMht * sumpyForMht));}
+  double getMet() {return _MET->pt();}
+  double getHT() {return _MET->HT();}
+  double getMHT() {return _MET->MHT();}
   double getMass(const TLorentzVector& Tobj1, const TLorentzVector& Tobj2, string partName) {
     return diParticleMass(Tobj1, Tobj2, distats[partName].smap.at("HowCalculateMassReco"));
   }
@@ -71,7 +74,8 @@ private:
 
   void CRfillCuts();
   ///// Functions /////
-  void fill_Folder(string, const int);
+  //void fill_Folder(string, const int, string syst="");
+  void fill_Folder(string, const int, Histogramer& ihisto, int syst=-1 );
 
   void getInputs();
   void setupJob(string);
@@ -80,13 +84,16 @@ private:
   void setupGeneral(TTree*);
   void setCutNeeds();
 
-  void smearLepton(Lepton&, CUTS, const PartStats&);
-  void smearJet(Particle&, const PartStats&);
+  void smearLepton(Lepton&, CUTS, const PartStats&, string syst="orig");
+  void smearJet(Particle&, CUTS, const PartStats&, string syst="orig");
 
   bool JetMatchesLepton(const Lepton&, const TLorentzVector&, double, CUTS);
   TLorentzVector matchLeptonToGen(const TLorentzVector&, const PartStats&, CUTS);
   TLorentzVector matchTauToGen(const TLorentzVector&, double);
+  TLorentzVector matchJetToGen(const TLorentzVector&, const PartStats&, CUTS);
 
+
+  void getGoodParticles(int);
   void getGoodTauNu();
   void getGoodGen(const PartStats&);
   void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&);
@@ -115,8 +122,8 @@ private:
 
   inline bool passCutRange(string, double, const PartStats&);
 
-  void updateMet();
-  void treatMuons_Met();
+  void updateMet(string syst="orig");
+  void treatMuons_Met(string syst="orig");
   double getPileupWeight(float);
   unordered_map<CUTS, vector<int>*, EnumHash> getArray();
 
@@ -135,14 +142,23 @@ private:
   Taus* _Tau;
   Jet* _Jet;
   FatJet* _FatJet;
+  Met* _MET;
   Histogramer histo;
+  Histogramer syst_histo;
+  Systematics systematics;
+  JetScaleResolution jetScaleRes;
   PartStats genStat;
 
   unordered_map<string, PartStats> distats;
   unordered_map<string, FillVals*> fillInfo;
   unordered_map<string, double> genMap;
+  unordered_map<CUTS, vector<int>*, EnumHash>* active_part;
   unordered_map<CUTS, vector<int>*, EnumHash> goodParts;
+  vector<unordered_map<CUTS, vector<int>*, EnumHash>> syst_parts;
   unordered_map<CUTS, bool, EnumHash> need_cut;
+  vector<Particle*> allParticles;
+  vector<string> syst_names;
+
 
   static const unordered_map<string, CUTS> cut_num;
   static const unordered_map<CUTS, vector<CUTS>, EnumHash> adjList;
@@ -152,12 +168,9 @@ private:
   vector<string>* trigName[nTrigReq];
   vector<int> cuts_per, cuts_cumul;
 
-  TLorentzVector theMETVector;
-  double deltaMEx, deltaMEy, sumpxForMht, sumpyForMht, sumptForHt, phiForMht;
-
   double maxIso, minIso;
   int leadIndex, maxCut, crbins=1;
-  bool isData, CalculatePUSystematics;
+  bool isData, CalculatePUSystematics, doSystematics;
 
   vector<double>* Trigger_decision = 0;
   vector<string>* Trigger_names = 0;
@@ -168,12 +181,11 @@ private:
   BTagCalibration calib = BTagCalibration("csvv1", "Pileup/btagging.csv");
   BTagCalibrationReader reader = BTagCalibrationReader(BTagEntry::OP_TIGHT, "central");
 
-  double Met[3] = {0, 0, 0};
-
+  double rho =0;
 
   const static vector<CUTS> genCuts;
   const static vector<CUTS> jetCuts;
-  double pu_weight, wgt;
+  double pu_weight, wgt, backup_wgt;
   unordered_map<int, GenFill*> genMaper;
 
   vector<CRTester*> testVec;

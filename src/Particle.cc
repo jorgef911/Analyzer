@@ -1,28 +1,143 @@
 #include "Particle.h"
+#include <signal.h>
 
 #define SetBranch(name, variable) BOOM->SetBranchStatus(name, 1);  BOOM->SetBranchAddress(name, &variable);
 
-Particle::Particle(TTree* _BOOM, string _GenName, string filename) : BOOM(_BOOM), GenName(_GenName) {
+//particle is a objet that stores multiple versions of the particle candidates
+Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string> syst_names) : BOOM(_BOOM), GenName(_GenName) {
   type = PType::None;
   getPartStats(filename);
-  //set the pt to an empty vector if the branch does not exist
-  if( _BOOM->GetListOfBranches()->FindObject((GenName+"_pt").c_str()) ==0){
-    pt=new vector<double>();
-  }else{
-    SetBranch((GenName+"_pt").c_str(), pt);
-    SetBranch((GenName+"_eta").c_str(), eta);
-    SetBranch((GenName+"_phi").c_str(), phi);
-    SetBranch((GenName+"_energy").c_str(), energy);
+
+  systVec["orig"] = new vector<TLorentzVector>();
+  for( auto name : syst_names) {
+    systVec[name] = new vector<TLorentzVector>();
   }
 
+  //set the pt to an empty vector if the branch does not exist
+  //backward compatible yeah!!
+  if( _BOOM->GetListOfBranches()->FindObject((GenName+"_pt").c_str()) ==0){
+    mpt=new vector<double>();
+  }else{
+    SetBranch((GenName+"_pt").c_str(), mpt);
+    SetBranch((GenName+"_eta").c_str(), meta);
+    SetBranch((GenName+"_phi").c_str(), mphi);
+    SetBranch((GenName+"_energy").c_str(), menergy);
+  }
+  activeSystematic="orig";
 }
+
+//void Particle::setPtEtaPhiESyst(uint index,double ipt,double ieta, double iphi, double ienergy, string syst){
+  //if(systVec[syst]->size()< index ){
+    //cout<<"syst  "<<syst<<" at index "<<index<<" does not exist"<<"  size "<<systVec[syst]->size()<<endl;
+  //}
+  //systVec[syst]->at(index).SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
+//}
+
+void Particle::addPtEtaPhiESyst(double ipt,double ieta, double iphi, double ienergy, string syst){
+  if(systVec[syst]->size()==Reco.size()){
+    systVec[syst]->clear();
+  }
+  TLorentzVector mp4;
+  mp4.SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
+  systVec[syst]->push_back(mp4);
+}
+
+
+void Particle::addP4Syst(TLorentzVector mp4, string syst){
+  //if(systVec[syst]->size()==Reco.size()){
+    //cout<<"Something is rotten in the state of Denmark."<<endl;
+    //cout<<systVec[syst]->size()<<"  "<<Reco.size()<<"  for "<< syst<<endl;
+    //raise(SIGSEGV);
+    //systVec[syst]->clear();
+  //}
+  systVec[syst]->push_back(mp4);
+}
+
+
+void Particle::init(){
+    //cleanup of the particles
+  Reco.clear();
+  for(auto &it: systVec){
+    it.second->clear();
+  }
+  TLorentzVector tmp;
+  for(uint i=0; i < mpt->size(); i++) {
+    tmp.SetPtEtaPhiE(mpt->at(i),meta->at(i),mphi->at(i),menergy->at(i));
+    Reco.push_back(tmp);
+  }
+  systVec["orig"]=&Reco;
+  setCurrentP("orig");
+}
+
+double Particle::pt(uint index)const         {return cur_P->at(index).Pt();}
+double Particle::eta(uint index)const        {return cur_P->at(index).Eta();}
+double Particle::phi(uint index)const        {return cur_P->at(index).Phi();}
+double Particle::energy(uint index)const     {return cur_P->at(index).E();}
+uint Particle::size()const                   {return Reco.size();}
+vector<TLorentzVector>::iterator Particle::begin(){ return cur_P->begin();}
+vector<TLorentzVector>::iterator Particle::end(){ return cur_P->end();}
+vector<TLorentzVector>::const_iterator Particle::begin()const { return cur_P->begin();}
+vector<TLorentzVector>::const_iterator Particle::end()const { return cur_P->end();}
+
+
+TLorentzVector Particle::p4(uint index)const {return (cur_P->at(index));}
+TLorentzVector& Particle::p4(uint index) {return cur_P->at(index);}
+
+
+void Particle::setCurrentP(string syst){
+  //if (systVec[syst]->size()!=Reco.size()){
+    //cout<<"Rebel on. This does not work"<<endl;
+    //cout<<syst<<" vector has not been filled for "<<GenName<<endl;
+  //}
+  cur_P = systVec[syst];
+  activeSystematic=syst;
+}
+
 
 void Particle::unBranch() {
   BOOM->SetBranchStatus((GenName+"*").c_str(), 0);
 }
 
 
-Photon::Photon(TTree* _BOOM, string filename) : Particle(_BOOM, "Photon", filename) {
+void Particle::getPartStats(string filename) {
+  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+  ifstream info_file(filename);
+  boost::char_separator<char> sep(", \t");
+
+  if(!info_file) {
+    std::cout << "could not open file " << filename <<std::endl;
+    return;
+  }
+
+  vector<string> stemp;
+  string group,line;
+  while(getline(info_file, line)) {
+    tokenizer tokens(line, sep);
+    stemp.clear();
+    for(tokenizer::iterator iter = tokens.begin();iter != tokens.end(); iter++) {
+      if( ((*iter)[0] == '/' && (*iter)[0] == '/') || ((*iter)[0] == '#') ) break;
+      stemp.push_back(*iter);
+    }
+    if(stemp.size() == 0) continue;
+    else if(stemp.size() == 1) {
+      group = stemp[0];
+      continue;
+    } else if(group == "") {
+      cout << "error in " << filename << "; no groups specified for data" << endl;
+      exit(1);
+    } else if(stemp.size() == 2) {
+
+      if(stemp[1] == "1" || stemp[1] == "true" ) pstats[group].bmap[stemp[0]] = true;
+      else if(stemp[1] == "0"  || stemp[1] == "false" ) pstats[group].bmap[stemp[0]]=false;
+
+      else if(stemp[1].find_first_not_of("0123456789+-.") == string::npos) pstats[group].dmap[stemp[0]]=stod(stemp[1]);
+      else pstats[group].smap[stemp[0]] = stemp[1];
+    } else  pstats[group].pmap[stemp[0]] = make_pair(stod(stemp[1]), stod(stemp[2]));
+  }
+  info_file.close();
+}
+
+Photon::Photon(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Photon", filename, syst_names) {
   SetBranch("Photon_et", et);
   SetBranch("Photon_HoverE", hoverE);
   SetBranch("Photon_phoR9", phoR);
@@ -35,7 +150,7 @@ Photon::Photon(TTree* _BOOM, string filename) : Particle(_BOOM, "Photon", filena
   SetBranch("Photon_hasPixelSeed", hasPixelSeed);
 }
 
-Generated::Generated(TTree* _BOOM, string filename) : Particle(_BOOM, "Gen", filename) {
+Generated::Generated(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Gen", filename, syst_names) {
 
   SetBranch("Gen_pdg_id", pdg_id);
   SetBranch("Gen_motherpdg_id", motherpdg_id);
@@ -43,7 +158,8 @@ Generated::Generated(TTree* _BOOM, string filename) : Particle(_BOOM, "Gen", fil
   SetBranch("Gen_BmotherIndex", BmotherIndex);
 }
 
-Jet::Jet(TTree* _BOOM, string filename) : Particle(_BOOM, "Jet", filename) {
+
+Jet::Jet(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Jet", filename, syst_names) {
   type = PType::Jet;
   SetBranch("Jet_neutralHadEnergyFraction", neutralHadEnergyFraction);
   SetBranch("Jet_neutralEmEmEnergyFraction", neutralEmEmEnergyFraction);
@@ -61,6 +177,7 @@ void Jet::findExtraCuts() {
     extraCuts.push_back(CUTS::eGMuon);
     extraCuts.push_back(CUTS::eGElec);
     extraCuts.push_back(CUTS::eGTau);
+    extraCuts.push_back(CUTS::eGJet);
   }
 
 }
@@ -79,7 +196,7 @@ vector<CUTS> Jet::overlapCuts(CUTS ePos) {
 }
 
 
-FatJet::FatJet(TTree* _BOOM, string filename) : Particle(_BOOM, "Jet_toptag", filename) {
+FatJet::FatJet(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Jet_toptag", filename, syst_names) {
   type = PType::FatJet;
   SetBranch("Jet_toptag_tau1", tau1);
   SetBranch("Jet_toptag_tau2", tau2);
@@ -110,7 +227,7 @@ vector<CUTS> FatJet::overlapCuts(CUTS ePos) {
 }
 
 
-Lepton::Lepton(TTree* _BOOM, string GenName, string EndName) : Particle(_BOOM, GenName, EndName) {
+Lepton::Lepton(TTree* _BOOM, string GenName, string EndName, vector<string> syst_names) : Particle(_BOOM, GenName, EndName, syst_names) {
   SetBranch((GenName+"_charge").c_str(), charge);
 }
 
@@ -120,7 +237,7 @@ void Lepton::findExtraCuts() {
   }
 }
 
-Electron::Electron(TTree* _BOOM, string filename) : Lepton(_BOOM, "patElectron", filename) {
+Electron::Electron(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "patElectron", filename, syst_names) {
   type = PType::Electron;
   if(pstats["Elec1"].bmap["DoDiscrByIsolation"] || pstats["Elec2"].bmap["DoDiscrByIsolation"]) {
     SetBranch("patElectron_isoChargedHadrons", isoChargedHadrons);
@@ -145,7 +262,7 @@ Electron::Electron(TTree* _BOOM, string filename) : Lepton(_BOOM, "patElectron",
   }
 }
 
-Muon::Muon(TTree* _BOOM, string filename) : Lepton(_BOOM, "Muon", filename) {
+Muon::Muon(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "Muon", filename, syst_names) {
   type = PType::Muon;
 
   if(pstats["Muon1"].bmap["DoDiscrByTightID"] || pstats["Muon2"].bmap["DoDiscrByTightID"]) {
@@ -163,7 +280,7 @@ Muon::Muon(TTree* _BOOM, string filename) : Lepton(_BOOM, "Muon", filename) {
 }
 
 ///////fix against stuff
-Taus::Taus(TTree* _BOOM, string filename) : Lepton(_BOOM, "Tau", filename) {
+Taus::Taus(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "Tau", filename, syst_names) {
   type = PType::Tau;
 
   ////Electron discrimination
@@ -243,58 +360,17 @@ void Taus::findExtraCuts() {
   extraCuts.push_back(CUTS::eRElec2);
 }
 
-void Particle::getPartStats(string filename) {
-  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-  ifstream info_file(filename);
-  boost::char_separator<char> sep(", \t");
-
-  if(!info_file) {
-    std::cout << "could not open file " << filename <<std::endl;
-    return;
-  }
-
-  vector<string> stemp;
-  string group,line;
-  while(getline(info_file, line)) {
-    tokenizer tokens(line, sep);
-    stemp.clear();
-    for(tokenizer::iterator iter = tokens.begin();iter != tokens.end(); iter++) {
-      if( ((*iter)[0] == '/' && (*iter)[0] == '/') || ((*iter)[0] == '#') ) break;
-      stemp.push_back(*iter);
-    }
-    if(stemp.size() == 0) continue;
-    else if(stemp.size() == 1) {
-      group = stemp[0];
-      continue;
-    } else if(group == "") {
-      cout << "error in " << filename << "; no groups specified for data" << endl;
-      exit(1);
-    } else if(stemp.size() == 2) {
-
-      if(stemp[1] == "1" || stemp[1] == "true" ) pstats[group].bmap[stemp[0]] = true;
-      else if(stemp[1] == "0"  || stemp[1] == "false" ) pstats[group].bmap[stemp[0]]=false;
-
-      else if(stemp[1].find_first_not_of("0123456789+-.") == string::npos) pstats[group].dmap[stemp[0]]=stod(stemp[1]);
-      else pstats[group].smap[stemp[0]] = stemp[1];
-    } else  pstats[group].pmap[stemp[0]] = make_pair(stod(stemp[1]), stod(stemp[2]));
-  }
-  info_file.close();
-
-
-}
-
-
 
 
 bool Electron::get_Iso(int index, double min, double max) const {
   double maxIsoval = std::max(0.0, isoNeutralHadrons->at(index) + isoPhotons->at(index) - 0.5 * isoPU->at(index));
-  double isoSum = (isoChargedHadrons->at(index) + maxIsoval) / smearP.at(index).Pt();
+  double isoSum = (isoChargedHadrons->at(index) + maxIsoval) / cur_P->at(index).Pt();
   return (isoSum >= min && isoSum < max);
 }
 
 bool Muon::get_Iso(int index, double min, double max) const {
   double maxIsoval = std::max(0.0, isoNeutralHadron->at(index) + isoPhoton->at(index) - 0.5 * isoPU->at(index));
-  double isoSum = (isoCharged->at(index) + maxIsoval) / smearP.at(index).Pt();
+  double isoSum = (isoCharged->at(index) + maxIsoval) / cur_P->at(index).Pt();
   return (isoSum >= min && isoSum < max);
 }
 
@@ -304,3 +380,5 @@ bool Taus::get_Iso(int index, double onetwo, double max) const {
   double minIsoval = (minIsotmp != 0) ? minIsotmp->at(index) : true;
   return (maxIsoval > 0.5 && minIsoval > 0.5);
 }
+
+

@@ -52,7 +52,7 @@ void parseCommandLine(int argc, char *argv[], vector<string> &inputnames, string
       continue;
     } else if(argv[arg][0] == '-') {
       cout << endl;
-      cout << "You entered an option that doesn't exist.  Please use one of the options:" << endl; 
+      cout << "You entered an option that doesn't exist.  Please use one of the options:" << endl;
       usage();
     }else if(inputnames.size()==0){
       inputnames.push_back(argv[arg]);
@@ -103,14 +103,14 @@ int main (int argc, char* argv[]) {
   //this way we still have the output
   signal(SIGINT,KeyboardInterrupt_endJob);
 
-
+  //main event loop
   for(int i=0; i < testing.nentries; i++) {
     testing.clear_values();
     testing.preprocess(i);
     testing.fill_histogram();
     //this will be set if ctrl+c is pressed
     if(do_break){
-      testing.nentries=i;
+      testing.nentries=i+1;
       break;
     }
   }
