@@ -81,7 +81,8 @@ private:
   void setupJob(string);
   void initializePileupInfo(string, string, string, string);
   void read_info(string);
-  void setupGeneral(TTree*);
+  void setupGeneral();
+  void initializeTrigger();
   void setCutNeeds();
 
   void smearLepton(Lepton&, CUTS, const PartStats&, string syst="orig");
@@ -133,8 +134,11 @@ private:
   ///// values /////
 
   TChain* BOOM;
+  TTree* BAAM;
+  TFile* infoFile;
   string filespace = "";
   double hPU[100];
+  int version=0;
 
   Generated* _Gen;
   Electron* _Electron;
@@ -181,7 +185,7 @@ private:
   BTagCalibration calib = BTagCalibration("csvv1", "Pileup/btagging.csv");
   BTagCalibrationReader reader = BTagCalibrationReader(BTagEntry::OP_TIGHT, "central");
 
-  double rho =0;
+  double rho =20.;
 
   const static vector<CUTS> genCuts;
   const static vector<CUTS> jetCuts;

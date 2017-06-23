@@ -114,6 +114,8 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
 
     BOOM->Add(infile.c_str());
   }
+
+
   nentries = (int) BOOM->GetEntries();
   BOOM->SetBranchStatus("*", 0);
   std::cout << "TOTAL EVENTS: " << nentries << std::endl;
@@ -130,7 +132,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   filespace=configFolder;
   filespace+="/";
 
-  setupGeneral(BOOM);
+  setupGeneral();
 
   reader.load(calib, BTagEntry::FLAV_B, "comb");
 
@@ -199,7 +201,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   if(doSystematics)
     syst_histo=Histogramer(1, filespace+"Hist_syst_entries.in", filespace+"Cuts.in", outfile, isData, cr_variables,syst_names);
   systematics = Systematics(distats);
-  jetScaleRes = JetScaleResolution("Pileup/Summer16_23Sep2016V4_MC_UncertaintySources_AK4PFchs.txt", "FlavorQCD",  "Pileup/Spring16_25nsV6_MC_PtResolution_AK4PFchs.txt", "Pileup/Spring16_25nsV6_MC_SF_AK4PFchs.txt");
+  jetScaleRes = JetScaleResolution("Pileup/Summer16_23Sep2016V4_MC_Uncertainty_AK4PFchs.txt", "",  "Pileup/Spring16_25nsV6_MC_PtResolution_AK4PFchs.txt", "Pileup/Spring16_25nsV6_MC_SF_AK4PFchs.txt");
 
 
 
@@ -306,25 +308,6 @@ void Analyzer::setupCR(string var, double val) {
 ////destructor
 Analyzer::~Analyzer() {
 
-  delete BOOM;
-  delete _Electron;
-  delete _Muon;
-  delete _Tau;
-  delete _Jet;
-  if(!isData) delete _Gen;
-
-  for(auto pair: fillInfo) {
-    delete pair.second;
-  }
-
-  for(auto e: Enum<CUTS>()) {
-    delete goodParts[e];
-  }
-
-  for(int i=0; i < nTrigReq; i++) {
-    delete trigPlace[i];
-    delete trigName[i];
-  }
 }
 
 
@@ -333,14 +316,22 @@ void Analyzer::clear_values() {
 
   for(auto e: Enum<CUTS>()) {
     goodParts[e]->clear();
-
   }
   //faster!!
-  for(auto it: syst_parts) {
+  for(auto &it: syst_parts) {
     for(auto e: Enum<CUTS>()) {
       it[e]->clear();
     }
   }
+
+  if(version==1 && infoFile!=BOOM->GetFile()){
+    cout<<"New file! Will get the trigger info."<<endl;
+    infoFile=BOOM->GetFile();
+    BAAM= (TTree*) infoFile->Get("TNT/BAAM");
+    initializeTrigger();
+    infoFile->Close();
+  }
+
 
   leadIndex=-1;
   maxCut = 0;
@@ -406,6 +397,18 @@ void Analyzer::preprocess(int event) {
   getGoodParticles(-1);
 
   for(size_t i=0; i < syst_names.size(); i++) {
+    string syst=syst_names[i];
+    if(syst.find("Met")!=string::npos){
+      //does not influence the particle selection:
+
+      for(auto e: Enum<CUTS>()) {
+        if(e!=CUTS::eMET){
+          continue;
+        }
+        syst_parts.at(i)[e]=goodParts[e];
+      }
+      continue;
+    }
     getGoodParticles(i);
   }
   active_part = &goodParts;
@@ -695,9 +698,8 @@ void Analyzer::treatMuons_Met(string syst) {
 
 
 /////sets up other values needed for analysis that aren't particle specific
-void Analyzer::setupGeneral(TTree* BOOM) {
+void Analyzer::setupGeneral() {
   SetBranch("Trigger_decision", Trigger_decision);
-  SetBranch("Trigger_names", Trigger_names);
   SetBranch("nTruePUInteractions", nTruePU);
   SetBranch("bestVertices", bestVertices);
   SetBranch("weightevt", gen_weight);
@@ -711,7 +713,35 @@ void Analyzer::setupGeneral(TTree* BOOM) {
   read_info(filespace + "Run_info.in");
   read_info(filespace + "Systematics_info.in");
 
-  BOOM->GetEntry(0);
+  if( BOOM->GetListOfBranches()->FindObject("Trigger_names") ==0){
+    infoFile=BOOM->GetFile();
+    BAAM= (TTree*) infoFile->Get("TNT/BAAM");
+    initializeTrigger();
+    infoFile->Close();
+    version=1;
+  }else{
+    SetBranch("Trigger_names", Trigger_names);
+    BOOM->GetEntry(0);
+    for(int i = 0; i < nTrigReq; i++) {
+      for(int j = 0; j < (int)trigName[i]->size(); j++) {
+        for(int k = 0; k < (int)Trigger_names->size(); k++) {
+          if(Trigger_names->at(k).find(trigName[i]->at(j)) != string::npos) {
+            trigPlace[i]->at(j) = k;
+            break;
+          }
+        }
+      }
+    }
+    BOOM->SetBranchStatus("Trigger_names", 0);
+  }
+}
+
+
+//get the correct trigger position:
+void Analyzer::initializeTrigger() {
+  BAAM->SetBranchStatus("Trigger_names", 1);
+  BAAM->SetBranchAddress("Trigger_names", &Trigger_names);
+  BAAM->GetEntry(0);
   for(int i = 0; i < nTrigReq; i++) {
     for(int j = 0; j < (int)trigName[i]->size(); j++) {
       for(int k = 0; k < (int)Trigger_names->size(); k++) {
@@ -722,8 +752,7 @@ void Analyzer::setupGeneral(TTree* BOOM) {
       }
     }
   }
-  BOOM->SetBranchStatus("Trigger_names", 0);
-
+  BAAM->SetBranchStatus("Trigger_names", 0);
 }
 
 
@@ -939,14 +968,17 @@ void Analyzer::smearLepton(Lepton& lepton, CUTS eGenPos, const PartStats& stats,
 
 ///Same as smearlepton, just jet specific
 void Analyzer::smearJet(Particle& jet, const CUTS eGenPos, const PartStats& stats, string syst) {
-
-
+  //at the moment
+  if(jet.type != PType::Jet){
+    return;
+  }
   //add energy scale uncertainty
   if( !( isData || !stats.bmap.at("SmearTheJet") ) ) {
     if(syst=="orig"){
+      //only for jets we want to use smearing
       jet.systVec["orig"]->clear();
     }
-    for(size_t i=0; i< jet.size(); i++) {
+    for(size_t i=0; i< jet.Reco.size(); i++) {
       if(JetMatchesLepton(*_Muon, jet.Reco[i], stats.dmap.at("MuonMatchingDeltaR"), CUTS::eGMuon) ||
         JetMatchesLepton(*_Tau, jet.Reco[i], stats.dmap.at("TauMatchingDeltaR"), CUTS::eGTau) ||
         JetMatchesLepton(*_Electron, jet.Reco[i],stats.dmap.at("ElectronMatchingDeltaR"), CUTS::eGElec)){
@@ -957,20 +989,21 @@ void Analyzer::smearJet(Particle& jet, const CUTS eGenPos, const PartStats& stat
       double sf=1.;
       //only apply corrections for jets not for FatJets
       if(jet.type == PType::Jet){
+
         TLorentzVector genJet=matchJetToGen(jet.Reco[i], jet.pstats["Smear"],eGenPos);
         if(syst=="orig"){
-          sf=jetScaleRes.GetRes(jet.p4(i),genJet, rho, 0);
+          sf=jetScaleRes.GetRes(jet.Reco[i],genJet, rho, 0);
         }else if(syst=="Jet_Smear_Up"){
-          sf=jetScaleRes.GetRes(jet.p4(i),genJet, rho, 1);
+          sf=jetScaleRes.GetRes(jet.Reco[i],genJet, rho, 1);
         }else if(syst=="Jet_Smear_Down"){
-          sf=jetScaleRes.GetRes(jet.p4(i),genJet, rho, -1);
+          sf=jetScaleRes.GetRes(jet.Reco[i],genJet, rho, -1);
         }else if(syst=="Jet_Scale_Up"){
-          sf = 1.+ jetScaleRes.GetScale(jet.p4(i), false, +1.);
+          sf = 1.+ jetScaleRes.GetScale(jet.Reco[i], false, +1.);
         }else if(syst=="Jet_Scale_Down"){
-          sf = 1.- jetScaleRes.GetScale(jet.p4(i), false, -1) ;
+          sf = 1.- jetScaleRes.GetScale(jet.Reco[i], false, -1) ;
         }
       }
-      systematics.shiftParticle(jet, jet.p4(i), sf, _MET->systdeltaMEx[syst], _MET->systdeltaMEy[syst], syst);
+      systematics.shiftParticle(jet, jet.Reco[i], sf, _MET->systdeltaMEx[syst], _MET->systdeltaMEy[syst], syst);
     }
   }
   jet.setCurrentP(syst);
@@ -1046,6 +1079,12 @@ void Analyzer::getGoodGen(const PartStats& stats) {
     if( (id<5 || id==9 ||  id==21) && genMaper[5] != nullptr && _Gen->status->at(j) == genMaper[5]->status) {
       active_part->at(genMaper[5]->ePos)->push_back(j);
     }
+    //we are not interested in pythia info here!
+    if(_Gen->status->at(j)>10){
+      break;
+    }
+    //cout<<id<<"  "<<_Gen->status->at(j)<<endl;
+
   }
 
 }
@@ -1272,7 +1311,9 @@ void Analyzer::getGoodRecoFatJets(CUTS ePos, const PartStats& stats, const strin
 //came ro decayed into those leptons
 bool Analyzer::isOverlaping(const TLorentzVector& lvec, Lepton& overlapper, CUTS ePos, double MatchingDeltaR) {
   for(auto it : *active_part->at(ePos)) {
-    if(lvec.DeltaR(overlapper.p4(it)) < MatchingDeltaR) return true;
+    if(lvec.DeltaR(overlapper.p4(it)) < MatchingDeltaR){
+      return true;
+    }
   }
   return false;
 }

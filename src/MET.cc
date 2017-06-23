@@ -72,8 +72,8 @@ void Met::init(){
 void Met::update(string syst="orig"){
   ///Calculates met from values from each file plus smearing and treating muons as neutrinos
 
-  systVec[syst]->SetPxPyPzE(systVec[syst]->Px()+systdeltaMEx[syst], systVec[syst]->Py()+systdeltaMEy[syst], systVec[syst]->Pz(),
-  TMath::Sqrt(pow(systVec[syst]->Px()+systdeltaMEx[syst],2) + pow(systVec[syst]->Py()+systdeltaMEy[syst],2)));
+  systVec[syst]->SetPxPyPzE(cur_P->Px()+systdeltaMEx[syst], cur_P->Py()+systdeltaMEy[syst], cur_P->Pz(),
+  TMath::Sqrt(pow(cur_P->Px()+systdeltaMEx[syst],2) + pow(cur_P->Py()+systdeltaMEy[syst],2)));
   setCurrentP(syst);
 }
 

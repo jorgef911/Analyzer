@@ -8,11 +8,7 @@
 #include "Particle.h"
 //#include <boost/unordered_map.hpp>
 
-//#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
-//#pragma GCC diagnostic push
-//#pragma GCC diagnostic ignored "-Wattributes"
-//#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
-//#pragma GCC diagnostic pop
+// we will put stuff from the main analyser here once we know what
 
 
 class TRandom3;

@@ -64,8 +64,8 @@ void Particle::init(){
   for(uint i=0; i < mpt->size(); i++) {
     tmp.SetPtEtaPhiE(mpt->at(i),meta->at(i),mphi->at(i),menergy->at(i));
     Reco.push_back(tmp);
+    systVec["orig"]->push_back(tmp);
   }
-  systVec["orig"]=&Reco;
   setCurrentP("orig");
 }
 

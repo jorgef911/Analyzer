@@ -48,6 +48,8 @@ endif
 CXXFLAGS+=$(CXXSPEED)
 LDFLAGS+=$(LDSPEED)
 
+
+##This will make it very slow
 ifdef DEBUG
 CXXFLAGS = -O0 -g -pg -Wall $(ROOTCFLAGS) -I./
 LDFLAGS = -O0 -g -Wall $(ROOTLIBS) -lGenVector
