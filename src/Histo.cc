@@ -1,14 +1,25 @@
 #include "Histo.h"
+#include "unistd.h"
 
 Histogramer::Histogramer() : outfile(nullptr) {}
 
-Histogramer::Histogramer(int _Npdf, string histname, string cutname, string outfilename, bool _isData, vector<string>& folderCuts):
+Histogramer::Histogramer(int _Npdf, string histname, string cutname, string outfilename, bool _isData, vector<string>& folderCuts, const vector<string> &syst_unvertainties ):
 outfile(nullptr), outname(outfilename), Npdf(_Npdf), isData(_isData) {
 
-  read_cuts(cutname, folderCuts);
-  NFolders = folders.size();
-  read_hist(histname);
-
+  //no syst uncertainty hist object
+  if (syst_unvertainties.size()==0){
+    read_cuts(cutname, folderCuts);
+    NFolders = folders.size();
+    read_hist(histname);
+  }else{
+    read_syst(syst_unvertainties);
+    NFolders = folders.size();
+    read_hist(histname);
+    CR = true;
+    for(auto it: data){
+      it.second->setControlRegions();
+    }
+  }
   if(folderCuts.size() != 0) {
     CR = true;
     for(auto it: data) it.second->setControlRegions();
@@ -228,6 +239,18 @@ void Histogramer::read_cuts(string filename, vector<string>& folderCuts) {
 }
 
 
+void Histogramer::read_syst(const vector<string>& syst_uncertainties) {
+
+  int i=0;
+  for(const string &syst : syst_uncertainties){
+    folders.push_back(syst);
+    folderToCutNum.push_back(i);
+    i++;
+  }
+
+}
+
+
 void Histogramer::fillCRFolderNames(string sofar, int index, bool isFirst, const vector<string>& variables) {
   if(index >= (int)variables.size()) {
     folders.push_back(sofar);
@@ -244,7 +267,11 @@ void Histogramer::fillCRFolderNames(string sofar, int index, bool isFirst, const
 
 void Histogramer::fill_histogram() {
 
-  outfile = new TFile(outname.c_str(), "RECREATE");
+  if( access( outname.c_str(), F_OK ) == -1 ){
+    outfile = new TFile(outname.c_str(), "RECREATE");
+  }else{
+    outfile = new TFile(outname.c_str(), "UPDATE");
+  }
   for(auto it: folders) {
     outfile->mkdir( it.c_str() );
   }
@@ -255,7 +282,7 @@ void Histogramer::fill_histogram() {
   outfile->Close();
 }
 
-void Histogramer::addVal(double value, string group, int maxcut, string histn, double weight) {
+void Histogramer::addVal(double value, string group, int maxcut, string histn, double weight, int syst) {
   int maxFolder=0;
 
 
@@ -265,13 +292,16 @@ void Histogramer::addVal(double value, string group, int maxcut, string histn, d
       if(maxcut > folderToCutNum[i]) maxFolder++;
       else break;
     }
+  }
+  if(syst!=-1){
+    maxFolder=syst;
   }
 
   data[group]->AddPoint(histn, maxFolder, value, weight);
 
 }
 
-void Histogramer::addVal(double valuex, double valuey, string group, int maxcut, string histn, double weight) {
+void Histogramer::addVal(double valuex, double valuey, string group, int maxcut, string histn, double weight, int syst) {
   int maxFolder=0;
 
   if(CR) maxFolder = maxcut;
@@ -281,6 +311,8 @@ void Histogramer::addVal(double valuex, double valuey, string group, int maxcut,
       else break;
     }
   }
-
+  if(syst!=-1){
+    maxFolder=syst;
+  }
   data[group]->AddPoint(histn, maxFolder, valuex, valuey, weight);
 }

@@ -26,11 +26,15 @@ struct CRTester;
 #include "Particle.h"
 #include "MET.h"
 #include "Histo.h"
+
+/////fix
+#include "./btagging/BTagCalibrationStandalone.h"
+
 #include "Cut_enum.h"
 #include "FillInfo.h"
 #include "CRTest.h"
 #include "Systematics.h"
-#include "JetResolution.h"
+#include "JetScaleResolution.h"
 
 double normPhi(double phi);
 double absnormPhi(double phi);
@@ -70,13 +74,15 @@ private:
 
   void CRfillCuts();
   ///// Functions /////
-  void fill_Folder(string, const int);
+  //void fill_Folder(string, const int, string syst="");
+  void fill_Folder(string, const int, Histogramer& ihisto, int syst=-1 );
 
   void getInputs();
   void setupJob(string);
   void initializePileupInfo(string, string, string, string);
   void read_info(string);
-  void setupGeneral(TTree*);
+  void setupGeneral();
+  void initializeTrigger();
   void setCutNeeds();
 
   void smearLepton(Lepton&, CUTS, const PartStats&, string syst="orig");
@@ -91,14 +97,14 @@ private:
   void getGoodParticles(int);
   void getGoodTauNu();
   void getGoodGen(const PartStats&);
-  void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&);
-  void getGoodRecoJets(CUTS, const PartStats&);
-  void getGoodRecoFatJets(CUTS, const PartStats&);
+  void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&, const string&);
+  void getGoodRecoJets(CUTS, const PartStats&, const string&);
+  void getGoodRecoFatJets(CUTS, const PartStats&, const string&);
 
-  void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&);
-  void getGoodDiJets(const PartStats&);
+  void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&, const string&);
+  void getGoodDiJets(const PartStats&, const string&);
 
-  void VBFTopologyCut(const PartStats&);
+  void VBFTopologyCut(const PartStats&, const string&);
   void TriggerCuts(vector<int>&, const vector<string>&, CUTS);
 
 
@@ -128,8 +134,11 @@ private:
   ///// values /////
 
   TChain* BOOM;
+  TTree* BAAM;
+  TFile* infoFile;
   string filespace = "";
   double hPU[100];
+  int version=0;
 
   Generated* _Gen;
   Electron* _Electron;
@@ -139,8 +148,9 @@ private:
   FatJet* _FatJet;
   Met* _MET;
   Histogramer histo;
+  Histogramer syst_histo;
   Systematics systematics;
-  JetResolution jetRes;
+  JetScaleResolution jetScaleRes;
   PartStats genStat;
 
   unordered_map<string, PartStats> distats;
@@ -160,7 +170,6 @@ private:
   vector<int>* trigPlace[nTrigReq];
   bool setTrigger = false;
   vector<string>* trigName[nTrigReq];
-
   vector<int> cuts_per, cuts_cumul;
 
   double maxIso, minIso;
@@ -172,7 +181,11 @@ private:
   float nTruePU = 0;
   int bestVertices = 0;
   double gen_weight = 0;
-  double rho =0;
+
+  BTagCalibration calib = BTagCalibration("csvv1", "Pileup/btagging.csv");
+  BTagCalibrationReader reader = BTagCalibrationReader(BTagEntry::OP_TIGHT, "central");
+
+  double rho =20.;
 
   const static vector<CUTS> genCuts;
   const static vector<CUTS> jetCuts;
