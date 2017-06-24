@@ -1728,6 +1728,47 @@ void Analyzer::fill_Folder(string group, const int max) {
       if(lep2->type != PType::Tau){
         histAddVal(isZdecay(part2, *lep2), "Part2IsZdecay");
       }
+
+      //electron tau stuff:
+      if(lep1->type == PType::Electron && lep2->type == PType::Electron){
+        //loop over taus to find a match in the unisolated taus:
+        int matchedTauInd=-1;
+        TLorentzVector matchedEle;
+        TLorentzVector unmatchedEle;
+        for( size_t itau =0; itau< _Tau->smearP.size(); itau++){
+          if(part2.DeltaR(_Tau->smearP.at(itau))<0.3){
+            //we are sure that part1 passes the tight id
+            matchedTauInd=itau;
+            matchedEle=part2;
+            unmatchedEle=part1;
+          }else if(part1.DeltaR(_Tau->smearP.at(itau))<0.3){
+            //check if part2 passes the tight id:
+            if(find(goodParts[CUTS::eRElec1]->begin(),goodParts[CUTS::eRElec1]->end(),p2)!=goodParts[CUTS::eRElec1]->end()){
+              matchedTauInd=itau;
+              matchedEle=part1;
+              unmatchedEle=part2;
+            }
+          }
+        }
+        if(matchedTauInd>=0){
+          if(find(goodParts[CUTS::eRTau1]->begin(),goodParts[CUTS::eRTau1]->end(),matchedTauInd)!=goodParts[CUTS::eRTau1]->end()){
+            histAddVal(_Tau->smearP.at(matchedTauInd).Pt(), "DiEleGoodTauMatchPt");
+            histAddVal(_Tau->smearP.at(matchedTauInd).Pt()-matchedEle.Pt(), "DiEleGoodTauMatchDeltaPt");
+            histAddVal((_Tau->smearP.at(matchedTauInd)+unmatchedEle).M(), "DiEleGoodTauMatchMass");
+            histAddVal((matchedEle+unmatchedEle).M(), "DiEleEleGoodMatchMass");
+            histAddVal(matchedEle.Pt(), "DiEleEleGoodMatchPt");
+          }else{
+            histAddVal(_Tau->smearP.at(matchedTauInd).Pt(), "DiEleTauMatchPt");
+            histAddVal(_Tau->smearP.at(matchedTauInd).Pt()-matchedEle.Pt(), "DiEleTauMatchDeltaPt");
+            histAddVal((_Tau->smearP.at(matchedTauInd)+unmatchedEle).M(), "DiEleTauMatchMass");
+            histAddVal((matchedEle+unmatchedEle).M(), "DiEleEleMatchMass");
+            histAddVal(matchedEle.Pt(), "DiEleEleMatchPt");
+          }
+        }else{
+          histAddVal((part1+part2).M(), "DiEleEleUnMatchMass");
+          histAddVal(part2.Pt(), "DiEleEleUnMatchPt");
+        }
+      }
     }
   }
 }

@@ -156,5 +156,6 @@ ApplyJetBTagging 1
 JetBTaggingCut  0.600
 MatchBToGen     0
 UseBtagSF       1
+RemoveBJetsFromJets  0
 
 
