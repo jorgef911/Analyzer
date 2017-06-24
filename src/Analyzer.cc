@@ -733,9 +733,13 @@ void Analyzer::setCutNeeds() {
       need_cut[e] = true;
     }
   }
-
   for(auto it: *histo.get_cutorder()) {
-    need_cut[cut_num.at(it)] = true;
+    try{
+      need_cut[cut_num.at(it)] = true;
+    }catch(...){
+      cout<<"The following cut is strange: "<<it<<endl;
+      exit(2);
+    }
     if(adjList.find(cut_num.at(it)) == adjList.end()) continue;
     for(auto e: adjList.at(cut_num.at(it))) {
       need_cut[e] = true;
