@@ -100,16 +100,16 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
 
   BOOM= new TChain("TNT/BOOM");
 
-  gEnv->SetValue("TFile.Recover", 0);
+  //gEnv->SetValue("TFile.Recover", 0);
 
 
   for( string infile: infiles){
-    TFile* tmp;
-    tmp = TFile::Open(infile.c_str());
-    if(!tmp) {
-      cout << endl << endl << "File " << infile << " did not open correctly, exiting" <<endl;
-      exit(EXIT_FAILURE);
-    }
+    //TFile* tmp;
+    //tmp = TFile::Open(infile.c_str());
+    //if(!tmp) {
+      //cout << endl << endl << "File " << infile << " did not open correctly, exiting" <<endl;
+      //exit(EXIT_FAILURE);
+    //}
 
     BOOM->Add(infile.c_str());
   }
@@ -234,6 +234,7 @@ void Analyzer::create_fillInfo() {
   fillInfo["FillCentralJet"] = new FillVals(CUTS::eRCenJet, FILLER::Single, _Jet);
   fillInfo["FillWJet"] =     new FillVals(CUTS::eRWjet, FILLER::Single, _FatJet);
 
+  fillInfo["FillDiElectron"] = new FillVals(CUTS::eDiElec, FILLER::Dipart, _Electron, _Electron);
   fillInfo["FillDiMuon"] =     new FillVals(CUTS::eDiMuon, FILLER::Dipart, _Muon, _Muon);
   fillInfo["FillDiTau"] =      new FillVals(CUTS::eDiTau, FILLER::Dipart, _Tau, _Tau);
   fillInfo["FillMetCuts"] =    new FillVals();
