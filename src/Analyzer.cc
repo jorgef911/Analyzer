@@ -144,7 +144,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   for(auto &it : distats["Systematics"].bmap) {
     if( it.first == "useSystematics")
       doSystematics= it.second;
-    else if( it.second) {
+    else if(doSystematics && it.second) {
       syst_names.push_back(it.first);
       syst_parts.push_back(getArray());
     }
@@ -343,9 +343,6 @@ void Analyzer::clear_values() {
 
   for(auto e: Enum<CUTS>()) {
     goodParts[e]->clear();
-    for(auto it: syst_parts) {
-      it[e]->clear();
-    }
   }
   //faster!!
   for(auto &it: syst_parts) {
@@ -447,12 +444,12 @@ void Analyzer::preprocess(int event) {
     getGoodParticles(i);
   }
   active_part = &goodParts;
-
-  if( event < 10 || ( event < 100 && event % 10 == 0 ) ||
-    ( event < 1000 && event % 100 == 0 ) ||
-    ( event < 10000 && event % 1000 == 0 ) ||
-    ( event >= 10000 && event % 10000 == 0 ) ) {
-       cout << event << " Events analyzed\n";
+  int ievent=event +1;
+  if( ievent < 10 || ( ievent < 100 && ievent % 10 == 0 ) ||
+    ( ievent < 1000 && ievent % 100 == 0 ) ||
+    ( ievent < 10000 && ievent % 1000 == 0 ) ||
+    ( ievent >= 10000 && ievent % 10000 == 0 ) ) {
+       cout << ievent << " Events analyzed\n";
   }
 }
 
@@ -1011,40 +1008,84 @@ void Analyzer::setCutNeeds() {
 
 ///Smears lepton only if specified and not a data file.  Otherwise, just filles up lorentz vectors
 //of the data into the vector container smearP with is in each lepton object.
-void Analyzer::smearLepton(Lepton& lepton, CUTS eGenPos, const PartStats& stats, string syst) {
+void Analyzer::smearLepton(Lepton& lep, CUTS eGenPos, const PartStats& stats, string syst) {
+  if( !isData ) {
+    if(syst!="orig"){
+      //save time to not rerun stuff
+      if( syst.find("Muon")==string::npos && lep.type == PType::Muon){
+        return;
+      }else if( syst.find("Ele")==string::npos && lep.type == PType::Electron){
+        return;
+      }else if( syst.find("Tau")==string::npos && lep.type == PType::Tau){
+        return;
+      }
+    }
+    //if the orig particle should be smeared this vector needs to be cleared
+    double scale=stats.dmap.at("PtScaleOffset");
+    double resolution=stats.dmap.at("PtScaleOffset");
+    if(!stats.bmap.at("SmearTheParticle")) {
+      scale=1.;
+      resolution=1.;
+    }
+    double syst_scale=0.;
+    double syst_res=0.;
+    if(lep.type == PType::Muon){
+      syst_scale=distats["Muon_systematics"].dmap.at("scale");
+      syst_res=distats["Muon_systematics"].dmap.at("res");
+    }else if(lep.type == PType::Electron){
+      syst_scale=distats["Electron_systematics"].dmap.at("scale");
+      syst_res=distats["Electron_systematics"].dmap.at("res");
+    }else if(lep.type == PType::Tau){
+      syst_scale=distats["Tau_systematics"].dmap.at("scale");
+      syst_res=distats["Tau_systematics"].dmap.at("res");
+    }
+    bool dores=(syst.find("_Res_")!=string::npos);
+    bool doscale=(syst.find("_Scale_")!=string::npos);
 
-  //if(syst == "shift") {
-    /////shift code
-    //cout << "here shift" << endl;
 
-  //} else if(syst != "orig") {
-    //cout << "other" << endl;
-    //lepton.setCurrentP("orig");
+    if(syst.find("_Up")!=string::npos){
+      syst_scale=1.+syst_scale;
+      syst_res=1.+syst_res;
+    }else{
+      syst_scale=1.-syst_scale;
+      syst_res=1.-syst_res;
+    }
 
-  //} else if(syst == "orig") {
-    //if( !( isData || !stats.bmap.at("SmearTheParticle")) ) {
-      ////if the orig particle should be smeared this vector needs to be cleared
-      //if(syst=="orig"){
-        //lepton.systVec["orig"]->clear();
-      //}
-      //for(size_t i = 0; i < lepton.size(); i++) {
-        //TLorentzVector genVec =  matchLeptonToGen(lepton.Reco.at(i), lepton.pstats["Smear"],eGenPos);
-        //if(genVec == TLorentzVector(0,0,0,0)) {
-          //lepton.cur_P->push_back(lepton.Reco[i]);
-        //}else{
 
-          ////double smearedPt = (genVec.Pt()*stats.dmap.at("PtScaleOffset")) + (lepton.Reco[i].Pt() - genVec.Pt())*stats.dmap.at("PtSigmaOffset");
-          ////double smearedEta =(genVec.Eta()*stats.dmap.at("EtaScaleOffset")) + (lepton.Reco[i].Eta() - genVec.Eta())*stats.dmap.at("EtaSigmaOffset");
-          ////double smearedPhi = (genVec.Phi() * stats.dmap.at("PhiScaleOffset")) + (lepton.Reco[i].Phi() - genVec.Phi())*stats.dmap.at("PhiSigmaOffset");
-          ////double smearedEnergy = (genVec.Energy()*stats.dmap.at("EnergyScaleOffset")) + (lepton.Reco[i].Energy() - genVec.Energy())*stats.dmap.at("EnergySigmaOffset");
-
-          ////TODO add resolution
-
-          //systematics.shiftParticle(lepton, lepton.Reco[i], stats.dmap.at("PtScaleOffset"), _MET->systdeltaMEx[syst], _MET->systdeltaMEy[syst], syst);
-        //}
-
-      //}
+    //if(syst=="orig" && stats.bmap.at("SmearTheParticle")){
+      //lep.systVec["orig"]->clear();
     //}
+    if( (syst=="orig" && stats.bmap.at("SmearTheParticle") ) or syst!="orig"){
+      if(lep.size()>0){
+        cout<<"lmlml  "<<  lep.size()<<endl;
+        cout<<dores<<"  jnjbj "<<doscale<< " nknk "<<syst_scale <<"   "<<syst_res <<"  "<<lep.getName()<<"  "<<syst<<endl;
+      }
+      for(size_t i = 0; i < lep.Reco.size(); i++) {
+        double smearedPt=1.;
+        TLorentzVector genVec =  matchLeptonToGen(lep.Reco.at(i), lep.pstats["Smear"],eGenPos);
+        if(genVec != TLorentzVector(0,0,0,0)) {
+          if(syst=="orig"){
+            smearedPt = (genVec.Pt()*scale) + (lep.Reco[i].Pt() - genVec.Pt())*(resolution);
+          }else if(dores){
+            smearedPt = (genVec.Pt()*scale) + (lep.Reco[i].Pt() - genVec.Pt())*(syst_res);
+            cout<<"test:  "<<smearedPt<<"  "<<(genVec.Pt()*scale) <<"  "<<(lep.Reco[i].Pt() - genVec.Pt())*(syst_res)<<endl;
+          }else if(doscale){
+            smearedPt = (genVec.Pt()*(syst_scale)) + (lep.Reco[i].Pt() - genVec.Pt())*(resolution);
+            cout<<"test2:  "<<smearedPt<<endl;
+          }
+          //double smearedEta =(genVec.Eta()*stats.dmap.at("EtaScaleOffset")) + (lep.Reco[i].Eta() - genVec.Eta())*stats.dmap.at("EtaSigmaOffset");
+          //double smearedPhi = (genVec.Phi() * stats.dmap.at("PhiScaleOffset")) + (lep.Reco[i].Phi() - genVec.Phi())*stats.dmap.at("PhiSigmaOffset");
+          //double smearedEnergy = (genVec.Energy()*stats.dmap.at("EnergyScaleOffset")) + (lep.Reco[i].Energy() - genVec.Energy())*stats.dmap.at("EnergySigmaOffset");
+
+        }else{
+          cout<<"no gen"<<endl;
+        }
+        cout<<"before: "<<lep.Reco[i].Pt()<<" sf  "<<smearedPt<<" syst "<<syst <<endl;
+        systematics.shiftParticle(lep, lep.Reco[i], smearedPt, _MET->systdeltaMEx[syst], _MET->systdeltaMEy[syst], syst);
+        cout<<"after: "<<lep.systVec[syst]->at(i).Pt()<<endl;
+      }
+    }
+  }
     //lepton.setCurrentP(syst);
   //}
 }
@@ -1076,9 +1117,9 @@ void Analyzer::smearJet(Particle& jet, const CUTS eGenPos, const PartStats& stat
         TLorentzVector genJet=matchJetToGen(jet.Reco[i], jet.pstats["Smear"],eGenPos);
         if(syst=="orig"){
           sf=jetScaleRes.GetRes(jet.Reco[i],genJet, rho, 0);
-        }else if(syst=="Jet_Smear_Up"){
+        }else if(syst=="Jet_Res_Up"){
           sf=jetScaleRes.GetRes(jet.Reco[i],genJet, rho, 1);
-        }else if(syst=="Jet_Smear_Down"){
+        }else if(syst=="Jet_Res_Down"){
           sf=jetScaleRes.GetRes(jet.Reco[i],genJet, rho, -1);
         }else if(syst=="Jet_Scale_Up"){
           sf = 1.+ jetScaleRes.GetScale(jet.Reco[i], false, +1.);
@@ -1132,7 +1173,7 @@ TLorentzVector Analyzer::matchTauToGen(const TLorentzVector& lvec, double lDelta
       return genVec;
     }
   }
-  return TLorentzVector(0,0,0,0);
+  return genVec;
 }
 
 
