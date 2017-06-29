@@ -1052,14 +1052,14 @@ void Analyzer::smearLepton(Lepton& lep, CUTS eGenPos, const PartStats& stats, st
     }
 
 
-    //if(syst=="orig" && stats.bmap.at("SmearTheParticle")){
-      //lep.systVec["orig"]->clear();
-    //}
+    if(syst=="orig" && stats.bmap.at("SmearTheParticle")){
+      lep.systVec["orig"]->clear();
+    }
     if( (syst=="orig" && stats.bmap.at("SmearTheParticle") ) or syst!="orig"){
-      if(lep.size()>0){
-        cout<<"lmlml  "<<  lep.size()<<endl;
-        cout<<dores<<"  jnjbj "<<doscale<< " nknk "<<syst_scale <<"   "<<syst_res <<"  "<<lep.getName()<<"  "<<syst<<endl;
-      }
+      //if(lep.size()>0){
+        //cout<<"lmlml  "<<  lep.size()<<endl;
+        //cout<<dores<<"  jnjbj "<<doscale<< " nknk "<<syst_scale <<"   "<<syst_res <<"  "<<lep.getName()<<"  "<<syst<<endl;
+      //}
       for(size_t i = 0; i < lep.Reco.size(); i++) {
         double smearedPt=1.;
         TLorentzVector genVec =  matchLeptonToGen(lep.Reco.at(i), lep.pstats["Smear"],eGenPos);
@@ -1068,21 +1068,19 @@ void Analyzer::smearLepton(Lepton& lep, CUTS eGenPos, const PartStats& stats, st
             smearedPt = (genVec.Pt()*scale) + (lep.Reco[i].Pt() - genVec.Pt())*(resolution);
           }else if(dores){
             smearedPt = (genVec.Pt()*scale) + (lep.Reco[i].Pt() - genVec.Pt())*(syst_res);
-            cout<<"test:  "<<smearedPt<<"  "<<(genVec.Pt()*scale) <<"  "<<(lep.Reco[i].Pt() - genVec.Pt())*(syst_res)<<endl;
           }else if(doscale){
             smearedPt = (genVec.Pt()*(syst_scale)) + (lep.Reco[i].Pt() - genVec.Pt())*(resolution);
-            cout<<"test2:  "<<smearedPt<<endl;
           }
           //double smearedEta =(genVec.Eta()*stats.dmap.at("EtaScaleOffset")) + (lep.Reco[i].Eta() - genVec.Eta())*stats.dmap.at("EtaSigmaOffset");
           //double smearedPhi = (genVec.Phi() * stats.dmap.at("PhiScaleOffset")) + (lep.Reco[i].Phi() - genVec.Phi())*stats.dmap.at("PhiSigmaOffset");
           //double smearedEnergy = (genVec.Energy()*stats.dmap.at("EnergyScaleOffset")) + (lep.Reco[i].Energy() - genVec.Energy())*stats.dmap.at("EnergySigmaOffset");
 
-        }else{
-          cout<<"no gen"<<endl;
+        //}else{
+          //cout<<"no gen"<<endl;
         }
-        cout<<"before: "<<lep.Reco[i].Pt()<<" sf  "<<smearedPt<<" syst "<<syst <<endl;
+        //cout<<"before: "<<lep.Reco[i].Pt()<<" sf  "<<smearedPt<<" syst "<<syst <<endl;
         systematics.shiftParticle(lep, lep.Reco[i], smearedPt, _MET->systdeltaMEx[syst], _MET->systdeltaMEy[syst], syst);
-        cout<<"after: "<<lep.systVec[syst]->at(i).Pt()<<endl;
+        //cout<<"after: "<<lep.systVec[syst]->at(i).Pt()<<endl;
       }
     }
   }
@@ -1194,19 +1192,24 @@ TLorentzVector Analyzer::matchJetToGen(const TLorentzVector& lvec, const PartSta
 ////Calculates the number of gen particles.  Based on id number and status of each particle
 void Analyzer::getGoodGen(const PartStats& stats) {
   for(size_t j = 0; j < _Gen->size(); j++) {
+    //we are not interested in pythia info here!
+    if(_Gen->status->at(j)>10){
+      continue;
+    }
     int id = abs(_Gen->pdg_id->at(j));
     if(genMaper[id] != nullptr && _Gen->status->at(j) == genMaper[id]->status) {
       if(id == 15 && (_Gen->pt(j) < stats.pmap.at("TauPtCut").first || _Gen->pt(j) > stats.pmap.at("TauPtCut").second || abs(_Gen->eta(j)) > stats.dmap.at("TauEtaCut"))) continue;
       active_part->at(genMaper[id]->ePos)->push_back(j);
+      //cout<<"mkmlkmlk"<<endl;
     }
     //something special for jet
     if( (id<5 || id==9 ||  id==21) && genMaper[5] != nullptr && _Gen->status->at(j) == genMaper[5]->status) {
       active_part->at(genMaper[5]->ePos)->push_back(j);
+      //cout<<id<<"  "<<_Gen->status->at(j)<<endl;
     }
-    //we are not interested in pythia info here!
-    if(_Gen->status->at(j)>10){
-      break;
-    }
+    //if(_Gen->status->at(j)>10){
+      //break;
+    //}
     //cout<<id<<"  "<<_Gen->status->at(j)<<endl;
 
   }
