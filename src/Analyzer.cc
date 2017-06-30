@@ -104,12 +104,13 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
 
 
   for( string infile: infiles){
-    TFile* tmp;
-    tmp = TFile::Open(infile.c_str());
-    if(!tmp) {
-      cout << endl << endl << "File " << infile << " did not open correctly, exiting" <<endl;
-      exit(EXIT_FAILURE);
-    }
+
+    cout << infile << endl;
+    // tmp = TFile::Open(infile.c_str());
+    // if(!tmp) {
+    //   cout << endl << endl << "File " << infile << " did not open correctly, exiting" <<endl;
+    //   exit(EXIT_FAILURE);
+    // }
 
     BOOM->Add(infile.c_str());
   }
@@ -178,8 +179,10 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
         if(gtltSign == '>') SignalRegion += factor;
         factor *= 2;
       }
-      if(distats["Control_Region"].bmap.find("Unblind") != distats["Control_Region"].bmap.end()) {
-        blinded = !distats["Control_Region"].bmap["Unblind"];
+      if(distats["Control_Region"].smap.find("Unblind") != distats["Control_Region"].smap.end()) {
+
+        blinded = distats["Control_Region"].smap["Unblind"] == "false";
+	cout << "we have " << blinded << endl;
       }
     }
   }
