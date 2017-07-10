@@ -72,13 +72,13 @@ void parseCommandLine(int argc, char *argv[], vector<string> &inputnames, string
   }
 
 
-  for( auto file: inputnames) {
-    ifstream ifile(file);
-    if ( !ifile && file.find("root://") == string::npos && file.find("root\\://") == string::npos) {
-      std::cout << "The file '" << inputnames.back() << "' doesn't exist" << std::endl;
-      exit(EXIT_FAILURE);
-    }
-  }
+  //for( auto file: inputnames) {
+    //ifstream ifile(file);
+    //if ( !ifile && file.find("root://") == string::npos && file.find("root\\://") == string::npos) {
+      //std::cout << "The file '" << inputnames.back() << "' doesn't exist" << std::endl;
+      //exit(EXIT_FAILURE);
+    //}
+  //}
   return;
 }
 
@@ -103,14 +103,14 @@ int main (int argc, char* argv[]) {
   //this way we still have the output
   signal(SIGINT,KeyboardInterrupt_endJob);
 
-
+  //main event loop
   for(int i=0; i < testing.nentries; i++) {
     testing.clear_values();
     testing.preprocess(i);
     testing.fill_histogram();
     //this will be set if ctrl+c is pressed
     if(do_break){
-      testing.nentries=i;
+      testing.nentries=i+1;
       break;
     }
   }

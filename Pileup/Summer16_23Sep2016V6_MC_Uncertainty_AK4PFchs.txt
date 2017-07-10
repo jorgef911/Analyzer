@@ -1,0 +1,682 @@
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+
+
+  <link crossorigin="anonymous" href="https://assets-cdn.github.com/assets/frameworks-49f1e970452082ece91a8cb77754f31a769167f4f9cd527a501b1cafa52bb1b6.css" media="all" rel="stylesheet" />
+  <link crossorigin="anonymous" href="https://assets-cdn.github.com/assets/github-3930453070a4974307a742646c4a44f265b3e16fe90e22d4f6640ad5bcfaf195.css" media="all" rel="stylesheet" />
+  
+  
+  <link crossorigin="anonymous" href="https://assets-cdn.github.com/assets/site-a59bd8fb44017386caff9fbca36994bddc4e2da35d6b61b41f39734d64cf6bb6.css" media="all" rel="stylesheet" />
+  
+
+  <meta name="viewport" content="width=device-width">
+  
+  <title>JECDatabase/Summer16_23Sep2016V6_MC_Uncertainty_AK4PFchs.txt at master · cms-jet/JECDatabase · GitHub</title>
+  <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="GitHub">
+  <link rel="fluid-icon" href="https://github.com/fluidicon.png" title="GitHub">
+  <meta property="fb:app_id" content="1401488693436528">
+
+    
+    <meta content="https://avatars0.githubusercontent.com/u/5247584?v=3&amp;s=400" property="og:image" /><meta content="GitHub" property="og:site_name" /><meta content="object" property="og:type" /><meta content="cms-jet/JECDatabase" property="og:title" /><meta content="https://github.com/cms-jet/JECDatabase" property="og:url" /><meta content="JECDatabase - This repository contains a historical record of all jet energy corrections (JEC), uncertainties, and resolution files. These file come in text, tarball, and SQLite format. Also contai..." property="og:description" />
+
+  <link rel="assets" href="https://assets-cdn.github.com/">
+  
+  <meta name="pjax-timeout" content="1000">
+  
+  <meta name="request-id" content="B98E:26DF:93724A:D377B4:594246D9" data-pjax-transient>
+  
+
+  <meta name="selected-link" value="repo_source" data-pjax-transient>
+
+  <meta name="google-site-verification" content="KT5gs8h0wvaagLKAVWq8bbeNwnZZK1r1XQysX3xurLU">
+<meta name="google-site-verification" content="ZzhVyEFwb7w3e0-uOTltm8Jsck2F5StVihD0exw2fsA">
+    <meta name="google-analytics" content="UA-3769691-2">
+
+<meta content="collector.githubapp.com" name="octolytics-host" /><meta content="github" name="octolytics-app-id" /><meta content="https://collector.githubapp.com/github-external/browser_event" name="octolytics-event-url" /><meta content="B98E:26DF:93724A:D377B4:594246D9" name="octolytics-dimension-request_id" /><meta content="iad" name="octolytics-dimension-region_edge" /><meta content="iad" name="octolytics-dimension-region_render" />
+<meta content="/&lt;user-name&gt;/&lt;repo-name&gt;/blob/show" data-pjax-transient="true" name="analytics-location" />
+
+
+
+
+  <meta class="js-ga-set" name="dimension1" content="Logged Out">
+
+
+  
+
+      <meta name="hostname" content="github.com">
+  <meta name="user-login" content="">
+
+      <meta name="expected-hostname" content="github.com">
+    <meta name="js-proxy-site-detection-payload" content="MzNiOWY0YWUwNGZiNmNlM2QwYzhhYjIxOTc0NThmNjdiZTE5YzY0NWM4YTBiMjZiMmYwOWMwNTVjZDM4NmVkOHx7InJlbW90ZV9hZGRyZXNzIjoiMTI5LjU5LjE5Ny4xODEiLCJyZXF1ZXN0X2lkIjoiQjk4RToyNkRGOjkzNzI0QTpEMzc3QjQ6NTk0MjQ2RDkiLCJ0aW1lc3RhbXAiOjE0OTc1MTU3MzcsImhvc3QiOiJnaXRodWIuY29tIn0=">
+
+
+  <meta name="html-safe-nonce" content="7e081699a25a13da104d35ad5e163cf4cc0e07d9">
+
+  <meta http-equiv="x-pjax-version" content="2fe65a4cc3a76b4600f3bd333aba5b3d">
+  
+
+      <link href="https://github.com/cms-jet/JECDatabase/commits/master.atom" rel="alternate" title="Recent Commits to JECDatabase:master" type="application/atom+xml">
+
+  <meta name="description" content="JECDatabase - This repository contains a historical record of all jet energy corrections (JEC), uncertainties, and resolution files. These file come in text, tarball, and SQLite format. Also contained here are PDFs detailing what text files go into each SQLite file. This &quot;database&quot; is meant to be shared among all of the JERC developers as a common workspace.">
+  <meta name="go-import" content="github.com/cms-jet/JECDatabase git https://github.com/cms-jet/JECDatabase.git">
+
+  <meta content="5247584" name="octolytics-dimension-user_id" /><meta content="cms-jet" name="octolytics-dimension-user_login" /><meta content="42252606" name="octolytics-dimension-repository_id" /><meta content="cms-jet/JECDatabase" name="octolytics-dimension-repository_nwo" /><meta content="true" name="octolytics-dimension-repository_public" /><meta content="false" name="octolytics-dimension-repository_is_fork" /><meta content="42252606" name="octolytics-dimension-repository_network_root_id" /><meta content="cms-jet/JECDatabase" name="octolytics-dimension-repository_network_root_nwo" /><meta content="false" name="octolytics-dimension-repository_explore_github_marketplace_ci_cta_shown" />
+
+
+    <link rel="canonical" href="https://github.com/cms-jet/JECDatabase/blob/master/textFiles/Summer16_23Sep2016V6_MC/Summer16_23Sep2016V6_MC_Uncertainty_AK4PFchs.txt" data-pjax-transient>
+
+
+  <meta name="browser-stats-url" content="https://api.github.com/_private/browser/stats">
+
+  <meta name="browser-errors-url" content="https://api.github.com/_private/browser/errors">
+
+  <link rel="mask-icon" href="https://assets-cdn.github.com/pinned-octocat.svg" color="#000000">
+  <link rel="icon" type="image/x-icon" href="https://assets-cdn.github.com/favicon.ico">
+
+<meta name="theme-color" content="#1e2327">
+
+
+
+  </head>
+
+  <body class="logged-out env-production page-blob">
+    
+
+
+
+  <div class="position-relative js-header-wrapper ">
+    <a href="#start-of-content" tabindex="1" class="px-2 py-4 show-on-focus js-skip-to-content">Skip to content</a>
+    <div id="js-pjax-loader-bar" class="pjax-loader-bar"><div class="progress"></div></div>
+
+    
+    
+    
+
+
+
+          <header class="site-header js-details-container Details" role="banner">
+  <div class="site-nav-container">
+    <a class="header-logo-invertocat" href="https://github.com/" aria-label="Homepage" data-ga-click="(Logged out) Header, go to homepage, icon:logo-wordmark">
+      <svg aria-hidden="true" class="octicon octicon-mark-github" height="32" version="1.1" viewBox="0 0 16 16" width="32"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+    </a>
+
+    <button class="btn-link float-right site-header-toggle js-details-target" type="button" aria-label="Toggle navigation" aria-expanded="false">
+      <svg aria-hidden="true" class="octicon octicon-three-bars" height="24" version="1.1" viewBox="0 0 12 16" width="18"><path fill-rule="evenodd" d="M11.41 9H.59C0 9 0 8.59 0 8c0-.59 0-1 .59-1H11.4c.59 0 .59.41.59 1 0 .59 0 1-.59 1h.01zm0-4H.59C0 5 0 4.59 0 4c0-.59 0-1 .59-1H11.4c.59 0 .59.41.59 1 0 .59 0 1-.59 1h.01zM.59 11H11.4c.59 0 .59.41.59 1 0 .59 0 1-.59 1H.59C0 13 0 12.59 0 12c0-.59 0-1 .59-1z"/></svg>
+    </button>
+
+    <div class="site-header-menu">
+      <nav class="site-header-nav">
+        <a href="/features" class="js-selected-navigation-item nav-item" data-ga-click="Header, click, Nav menu - item:features" data-selected-links="/features /features">
+          Features
+</a>        <a href="/business" class="js-selected-navigation-item nav-item" data-ga-click="Header, click, Nav menu - item:business" data-selected-links="/business /business/security /business/customers /business">
+          Business
+</a>        <a href="/explore" class="js-selected-navigation-item nav-item" data-ga-click="Header, click, Nav menu - item:explore" data-selected-links="/explore /trending /trending/developers /integrations /integrations/feature/code /integrations/feature/collaborate /integrations/feature/ship /showcases /explore">
+          Explore
+</a>            <a href="/marketplace" class="js-selected-navigation-item nav-item" data-ga-click="Header, click, Nav menu - item:marketplace" data-selected-links=" /marketplace">
+              Marketplace
+</a>        <a href="/pricing" class="js-selected-navigation-item nav-item" data-ga-click="Header, click, Nav menu - item:pricing" data-selected-links="/pricing /pricing/developer /pricing/team /pricing/business-hosted /pricing/business-enterprise /pricing">
+          Pricing
+</a>      </nav>
+
+      <div class="site-header-actions">
+          <div class="header-search scoped-search site-scoped-search js-site-search" role="search">
+  <!-- '"` --><!-- </textarea></xmp> --></option></form><form accept-charset="UTF-8" action="/cms-jet/JECDatabase/search" class="js-site-search-form" data-scoped-search-url="/cms-jet/JECDatabase/search" data-unscoped-search-url="/search" method="get"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /></div>
+    <label class="form-control header-search-wrapper js-chromeless-input-container">
+        <a href="/cms-jet/JECDatabase/blob/master/textFiles/Summer16_23Sep2016V6_MC/Summer16_23Sep2016V6_MC_Uncertainty_AK4PFchs.txt" class="header-search-scope no-underline">This repository</a>
+      <input type="text"
+        class="form-control header-search-input js-site-search-focus js-site-search-field is-clearable"
+        data-hotkey="s"
+        name="q"
+        value=""
+        placeholder="Search"
+        aria-label="Search this repository"
+        data-unscoped-placeholder="Search GitHub"
+        data-scoped-placeholder="Search"
+        autocapitalize="off">
+        <input type="hidden" class="js-site-search-type-field" name="type" >
+    </label>
+</form></div>
+
+
+          <a class="text-bold site-header-link" href="/login?return_to=%2Fcms-jet%2FJECDatabase%2Fblob%2Fmaster%2FtextFiles%2FSummer16_23Sep2016V6_MC%2FSummer16_23Sep2016V6_MC_Uncertainty_AK4PFchs.txt" data-ga-click="(Logged out) Header, clicked Sign in, text:sign-in">Sign in</a>
+            <span class="text-gray">or</span>
+            <a class="text-bold site-header-link" href="/join?source=header-repo" data-ga-click="(Logged out) Header, clicked Sign up, text:sign-up">Sign up</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+
+  </div>
+
+  <div id="start-of-content" class="show-on-focus"></div>
+
+    <div id="js-flash-container">
+</div>
+
+
+
+  <div role="main">
+        <div itemscope itemtype="http://schema.org/SoftwareSourceCode">
+    <div id="js-repo-pjax-container" data-pjax-container>
+      
+
+
+  
+
+  
+
+
+    <div class="pagehead repohead instapaper_ignore readability-menu experiment-repo-nav">
+      <div class="container repohead-details-container">
+
+        <ul class="pagehead-actions">
+  <li>
+      <a href="/login?return_to=%2Fcms-jet%2FJECDatabase"
+    class="btn btn-sm btn-with-count tooltipped tooltipped-n"
+    aria-label="You must be signed in to watch a repository" rel="nofollow">
+    <svg aria-hidden="true" class="octicon octicon-eye" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M8.06 2C3 2 0 8 0 8s3 6 8.06 6C13 14 16 8 16 8s-3-6-7.94-6zM8 12c-2.2 0-4-1.78-4-4 0-2.2 1.8-4 4-4 2.22 0 4 1.8 4 4 0 2.22-1.78 4-4 4zm2-4c0 1.11-.89 2-2 2-1.11 0-2-.89-2-2 0-1.11.89-2 2-2 1.11 0 2 .89 2 2z"/></svg>
+    Watch
+  </a>
+  <a class="social-count" href="/cms-jet/JECDatabase/watchers"
+     aria-label="24 users are watching this repository">
+    24
+  </a>
+
+  </li>
+
+  <li>
+      <a href="/login?return_to=%2Fcms-jet%2FJECDatabase"
+    class="btn btn-sm btn-with-count tooltipped tooltipped-n"
+    aria-label="You must be signed in to star a repository" rel="nofollow">
+    <svg aria-hidden="true" class="octicon octicon-star" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path fill-rule="evenodd" d="M14 6l-4.9-.64L7 1 4.9 5.36 0 6l3.6 3.26L2.67 14 7 11.67 11.33 14l-.93-4.74z"/></svg>
+    Star
+  </a>
+
+    <a class="social-count js-social-count" href="/cms-jet/JECDatabase/stargazers"
+      aria-label="3 users starred this repository">
+      3
+    </a>
+
+  </li>
+
+  <li>
+      <a href="/login?return_to=%2Fcms-jet%2FJECDatabase"
+        class="btn btn-sm btn-with-count tooltipped tooltipped-n"
+        aria-label="You must be signed in to fork a repository" rel="nofollow">
+        <svg aria-hidden="true" class="octicon octicon-repo-forked" height="16" version="1.1" viewBox="0 0 10 16" width="10"><path fill-rule="evenodd" d="M8 1a1.993 1.993 0 0 0-1 3.72V6L5 8 3 6V4.72A1.993 1.993 0 0 0 2 1a1.993 1.993 0 0 0-1 3.72V6.5l3 3v1.78A1.993 1.993 0 0 0 5 15a1.993 1.993 0 0 0 1-3.72V9.5l3-3V4.72A1.993 1.993 0 0 0 8 1zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm3 10c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm3-10c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"/></svg>
+        Fork
+      </a>
+
+    <a href="/cms-jet/JECDatabase/network" class="social-count"
+       aria-label="9 users forked this repository">
+      9
+    </a>
+  </li>
+</ul>
+
+        <h1 class="public ">
+  <svg aria-hidden="true" class="octicon octicon-repo" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M4 9H3V8h1v1zm0-3H3v1h1V6zm0-2H3v1h1V4zm0-2H3v1h1V2zm8-1v12c0 .55-.45 1-1 1H6v2l-1.5-1.5L3 16v-2H1c-.55 0-1-.45-1-1V1c0-.55.45-1 1-1h10c.55 0 1 .45 1 1zm-1 10H1v2h2v-1h3v1h5v-2zm0-10H2v9h9V1z"/></svg>
+  <span class="author" itemprop="author"><a href="/cms-jet" class="url fn" rel="author">cms-jet</a></span><!--
+--><span class="path-divider">/</span><!--
+--><strong itemprop="name"><a href="/cms-jet/JECDatabase" data-pjax="#js-repo-pjax-container">JECDatabase</a></strong>
+
+</h1>
+
+      </div>
+      <div class="container">
+        
+<nav class="reponav js-repo-nav js-sidenav-container-pjax"
+     itemscope
+     itemtype="http://schema.org/BreadcrumbList"
+     role="navigation"
+     data-pjax="#js-repo-pjax-container">
+
+  <span itemscope itemtype="http://schema.org/ListItem" itemprop="itemListElement">
+    <a href="/cms-jet/JECDatabase" class="js-selected-navigation-item selected reponav-item" data-hotkey="g c" data-selected-links="repo_source repo_downloads repo_commits repo_releases repo_tags repo_branches /cms-jet/JECDatabase" itemprop="url">
+      <svg aria-hidden="true" class="octicon octicon-code" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path fill-rule="evenodd" d="M9.5 3L8 4.5 11.5 8 8 11.5 9.5 13 14 8 9.5 3zm-5 0L0 8l4.5 5L6 11.5 2.5 8 6 4.5 4.5 3z"/></svg>
+      <span itemprop="name">Code</span>
+      <meta itemprop="position" content="1">
+</a>  </span>
+
+    <span itemscope itemtype="http://schema.org/ListItem" itemprop="itemListElement">
+      <a href="/cms-jet/JECDatabase/issues" class="js-selected-navigation-item reponav-item" data-hotkey="g i" data-selected-links="repo_issues repo_labels repo_milestones /cms-jet/JECDatabase/issues" itemprop="url">
+        <svg aria-hidden="true" class="octicon octicon-issue-opened" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"/></svg>
+        <span itemprop="name">Issues</span>
+        <span class="Counter">0</span>
+        <meta itemprop="position" content="2">
+</a>    </span>
+
+  <span itemscope itemtype="http://schema.org/ListItem" itemprop="itemListElement">
+    <a href="/cms-jet/JECDatabase/pulls" class="js-selected-navigation-item reponav-item" data-hotkey="g p" data-selected-links="repo_pulls /cms-jet/JECDatabase/pulls" itemprop="url">
+      <svg aria-hidden="true" class="octicon octicon-git-pull-request" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0 0 10 15a1.993 1.993 0 0 0 1-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 0 0-1 3.72v6.56A1.993 1.993 0 0 0 2 15a1.993 1.993 0 0 0 1-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"/></svg>
+      <span itemprop="name">Pull requests</span>
+      <span class="Counter">0</span>
+      <meta itemprop="position" content="3">
+</a>  </span>
+
+    <a href="/cms-jet/JECDatabase/projects" class="js-selected-navigation-item reponav-item" data-selected-links="repo_projects new_repo_project repo_project /cms-jet/JECDatabase/projects">
+      <svg aria-hidden="true" class="octicon octicon-project" height="16" version="1.1" viewBox="0 0 15 16" width="15"><path fill-rule="evenodd" d="M10 12h3V2h-3v10zm-4-2h3V2H6v8zm-4 4h3V2H2v12zm-1 1h13V1H1v14zM14 0H1a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1z"/></svg>
+      Projects
+      <span class="Counter" >0</span>
+</a>
+
+
+    <div class="reponav-dropdown js-menu-container">
+      <button type="button" class="btn-link reponav-item reponav-dropdown js-menu-target " data-no-toggle aria-expanded="false" aria-haspopup="true">
+        Insights
+        <svg aria-hidden="true" class="octicon octicon-triangle-down v-align-middle text-gray" height="11" version="1.1" viewBox="0 0 12 16" width="8"><path fill-rule="evenodd" d="M0 5l6 6 6-6z"/></svg>
+      </button>
+      <div class="dropdown-menu-content js-menu-content">
+        <div class="dropdown-menu dropdown-menu-sw">
+          <a class="dropdown-item" href="/cms-jet/JECDatabase/pulse" data-skip-pjax>
+            <svg aria-hidden="true" class="octicon octicon-pulse" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path fill-rule="evenodd" d="M11.5 8L8.8 5.4 6.6 8.5 5.5 1.6 2.38 8H0v2h3.6l.9-1.8.9 5.4L9 8.5l1.6 1.5H14V8z"/></svg>
+            Pulse
+          </a>
+          <a class="dropdown-item" href="/cms-jet/JECDatabase/graphs" data-skip-pjax>
+            <svg aria-hidden="true" class="octicon octicon-graph" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M16 14v1H0V0h1v14h15zM5 13H3V8h2v5zm4 0H7V3h2v10zm4 0h-2V6h2v7z"/></svg>
+            Graphs
+          </a>
+        </div>
+      </div>
+    </div>
+</nav>
+
+      </div>
+    </div>
+
+<div class="container new-discussion-timeline experiment-repo-nav">
+  <div class="repository-content">
+
+    
+    
+  <a href="/cms-jet/JECDatabase/blob/5f828dc94e406bbc6fdf407c4e544465ba7cc88f/textFiles/Summer16_23Sep2016V6_MC/Summer16_23Sep2016V6_MC_Uncertainty_AK4PFchs.txt" class="d-none js-permalink-shortcut" data-hotkey="y">Permalink</a>
+
+  <!-- blob contrib key: blob_contributors:v21:07058beddbdc45d8b37b63553d2f2798 -->
+
+  <div class="file-navigation js-zeroclipboard-container">
+    
+<div class="select-menu branch-select-menu js-menu-container js-select-menu float-left">
+  <button class=" btn btn-sm select-menu-button js-menu-target css-truncate" data-hotkey="w"
+    
+    type="button" aria-label="Switch branches or tags" aria-expanded="false" aria-haspopup="true">
+      <i>Branch:</i>
+      <span class="js-select-button css-truncate-target">master</span>
+  </button>
+
+  <div class="select-menu-modal-holder js-menu-content js-navigation-container" data-pjax>
+
+    <div class="select-menu-modal">
+      <div class="select-menu-header">
+        <svg aria-label="Close" class="octicon octicon-x js-menu-close" height="16" role="img" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48z"/></svg>
+        <span class="select-menu-title">Switch branches/tags</span>
+      </div>
+
+      <div class="select-menu-filters">
+        <div class="select-menu-text-filter">
+          <input type="text" aria-label="Filter branches/tags" id="context-commitish-filter-field" class="form-control js-filterable-field js-navigation-enable" placeholder="Filter branches/tags">
+        </div>
+        <div class="select-menu-tabs">
+          <ul>
+            <li class="select-menu-tab">
+              <a href="#" data-tab-filter="branches" data-filter-placeholder="Filter branches/tags" class="js-select-menu-tab" role="tab">Branches</a>
+            </li>
+            <li class="select-menu-tab">
+              <a href="#" data-tab-filter="tags" data-filter-placeholder="Find a tag…" class="js-select-menu-tab" role="tab">Tags</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="select-menu-list select-menu-tab-bucket js-select-menu-tab-bucket" data-tab-filter="branches" role="menu">
+
+        <div data-filterable-for="context-commitish-filter-field" data-filterable-type="substring">
+
+
+            <a class="select-menu-item js-navigation-item js-navigation-open selected"
+               href="/cms-jet/JECDatabase/blob/master/textFiles/Summer16_23Sep2016V6_MC/Summer16_23Sep2016V6_MC_Uncertainty_AK4PFchs.txt"
+               data-name="master"
+               data-skip-pjax="true"
+               rel="nofollow">
+              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
+              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
+                master
+              </span>
+            </a>
+        </div>
+
+          <div class="select-menu-no-results">Nothing to show</div>
+      </div>
+
+      <div class="select-menu-list select-menu-tab-bucket js-select-menu-tab-bucket" data-tab-filter="tags">
+        <div data-filterable-for="context-commitish-filter-field" data-filterable-type="substring">
+
+
+        </div>
+
+        <div class="select-menu-no-results">Nothing to show</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+    <div class="BtnGroup float-right">
+      <a href="/cms-jet/JECDatabase/find/master"
+            class="js-pjax-capture-input btn btn-sm BtnGroup-item"
+            data-pjax
+            data-hotkey="t">
+        Find file
+      </a>
+      <button aria-label="Copy file path to clipboard" class="js-zeroclipboard btn btn-sm BtnGroup-item tooltipped tooltipped-s" data-copied-hint="Copied!" type="button">Copy path</button>
+    </div>
+    <div class="breadcrumb js-zeroclipboard-target">
+      <span class="repo-root js-repo-root"><span class="js-path-segment"><a href="/cms-jet/JECDatabase"><span>JECDatabase</span></a></span></span><span class="separator">/</span><span class="js-path-segment"><a href="/cms-jet/JECDatabase/tree/master/textFiles"><span>textFiles</span></a></span><span class="separator">/</span><span class="js-path-segment"><a href="/cms-jet/JECDatabase/tree/master/textFiles/Summer16_23Sep2016V6_MC"><span>Summer16_23Sep2016V6_MC</span></a></span><span class="separator">/</span><strong class="final-path">Summer16_23Sep2016V6_MC_Uncertainty_AK4PFchs.txt</strong>
+    </div>
+  </div>
+
+
+  <include-fragment class="commit-tease" src="/cms-jet/JECDatabase/contributors/master/textFiles/Summer16_23Sep2016V6_MC/Summer16_23Sep2016V6_MC_Uncertainty_AK4PFchs.txt">
+    <div>
+      Fetching contributors&hellip;
+    </div>
+
+    <div class="commit-tease-contributors">
+      <img alt="" class="loader-loading float-left" height="16" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-32-EAF2F5.gif" width="16" />
+      <span class="loader-error">Cannot retrieve contributors at this time</span>
+    </div>
+</include-fragment>
+  <div class="file">
+    <div class="file-header">
+  <div class="file-actions">
+
+    <div class="BtnGroup">
+      <a href="/cms-jet/JECDatabase/raw/master/textFiles/Summer16_23Sep2016V6_MC/Summer16_23Sep2016V6_MC_Uncertainty_AK4PFchs.txt" class="btn btn-sm BtnGroup-item" id="raw-url">Raw</a>
+        <a href="/cms-jet/JECDatabase/blame/master/textFiles/Summer16_23Sep2016V6_MC/Summer16_23Sep2016V6_MC_Uncertainty_AK4PFchs.txt" class="btn btn-sm js-update-url-with-hash BtnGroup-item" data-hotkey="b">Blame</a>
+      <a href="/cms-jet/JECDatabase/commits/master/textFiles/Summer16_23Sep2016V6_MC/Summer16_23Sep2016V6_MC_Uncertainty_AK4PFchs.txt" class="btn btn-sm BtnGroup-item" rel="nofollow">History</a>
+    </div>
+
+
+        <button type="button" class="btn-octicon disabled tooltipped tooltipped-nw"
+          aria-label="You must be signed in to make or propose changes">
+          <svg aria-hidden="true" class="octicon octicon-pencil" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path fill-rule="evenodd" d="M0 12v3h3l8-8-3-3-8 8zm3 2H1v-2h1v1h1v1zm10.3-9.3L12 6 9 3l1.3-1.3a.996.996 0 0 1 1.41 0l1.59 1.59c.39.39.39 1.02 0 1.41z"/></svg>
+        </button>
+        <button type="button" class="btn-octicon btn-octicon-danger disabled tooltipped tooltipped-nw"
+          aria-label="You must be signed in to make or propose changes">
+          <svg aria-hidden="true" class="octicon octicon-trashcan" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M11 2H9c0-.55-.45-1-1-1H5c-.55 0-1 .45-1 1H2c-.55 0-1 .45-1 1v1c0 .55.45 1 1 1v9c0 .55.45 1 1 1h7c.55 0 1-.45 1-1V5c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1zm-1 12H3V5h1v8h1V5h1v8h1V5h1v8h1V5h1v9zm1-10H2V3h9v1z"/></svg>
+        </button>
+  </div>
+
+  <div class="file-info">
+      42 lines (41 sloc)
+      <span class="file-info-divider"></span>
+    39.7 KB
+  </div>
+</div>
+
+    
+
+  <div itemprop="text" class="blob-wrapper data type-text">
+      <table class="highlight tab-size js-file-line-container" data-tab-size="8">
+      <tr>
+        <td id="L1" class="blob-num js-line-number" data-line-number="1"></td>
+        <td id="LC1" class="blob-code blob-code-inner js-file-line">{1 JetEta 1 JetPt &quot;&quot; Correction Uncertainty}</td>
+      </tr>
+      <tr>
+        <td id="L2" class="blob-num js-line-number" data-line-number="2"></td>
+        <td id="LC2" class="blob-code blob-code-inner js-file-line">-5.4 -5.0 150 9.0 0.1220 0.1220 11.0 0.1186 0.1186 13.5 0.1160 0.1160 16.5 0.1144 0.1144 19.5 0.1134 0.1134 22.5 0.1129 0.1129 26.0 0.1125 0.1125 30.0 0.1123 0.1123 34.5 0.1120 0.1120 40.0 0.1117 0.1117 46.0 0.1116 0.1116 52.5 0.1113 0.1113 60.0 0.1111 0.1111 69.0 0.1180 0.1180 79.0 0.1024 0.1024 90.5 0.0820 0.0820 105.5 0.0575 0.0575 123.5 0.0322 0.0322 143.0 0.0224 0.0224 163.5 0.0433 0.0433 185.0 0.0732 0.0732 208.0 0.1066 0.1066 232.5 0.1432 0.1432 258.5 0.1830 0.1830 286.0 0.1749 0.1749 331.0 0.1679 0.1679 396.0 0.1680 0.1680 468.5 0.1681 0.1681 549.5 0.1682 0.1682 639.0 0.1683 0.1683 738.0 0.1684 0.1684 847.5 0.1686 0.1686 968.5 0.1687 0.1687 1102.0 0.1688 0.1688 1249.5 0.1689 0.1689 1412.0 0.1691 0.1691 1590.5 0.1692 0.1692 1787.0 0.1693 0.1693 2003.0 0.1694 0.1694 2241.0 0.1696 0.1696 2503.0 0.1697 0.1697 2790.5 0.1698 0.1698 3107.0 0.1699 0.1699 3455.0 0.0972 0.0972 3837.0 0.0621 0.0621 4257.0 0.0410 0.0410 4719.0 0.0420 0.0420 5226.5 0.0434 0.0434 5784.0 0.0450 0.0450 6538.0 0.0445 0.0445 </td>
+      </tr>
+      <tr>
+        <td id="L3" class="blob-num js-line-number" data-line-number="3"></td>
+        <td id="LC3" class="blob-code blob-code-inner js-file-line">-5.0 -4.4 150 9.0 0.1221 0.1221 11.0 0.1187 0.1187 13.5 0.1162 0.1162 16.5 0.1144 0.1144 19.5 0.1135 0.1135 22.5 0.1129 0.1129 26.0 0.1125 0.1125 30.0 0.1124 0.1124 34.5 0.1120 0.1120 40.0 0.1117 0.1117 46.0 0.1115 0.1115 52.5 0.1114 0.1114 60.0 0.1111 0.1111 69.0 0.1181 0.1181 79.0 0.1025 0.1025 90.5 0.0821 0.0821 105.5 0.0576 0.0576 123.5 0.0324 0.0324 143.0 0.0226 0.0226 163.5 0.0434 0.0434 185.0 0.0732 0.0732 208.0 0.1067 0.1067 232.5 0.1432 0.1432 258.5 0.1831 0.1831 286.0 0.1752 0.1752 331.0 0.1684 0.1684 396.0 0.1685 0.1685 468.5 0.1686 0.1686 549.5 0.1688 0.1688 639.0 0.1689 0.1689 738.0 0.1690 0.1690 847.5 0.1691 0.1691 968.5 0.1693 0.1693 1102.0 0.1694 0.1694 1249.5 0.1695 0.1695 1412.0 0.1696 0.1696 1590.5 0.1698 0.1698 1787.0 0.1699 0.1699 2003.0 0.1700 0.1700 2241.0 0.1701 0.1701 2503.0 0.1703 0.1703 2790.5 0.1704 0.1704 3107.0 0.1705 0.1705 3455.0 0.0982 0.0982 3837.0 0.0636 0.0636 4257.0 0.0433 0.0433 4719.0 0.0394 0.0394 5226.5 0.0406 0.0406 5784.0 0.0423 0.0423 6538.0 0.0445 0.0445 </td>
+      </tr>
+      <tr>
+        <td id="L4" class="blob-num js-line-number" data-line-number="4"></td>
+        <td id="LC4" class="blob-code blob-code-inner js-file-line">-4.4 -4.0 150 9.0 0.1316 0.1316 11.0 0.1257 0.1257 13.5 0.1210 0.1210 16.5 0.1177 0.1177 19.5 0.1157 0.1157 22.5 0.1144 0.1144 26.0 0.1135 0.1135 30.0 0.1130 0.1130 34.5 0.1125 0.1125 40.0 0.1120 0.1120 46.0 0.1117 0.1117 52.5 0.1115 0.1115 60.0 0.1112 0.1112 69.0 0.1181 0.1181 79.0 0.1025 0.1025 90.5 0.0822 0.0822 105.5 0.0576 0.0576 123.5 0.0323 0.0323 143.0 0.0222 0.0222 163.5 0.0431 0.0431 185.0 0.0729 0.0729 208.0 0.1064 0.1064 232.5 0.1430 0.1430 258.5 0.1828 0.1828 286.0 0.1751 0.1751 331.0 0.1685 0.1685 396.0 0.1685 0.1685 468.5 0.1685 0.1685 549.5 0.1685 0.1685 639.0 0.1685 0.1685 738.0 0.1685 0.1685 847.5 0.1685 0.1685 968.5 0.1685 0.1685 1102.0 0.1685 0.1685 1249.5 0.1685 0.1685 1412.0 0.1685 0.1685 1590.5 0.1685 0.1685 1787.0 0.1685 0.1685 2003.0 0.1685 0.1685 2241.0 0.1685 0.1685 2503.0 0.1685 0.1685 2790.5 0.1685 0.1685 3107.0 0.1686 0.1686 3455.0 0.0947 0.0947 3837.0 0.0577 0.0577 4257.0 0.0220 0.0220 4719.0 0.0231 0.0231 5226.5 0.0248 0.0248 5784.0 0.0268 0.0268 6538.0 0.0293 0.0293 </td>
+      </tr>
+      <tr>
+        <td id="L5" class="blob-num js-line-number" data-line-number="5"></td>
+        <td id="LC5" class="blob-code blob-code-inner js-file-line">-4.0 -3.5 150 9.0 0.1146 0.1146 11.0 0.1049 0.1049 13.5 0.0969 0.0969 16.5 0.0908 0.0908 19.5 0.0870 0.0870 22.5 0.0845 0.0845 26.0 0.0826 0.0826 30.0 0.0815 0.0815 34.5 0.0805 0.0805 40.0 0.0797 0.0797 46.0 0.0792 0.0792 52.5 0.0788 0.0788 60.0 0.0793 0.0793 69.0 0.0744 0.0744 79.0 0.0640 0.0640 90.5 0.0532 0.0532 105.5 0.0408 0.0408 123.5 0.0279 0.0279 143.0 0.0169 0.0169 163.5 0.0120 0.0120 185.0 0.0177 0.0177 208.0 0.0276 0.0276 232.5 0.0385 0.0385 258.5 0.0497 0.0497 286.0 0.0609 0.0609 331.0 0.0779 0.0779 396.0 0.0843 0.0843 468.5 0.0843 0.0843 549.5 0.0844 0.0844 639.0 0.0844 0.0844 738.0 0.0844 0.0844 847.5 0.0844 0.0844 968.5 0.0845 0.0845 1102.0 0.0845 0.0845 1249.5 0.0846 0.0846 1412.0 0.0846 0.0846 1590.5 0.0847 0.0847 1787.0 0.0847 0.0847 2003.0 0.0848 0.0848 2241.0 0.0848 0.0848 2503.0 0.0849 0.0849 2790.5 0.0849 0.0849 3107.0 0.0849 0.0849 3455.0 0.0850 0.0850 3837.0 0.0361 0.0361 4257.0 0.0149 0.0149 4719.0 0.0167 0.0167 5226.5 0.0191 0.0191 5784.0 0.0218 0.0218 6538.0 0.0249 0.0249 </td>
+      </tr>
+      <tr>
+        <td id="L6" class="blob-num js-line-number" data-line-number="6"></td>
+        <td id="LC6" class="blob-code blob-code-inner js-file-line">-3.5 -3.0 150 9.0 0.1037 0.1037 11.0 0.0929 0.0929 13.5 0.0835 0.0835 16.5 0.0760 0.0760 19.5 0.0711 0.0711 22.5 0.0678 0.0678 26.0 0.0652 0.0652 30.0 0.0638 0.0638 34.5 0.0623 0.0623 40.0 0.0612 0.0612 46.0 0.0604 0.0604 52.5 0.0599 0.0599 60.0 0.0591 0.0591 69.0 0.0523 0.0523 79.0 0.0456 0.0456 90.5 0.0388 0.0388 105.5 0.0312 0.0312 123.5 0.0235 0.0235 143.0 0.0166 0.0166 163.5 0.0115 0.0115 185.0 0.0099 0.0099 208.0 0.0125 0.0125 232.5 0.0174 0.0174 258.5 0.0229 0.0229 286.0 0.0286 0.0286 331.0 0.0373 0.0373 396.0 0.0485 0.0485 468.5 0.0595 0.0595 549.5 0.0704 0.0704 639.0 0.0710 0.0710 738.0 0.0711 0.0711 847.5 0.0712 0.0712 968.5 0.0713 0.0713 1102.0 0.0713 0.0713 1249.5 0.0714 0.0714 1412.0 0.0715 0.0715 1590.5 0.0716 0.0716 1787.0 0.0717 0.0717 2003.0 0.0718 0.0718 2241.0 0.0719 0.0719 2503.0 0.0720 0.0720 2790.5 0.0721 0.0721 3107.0 0.0722 0.0722 3455.0 0.0429 0.0429 3837.0 0.0158 0.0158 4257.0 0.0168 0.0168 4719.0 0.0187 0.0187 5226.5 0.0212 0.0212 5784.0 0.0238 0.0238 6538.0 0.0270 0.0270 </td>
+      </tr>
+      <tr>
+        <td id="L7" class="blob-num js-line-number" data-line-number="7"></td>
+        <td id="LC7" class="blob-code blob-code-inner js-file-line">-3.0 -2.8 150 9.0 0.1394 0.1394 11.0 0.1181 0.1181 13.5 0.0990 0.0990 16.5 0.0847 0.0847 19.5 0.0736 0.0736 22.5 0.0664 0.0664 26.0 0.0608 0.0608 30.0 0.0574 0.0574 34.5 0.0542 0.0542 40.0 0.0526 0.0526 46.0 0.0506 0.0506 52.5 0.0499 0.0499 60.0 0.0493 0.0493 69.0 0.0453 0.0453 79.0 0.0402 0.0402 90.5 0.0354 0.0354 105.5 0.0304 0.0304 123.5 0.0261 0.0261 143.0 0.0231 0.0231 163.5 0.0219 0.0219 185.0 0.0220 0.0220 208.0 0.0235 0.0235 232.5 0.0259 0.0259 258.5 0.0287 0.0287 286.0 0.0320 0.0320 331.0 0.0373 0.0373 396.0 0.0444 0.0444 468.5 0.0507 0.0507 549.5 0.0576 0.0576 639.0 0.0634 0.0634 738.0 0.0707 0.0707 847.5 0.0801 0.0801 968.5 0.0802 0.0802 1102.0 0.0803 0.0803 1249.5 0.0804 0.0804 1412.0 0.0806 0.0806 1590.5 0.0807 0.0807 1787.0 0.0808 0.0808 2003.0 0.0810 0.0810 2241.0 0.0811 0.0811 2503.0 0.0813 0.0813 2790.5 0.0815 0.0815 3107.0 0.0817 0.0817 3455.0 0.0818 0.0818 3837.0 0.0609 0.0609 4257.0 0.0246 0.0246 4719.0 0.0243 0.0243 5226.5 0.0265 0.0265 5784.0 0.0289 0.0289 6538.0 0.0319 0.0319 </td>
+      </tr>
+      <tr>
+        <td id="L8" class="blob-num js-line-number" data-line-number="8"></td>
+        <td id="LC8" class="blob-code blob-code-inner js-file-line">-2.8 -2.6 150 9.0 0.1413 0.1413 11.0 0.1190 0.1190 13.5 0.0995 0.0995 16.5 0.0836 0.0836 19.5 0.0728 0.0728 22.5 0.0653 0.0653 26.0 0.0593 0.0593 30.0 0.0554 0.0554 34.5 0.0523 0.0523 40.0 0.0498 0.0498 46.0 0.0482 0.0482 52.5 0.0471 0.0471 60.0 0.0464 0.0464 69.0 0.0431 0.0431 79.0 0.0394 0.0394 90.5 0.0358 0.0358 105.5 0.0320 0.0320 123.5 0.0283 0.0283 143.0 0.0252 0.0252 163.5 0.0227 0.0227 185.0 0.0207 0.0207 208.0 0.0193 0.0193 232.5 0.0184 0.0184 258.5 0.0181 0.0181 286.0 0.0183 0.0183 331.0 0.0194 0.0194 396.0 0.0219 0.0219 468.5 0.0251 0.0251 549.5 0.0286 0.0286 639.0 0.0323 0.0323 738.0 0.0358 0.0358 847.5 0.0396 0.0396 968.5 0.0395 0.0395 1102.0 0.0396 0.0396 1249.5 0.0398 0.0398 1412.0 0.0400 0.0400 1590.5 0.0402 0.0402 1787.0 0.0404 0.0404 2003.0 0.0407 0.0407 2241.0 0.0409 0.0409 2503.0 0.0411 0.0411 2790.5 0.0414 0.0414 3107.0 0.0416 0.0416 3455.0 0.0418 0.0418 3837.0 0.0421 0.0421 4257.0 0.0183 0.0183 4719.0 0.0202 0.0202 5226.5 0.0226 0.0226 5784.0 0.0252 0.0252 6538.0 0.0284 0.0284 </td>
+      </tr>
+      <tr>
+        <td id="L9" class="blob-num js-line-number" data-line-number="9"></td>
+        <td id="LC9" class="blob-code blob-code-inner js-file-line">-2.6 -2.4 150 9.0 0.0954 0.0954 11.0 0.0831 0.0831 13.5 0.0712 0.0712 16.5 0.0603 0.0603 19.5 0.0521 0.0521 22.5 0.0459 0.0459 26.0 0.0404 0.0404 30.0 0.0368 0.0368 34.5 0.0333 0.0333 40.0 0.0302 0.0302 46.0 0.0280 0.0280 52.5 0.0264 0.0264 60.0 0.0248 0.0248 69.0 0.0224 0.0224 79.0 0.0204 0.0204 90.5 0.0185 0.0185 105.5 0.0166 0.0166 123.5 0.0148 0.0148 143.0 0.0132 0.0132 163.5 0.0119 0.0119 185.0 0.0108 0.0108 208.0 0.0099 0.0099 232.5 0.0091 0.0091 258.5 0.0086 0.0086 286.0 0.0083 0.0083 331.0 0.0083 0.0083 396.0 0.0090 0.0090 468.5 0.0102 0.0102 549.5 0.0118 0.0118 639.0 0.0136 0.0136 738.0 0.0155 0.0155 847.5 0.0174 0.0174 968.5 0.0193 0.0193 1102.0 0.0206 0.0206 1249.5 0.0211 0.0211 1412.0 0.0217 0.0217 1590.5 0.0223 0.0223 1787.0 0.0230 0.0230 2003.0 0.0237 0.0237 2241.0 0.0244 0.0244 2503.0 0.0252 0.0252 2790.5 0.0260 0.0260 3107.0 0.0268 0.0268 3455.0 0.0276 0.0276 3837.0 0.0286 0.0286 4257.0 0.0224 0.0224 4719.0 0.0246 0.0246 5226.5 0.0272 0.0272 5784.0 0.0300 0.0300 6538.0 0.0333 0.0333 </td>
+      </tr>
+      <tr>
+        <td id="L10" class="blob-num js-line-number" data-line-number="10"></td>
+        <td id="LC10" class="blob-code blob-code-inner js-file-line">-2.4 -2.2 150 9.0 0.0379 0.0379 11.0 0.0410 0.0410 13.5 0.0421 0.0421 16.5 0.0412 0.0412 19.5 0.0393 0.0393 22.5 0.0370 0.0370 26.0 0.0344 0.0344 30.0 0.0326 0.0326 34.5 0.0301 0.0301 40.0 0.0275 0.0275 46.0 0.0253 0.0253 52.5 0.0236 0.0236 60.0 0.0218 0.0218 69.0 0.0199 0.0199 79.0 0.0182 0.0182 90.5 0.0168 0.0168 105.5 0.0155 0.0155 123.5 0.0143 0.0143 143.0 0.0134 0.0134 163.5 0.0126 0.0126 185.0 0.0119 0.0119 208.0 0.0113 0.0113 232.5 0.0107 0.0107 258.5 0.0101 0.0101 286.0 0.0096 0.0096 331.0 0.0090 0.0090 396.0 0.0084 0.0084 468.5 0.0081 0.0081 549.5 0.0083 0.0083 639.0 0.0089 0.0089 738.0 0.0099 0.0099 847.5 0.0111 0.0111 968.5 0.0125 0.0125 1102.0 0.0140 0.0140 1249.5 0.0151 0.0151 1412.0 0.0163 0.0163 1590.5 0.0175 0.0175 1787.0 0.0188 0.0188 2003.0 0.0202 0.0202 2241.0 0.0216 0.0216 2503.0 0.0230 0.0230 2790.5 0.0244 0.0244 3107.0 0.0260 0.0260 3455.0 0.0276 0.0276 3837.0 0.0293 0.0293 4257.0 0.0269 0.0269 4719.0 0.0295 0.0295 5226.5 0.0324 0.0324 5784.0 0.0355 0.0355 6538.0 0.0392 0.0392 </td>
+      </tr>
+      <tr>
+        <td id="L11" class="blob-num js-line-number" data-line-number="11"></td>
+        <td id="LC11" class="blob-code blob-code-inner js-file-line">-2.2 -2.0 150 9.0 0.0305 0.0305 11.0 0.0335 0.0335 13.5 0.0368 0.0368 16.5 0.0383 0.0383 19.5 0.0379 0.0379 22.5 0.0366 0.0366 26.0 0.0346 0.0346 30.0 0.0332 0.0332 34.5 0.0307 0.0307 40.0 0.0280 0.0280 46.0 0.0256 0.0256 52.5 0.0235 0.0235 60.0 0.0215 0.0215 69.0 0.0193 0.0193 79.0 0.0176 0.0176 90.5 0.0161 0.0161 105.5 0.0148 0.0148 123.5 0.0139 0.0139 143.0 0.0131 0.0131 163.5 0.0126 0.0126 185.0 0.0121 0.0121 208.0 0.0117 0.0117 232.5 0.0113 0.0113 258.5 0.0110 0.0110 286.0 0.0106 0.0106 331.0 0.0101 0.0101 396.0 0.0095 0.0095 468.5 0.0092 0.0092 549.5 0.0093 0.0093 639.0 0.0096 0.0096 738.0 0.0104 0.0104 847.5 0.0114 0.0114 968.5 0.0127 0.0127 1102.0 0.0141 0.0141 1249.5 0.0157 0.0157 1412.0 0.0172 0.0172 1590.5 0.0186 0.0186 1787.0 0.0200 0.0200 2003.0 0.0215 0.0215 2241.0 0.0231 0.0231 2503.0 0.0247 0.0247 2790.5 0.0263 0.0263 3107.0 0.0280 0.0280 3455.0 0.0299 0.0299 3837.0 0.0319 0.0319 4257.0 0.0286 0.0286 4719.0 0.0315 0.0315 5226.5 0.0346 0.0346 5784.0 0.0379 0.0379 6538.0 0.0418 0.0418 </td>
+      </tr>
+      <tr>
+        <td id="L12" class="blob-num js-line-number" data-line-number="12"></td>
+        <td id="LC12" class="blob-code blob-code-inner js-file-line">-2.0 -1.8 150 9.0 0.0331 0.0331 11.0 0.0337 0.0337 13.5 0.0356 0.0356 16.5 0.0367 0.0367 19.5 0.0366 0.0366 22.5 0.0357 0.0357 26.0 0.0343 0.0343 30.0 0.0334 0.0334 34.5 0.0316 0.0316 40.0 0.0296 0.0296 46.0 0.0277 0.0277 52.5 0.0262 0.0262 60.0 0.0246 0.0246 69.0 0.0225 0.0225 79.0 0.0208 0.0208 90.5 0.0193 0.0193 105.5 0.0178 0.0178 123.5 0.0166 0.0166 143.0 0.0156 0.0156 163.5 0.0148 0.0148 185.0 0.0141 0.0141 208.0 0.0134 0.0134 232.5 0.0129 0.0129 258.5 0.0124 0.0124 286.0 0.0119 0.0119 331.0 0.0112 0.0112 396.0 0.0106 0.0106 468.5 0.0102 0.0102 549.5 0.0101 0.0101 639.0 0.0103 0.0103 738.0 0.0108 0.0108 847.5 0.0117 0.0117 968.5 0.0127 0.0127 1102.0 0.0140 0.0140 1249.5 0.0153 0.0153 1412.0 0.0167 0.0167 1590.5 0.0182 0.0182 1787.0 0.0194 0.0194 2003.0 0.0205 0.0205 2241.0 0.0216 0.0216 2503.0 0.0228 0.0228 2790.5 0.0241 0.0241 3107.0 0.0254 0.0254 3455.0 0.0269 0.0269 3837.0 0.0285 0.0285 4257.0 0.0241 0.0241 4719.0 0.0267 0.0267 5226.5 0.0298 0.0298 5784.0 0.0329 0.0329 6538.0 0.0367 0.0367 </td>
+      </tr>
+      <tr>
+        <td id="L13" class="blob-num js-line-number" data-line-number="13"></td>
+        <td id="LC13" class="blob-code blob-code-inner js-file-line">-1.8 -1.6 150 9.0 0.0345 0.0345 11.0 0.0333 0.0333 13.5 0.0333 0.0333 16.5 0.0336 0.0336 19.5 0.0332 0.0332 22.5 0.0325 0.0325 26.0 0.0314 0.0314 30.0 0.0308 0.0308 34.5 0.0293 0.0293 40.0 0.0278 0.0278 46.0 0.0264 0.0264 52.5 0.0252 0.0252 60.0 0.0239 0.0239 69.0 0.0222 0.0222 79.0 0.0206 0.0206 90.5 0.0192 0.0192 105.5 0.0178 0.0178 123.5 0.0166 0.0166 143.0 0.0155 0.0155 163.5 0.0147 0.0147 185.0 0.0139 0.0139 208.0 0.0133 0.0133 232.5 0.0127 0.0127 258.5 0.0122 0.0122 286.0 0.0117 0.0117 331.0 0.0111 0.0111 396.0 0.0105 0.0105 468.5 0.0102 0.0102 549.5 0.0101 0.0101 639.0 0.0103 0.0103 738.0 0.0107 0.0107 847.5 0.0114 0.0114 968.5 0.0122 0.0122 1102.0 0.0132 0.0132 1249.5 0.0143 0.0143 1412.0 0.0155 0.0155 1590.5 0.0167 0.0167 1787.0 0.0175 0.0175 2003.0 0.0183 0.0183 2241.0 0.0190 0.0190 2503.0 0.0198 0.0198 2790.5 0.0207 0.0207 3107.0 0.0216 0.0216 3455.0 0.0227 0.0227 3837.0 0.0238 0.0238 4257.0 0.0191 0.0191 4719.0 0.0216 0.0216 5226.5 0.0245 0.0245 5784.0 0.0276 0.0276 6538.0 0.0312 0.0312 </td>
+      </tr>
+      <tr>
+        <td id="L14" class="blob-num js-line-number" data-line-number="14"></td>
+        <td id="LC14" class="blob-code blob-code-inner js-file-line">-1.6 -1.4 150 9.0 0.0345 0.0345 11.0 0.0321 0.0321 13.5 0.0308 0.0308 16.5 0.0299 0.0299 19.5 0.0290 0.0290 22.5 0.0281 0.0281 26.0 0.0271 0.0271 30.0 0.0267 0.0267 34.5 0.0253 0.0253 40.0 0.0240 0.0240 46.0 0.0228 0.0228 52.5 0.0219 0.0219 60.0 0.0208 0.0208 69.0 0.0194 0.0194 79.0 0.0181 0.0181 90.5 0.0170 0.0170 105.5 0.0159 0.0159 123.5 0.0149 0.0149 143.0 0.0141 0.0141 163.5 0.0134 0.0134 185.0 0.0128 0.0128 208.0 0.0122 0.0122 232.5 0.0118 0.0118 258.5 0.0114 0.0114 286.0 0.0110 0.0110 331.0 0.0105 0.0105 396.0 0.0100 0.0100 468.5 0.0097 0.0097 549.5 0.0095 0.0095 639.0 0.0096 0.0096 738.0 0.0099 0.0099 847.5 0.0103 0.0103 968.5 0.0109 0.0109 1102.0 0.0116 0.0116 1249.5 0.0123 0.0123 1412.0 0.0131 0.0131 1590.5 0.0140 0.0140 1787.0 0.0149 0.0149 2003.0 0.0157 0.0157 2241.0 0.0162 0.0162 2503.0 0.0168 0.0168 2790.5 0.0174 0.0174 3107.0 0.0181 0.0181 3455.0 0.0189 0.0189 3837.0 0.0192 0.0192 4257.0 0.0152 0.0152 4719.0 0.0177 0.0177 5226.5 0.0206 0.0206 5784.0 0.0237 0.0237 6538.0 0.0273 0.0273 </td>
+      </tr>
+      <tr>
+        <td id="L15" class="blob-num js-line-number" data-line-number="15"></td>
+        <td id="LC15" class="blob-code blob-code-inner js-file-line">-1.4 -1.2 150 9.0 0.0352 0.0352 11.0 0.0334 0.0334 13.5 0.0313 0.0313 16.5 0.0291 0.0291 19.5 0.0272 0.0272 22.5 0.0256 0.0256 26.0 0.0241 0.0241 30.0 0.0234 0.0234 34.5 0.0217 0.0217 40.0 0.0201 0.0201 46.0 0.0188 0.0188 52.5 0.0178 0.0178 60.0 0.0166 0.0166 69.0 0.0153 0.0153 79.0 0.0142 0.0142 90.5 0.0132 0.0132 105.5 0.0121 0.0121 123.5 0.0110 0.0110 143.0 0.0101 0.0101 163.5 0.0094 0.0094 185.0 0.0087 0.0087 208.0 0.0081 0.0081 232.5 0.0075 0.0075 258.5 0.0070 0.0070 286.0 0.0065 0.0065 331.0 0.0058 0.0058 396.0 0.0051 0.0051 468.5 0.0047 0.0047 549.5 0.0045 0.0045 639.0 0.0046 0.0046 738.0 0.0050 0.0050 847.5 0.0055 0.0055 968.5 0.0062 0.0062 1102.0 0.0070 0.0070 1249.5 0.0077 0.0077 1412.0 0.0085 0.0085 1590.5 0.0093 0.0093 1787.0 0.0101 0.0101 2003.0 0.0109 0.0109 2241.0 0.0117 0.0117 2503.0 0.0125 0.0125 2790.5 0.0131 0.0131 3107.0 0.0135 0.0135 3455.0 0.0139 0.0139 3837.0 0.0145 0.0145 4257.0 0.0117 0.0117 4719.0 0.0141 0.0141 5226.5 0.0171 0.0171 5784.0 0.0202 0.0202 6538.0 0.0239 0.0239 </td>
+      </tr>
+      <tr>
+        <td id="L16" class="blob-num js-line-number" data-line-number="16"></td>
+        <td id="LC16" class="blob-code blob-code-inner js-file-line">-1.2 -1.0 150 9.0 0.0354 0.0354 11.0 0.0333 0.0333 13.5 0.0309 0.0309 16.5 0.0285 0.0285 19.5 0.0265 0.0265 22.5 0.0250 0.0250 26.0 0.0236 0.0236 30.0 0.0229 0.0229 34.5 0.0213 0.0213 40.0 0.0197 0.0197 46.0 0.0185 0.0185 52.5 0.0176 0.0176 60.0 0.0165 0.0165 69.0 0.0153 0.0153 79.0 0.0142 0.0142 90.5 0.0132 0.0132 105.5 0.0121 0.0121 123.5 0.0111 0.0111 143.0 0.0102 0.0102 163.5 0.0094 0.0094 185.0 0.0087 0.0087 208.0 0.0080 0.0080 232.5 0.0074 0.0074 258.5 0.0069 0.0069 286.0 0.0064 0.0064 331.0 0.0058 0.0058 396.0 0.0051 0.0051 468.5 0.0046 0.0046 549.5 0.0045 0.0045 639.0 0.0046 0.0046 738.0 0.0049 0.0049 847.5 0.0055 0.0055 968.5 0.0061 0.0061 1102.0 0.0068 0.0068 1249.5 0.0075 0.0075 1412.0 0.0082 0.0082 1590.5 0.0089 0.0089 1787.0 0.0097 0.0097 2003.0 0.0104 0.0104 2241.0 0.0111 0.0111 2503.0 0.0118 0.0118 2790.5 0.0123 0.0123 3107.0 0.0126 0.0126 3455.0 0.0130 0.0130 3837.0 0.0133 0.0133 4257.0 0.0105 0.0105 4719.0 0.0129 0.0129 5226.5 0.0160 0.0160 5784.0 0.0192 0.0192 6538.0 0.0228 0.0228 </td>
+      </tr>
+      <tr>
+        <td id="L17" class="blob-num js-line-number" data-line-number="17"></td>
+        <td id="LC17" class="blob-code blob-code-inner js-file-line">-1.0 -0.8 150 9.0 0.0339 0.0339 11.0 0.0314 0.0314 13.5 0.0285 0.0285 16.5 0.0258 0.0258 19.5 0.0237 0.0237 22.5 0.0220 0.0220 26.0 0.0206 0.0206 30.0 0.0199 0.0199 34.5 0.0180 0.0180 40.0 0.0163 0.0163 46.0 0.0149 0.0149 52.5 0.0138 0.0138 60.0 0.0129 0.0129 69.0 0.0119 0.0119 79.0 0.0111 0.0111 90.5 0.0104 0.0104 105.5 0.0096 0.0096 123.5 0.0089 0.0089 143.0 0.0084 0.0084 163.5 0.0079 0.0079 185.0 0.0074 0.0074 208.0 0.0070 0.0070 232.5 0.0067 0.0067 258.5 0.0063 0.0063 286.0 0.0060 0.0060 331.0 0.0056 0.0056 396.0 0.0052 0.0052 468.5 0.0049 0.0049 549.5 0.0048 0.0048 639.0 0.0048 0.0048 738.0 0.0049 0.0049 847.5 0.0051 0.0051 968.5 0.0054 0.0054 1102.0 0.0058 0.0058 1249.5 0.0061 0.0061 1412.0 0.0065 0.0065 1590.5 0.0069 0.0069 1787.0 0.0073 0.0073 2003.0 0.0077 0.0077 2241.0 0.0080 0.0080 2503.0 0.0084 0.0084 2790.5 0.0088 0.0088 3107.0 0.0091 0.0091 3455.0 0.0094 0.0094 3837.0 0.0097 0.0097 4257.0 0.0094 0.0094 4719.0 0.0120 0.0120 5226.5 0.0152 0.0152 5784.0 0.0184 0.0184 6538.0 0.0220 0.0220 </td>
+      </tr>
+      <tr>
+        <td id="L18" class="blob-num js-line-number" data-line-number="18"></td>
+        <td id="LC18" class="blob-code blob-code-inner js-file-line">-0.8 -0.6 150 9.0 0.0327 0.0327 11.0 0.0299 0.0299 13.5 0.0271 0.0271 16.5 0.0244 0.0244 19.5 0.0223 0.0223 22.5 0.0207 0.0207 26.0 0.0194 0.0194 30.0 0.0187 0.0187 34.5 0.0168 0.0168 40.0 0.0150 0.0150 46.0 0.0135 0.0135 52.5 0.0124 0.0124 60.0 0.0115 0.0115 69.0 0.0106 0.0106 79.0 0.0098 0.0098 90.5 0.0092 0.0092 105.5 0.0085 0.0085 123.5 0.0079 0.0079 143.0 0.0073 0.0073 163.5 0.0069 0.0069 185.0 0.0065 0.0065 208.0 0.0062 0.0062 232.5 0.0059 0.0059 258.5 0.0056 0.0056 286.0 0.0054 0.0054 331.0 0.0051 0.0051 396.0 0.0048 0.0048 468.5 0.0046 0.0046 549.5 0.0045 0.0045 639.0 0.0045 0.0045 738.0 0.0047 0.0047 847.5 0.0049 0.0049 968.5 0.0052 0.0052 1102.0 0.0055 0.0055 1249.5 0.0058 0.0058 1412.0 0.0061 0.0061 1590.5 0.0064 0.0064 1787.0 0.0067 0.0067 2003.0 0.0071 0.0071 2241.0 0.0073 0.0073 2503.0 0.0076 0.0076 2790.5 0.0078 0.0078 3107.0 0.0081 0.0081 3455.0 0.0083 0.0083 3837.0 0.0086 0.0086 4257.0 0.0088 0.0088 4719.0 0.0114 0.0114 5226.5 0.0147 0.0147 5784.0 0.0179 0.0179 6538.0 0.0216 0.0216 </td>
+      </tr>
+      <tr>
+        <td id="L19" class="blob-num js-line-number" data-line-number="19"></td>
+        <td id="LC19" class="blob-code blob-code-inner js-file-line">-0.6 -0.4 150 9.0 0.0360 0.0360 11.0 0.0329 0.0329 13.5 0.0297 0.0297 16.5 0.0268 0.0268 19.5 0.0246 0.0246 22.5 0.0230 0.0230 26.0 0.0216 0.0216 30.0 0.0209 0.0209 34.5 0.0192 0.0192 40.0 0.0176 0.0176 46.0 0.0164 0.0164 52.5 0.0154 0.0154 60.0 0.0144 0.0144 69.0 0.0133 0.0133 79.0 0.0123 0.0123 90.5 0.0114 0.0114 105.5 0.0104 0.0104 123.5 0.0094 0.0094 143.0 0.0086 0.0086 163.5 0.0079 0.0079 185.0 0.0072 0.0072 208.0 0.0067 0.0067 232.5 0.0062 0.0062 258.5 0.0058 0.0058 286.0 0.0054 0.0054 331.0 0.0051 0.0051 396.0 0.0048 0.0048 468.5 0.0048 0.0048 549.5 0.0050 0.0050 639.0 0.0054 0.0054 738.0 0.0059 0.0059 847.5 0.0066 0.0066 968.5 0.0072 0.0072 1102.0 0.0079 0.0079 1249.5 0.0085 0.0085 1412.0 0.0092 0.0092 1590.5 0.0098 0.0098 1787.0 0.0104 0.0104 2003.0 0.0111 0.0111 2241.0 0.0116 0.0116 2503.0 0.0122 0.0122 2790.5 0.0128 0.0128 3107.0 0.0132 0.0132 3455.0 0.0133 0.0133 3837.0 0.0134 0.0134 4257.0 0.0086 0.0086 4719.0 0.0112 0.0112 5226.5 0.0145 0.0145 5784.0 0.0177 0.0177 6538.0 0.0214 0.0214 </td>
+      </tr>
+      <tr>
+        <td id="L20" class="blob-num js-line-number" data-line-number="20"></td>
+        <td id="LC20" class="blob-code blob-code-inner js-file-line">-0.4 -0.2 150 9.0 0.0365 0.0365 11.0 0.0333 0.0333 13.5 0.0299 0.0299 16.5 0.0269 0.0269 19.5 0.0246 0.0246 22.5 0.0230 0.0230 26.0 0.0216 0.0216 30.0 0.0209 0.0209 34.5 0.0192 0.0192 40.0 0.0176 0.0176 46.0 0.0164 0.0164 52.5 0.0154 0.0154 60.0 0.0144 0.0144 69.0 0.0133 0.0133 79.0 0.0123 0.0123 90.5 0.0114 0.0114 105.5 0.0104 0.0104 123.5 0.0094 0.0094 143.0 0.0086 0.0086 163.5 0.0079 0.0079 185.0 0.0072 0.0072 208.0 0.0067 0.0067 232.5 0.0062 0.0062 258.5 0.0058 0.0058 286.0 0.0054 0.0054 331.0 0.0051 0.0051 396.0 0.0048 0.0048 468.5 0.0048 0.0048 549.5 0.0050 0.0050 639.0 0.0054 0.0054 738.0 0.0059 0.0059 847.5 0.0066 0.0066 968.5 0.0072 0.0072 1102.0 0.0079 0.0079 1249.5 0.0085 0.0085 1412.0 0.0091 0.0091 1590.5 0.0098 0.0098 1787.0 0.0104 0.0104 2003.0 0.0110 0.0110 2241.0 0.0116 0.0116 2503.0 0.0122 0.0122 2790.5 0.0127 0.0127 3107.0 0.0131 0.0131 3455.0 0.0132 0.0132 3837.0 0.0133 0.0133 4257.0 0.0084 0.0084 4719.0 0.0111 0.0111 5226.5 0.0144 0.0144 5784.0 0.0176 0.0176 6538.0 0.0213 0.0213 </td>
+      </tr>
+      <tr>
+        <td id="L21" class="blob-num js-line-number" data-line-number="21"></td>
+        <td id="LC21" class="blob-code blob-code-inner js-file-line">-0.2 0.0 150 9.0 0.0354 0.0354 11.0 0.0323 0.0323 13.5 0.0290 0.0290 16.5 0.0260 0.0260 19.5 0.0238 0.0238 22.5 0.0221 0.0221 26.0 0.0207 0.0207 30.0 0.0201 0.0201 34.5 0.0183 0.0183 40.0 0.0167 0.0167 46.0 0.0154 0.0154 52.5 0.0144 0.0144 60.0 0.0134 0.0134 69.0 0.0124 0.0124 79.0 0.0114 0.0114 90.5 0.0106 0.0106 105.5 0.0097 0.0097 123.5 0.0089 0.0089 143.0 0.0081 0.0081 163.5 0.0075 0.0075 185.0 0.0070 0.0070 208.0 0.0065 0.0065 232.5 0.0061 0.0061 258.5 0.0058 0.0058 286.0 0.0055 0.0055 331.0 0.0052 0.0052 396.0 0.0049 0.0049 468.5 0.0049 0.0049 549.5 0.0050 0.0050 639.0 0.0053 0.0053 738.0 0.0058 0.0058 847.5 0.0062 0.0062 968.5 0.0068 0.0068 1102.0 0.0074 0.0074 1249.5 0.0079 0.0079 1412.0 0.0084 0.0084 1590.5 0.0089 0.0089 1787.0 0.0094 0.0094 2003.0 0.0099 0.0099 2241.0 0.0104 0.0104 2503.0 0.0109 0.0109 2790.5 0.0113 0.0113 3107.0 0.0116 0.0116 3455.0 0.0117 0.0117 3837.0 0.0118 0.0118 4257.0 0.0083 0.0083 4719.0 0.0110 0.0110 5226.5 0.0143 0.0143 5784.0 0.0175 0.0175 6538.0 0.0212 0.0212 </td>
+      </tr>
+      <tr>
+        <td id="L22" class="blob-num js-line-number" data-line-number="22"></td>
+        <td id="LC22" class="blob-code blob-code-inner js-file-line">0.0 0.2 150 9.0 0.0358 0.0358 11.0 0.0326 0.0326 13.5 0.0293 0.0293 16.5 0.0262 0.0262 19.5 0.0239 0.0239 22.5 0.0222 0.0222 26.0 0.0208 0.0208 30.0 0.0201 0.0201 34.5 0.0183 0.0183 40.0 0.0167 0.0167 46.0 0.0154 0.0154 52.5 0.0144 0.0144 60.0 0.0134 0.0134 69.0 0.0124 0.0124 79.0 0.0114 0.0114 90.5 0.0106 0.0106 105.5 0.0097 0.0097 123.5 0.0089 0.0089 143.0 0.0081 0.0081 163.5 0.0075 0.0075 185.0 0.0070 0.0070 208.0 0.0065 0.0065 232.5 0.0061 0.0061 258.5 0.0058 0.0058 286.0 0.0055 0.0055 331.0 0.0052 0.0052 396.0 0.0049 0.0049 468.5 0.0049 0.0049 549.5 0.0050 0.0050 639.0 0.0053 0.0053 738.0 0.0058 0.0058 847.5 0.0062 0.0062 968.5 0.0068 0.0068 1102.0 0.0074 0.0074 1249.5 0.0079 0.0079 1412.0 0.0084 0.0084 1590.5 0.0089 0.0089 1787.0 0.0094 0.0094 2003.0 0.0100 0.0100 2241.0 0.0104 0.0104 2503.0 0.0109 0.0109 2790.5 0.0114 0.0114 3107.0 0.0116 0.0116 3455.0 0.0117 0.0117 3837.0 0.0119 0.0119 4257.0 0.0084 0.0084 4719.0 0.0111 0.0111 5226.5 0.0143 0.0143 5784.0 0.0176 0.0176 6538.0 0.0213 0.0213 </td>
+      </tr>
+      <tr>
+        <td id="L23" class="blob-num js-line-number" data-line-number="23"></td>
+        <td id="LC23" class="blob-code blob-code-inner js-file-line">0.2 0.4 150 9.0 0.0372 0.0372 11.0 0.0338 0.0338 13.5 0.0303 0.0303 16.5 0.0271 0.0271 19.5 0.0248 0.0248 22.5 0.0231 0.0231 26.0 0.0216 0.0216 30.0 0.0210 0.0210 34.5 0.0192 0.0192 40.0 0.0176 0.0176 46.0 0.0164 0.0164 52.5 0.0154 0.0154 60.0 0.0144 0.0144 69.0 0.0133 0.0133 79.0 0.0123 0.0123 90.5 0.0114 0.0114 105.5 0.0104 0.0104 123.5 0.0094 0.0094 143.0 0.0086 0.0086 163.5 0.0079 0.0079 185.0 0.0072 0.0072 208.0 0.0067 0.0067 232.5 0.0062 0.0062 258.5 0.0058 0.0058 286.0 0.0054 0.0054 331.0 0.0051 0.0051 396.0 0.0048 0.0048 468.5 0.0048 0.0048 549.5 0.0050 0.0050 639.0 0.0054 0.0054 738.0 0.0059 0.0059 847.5 0.0066 0.0066 968.5 0.0072 0.0072 1102.0 0.0079 0.0079 1249.5 0.0085 0.0085 1412.0 0.0091 0.0091 1590.5 0.0098 0.0098 1787.0 0.0104 0.0104 2003.0 0.0110 0.0110 2241.0 0.0116 0.0116 2503.0 0.0122 0.0122 2790.5 0.0127 0.0127 3107.0 0.0131 0.0131 3455.0 0.0132 0.0132 3837.0 0.0133 0.0133 4257.0 0.0084 0.0084 4719.0 0.0111 0.0111 5226.5 0.0144 0.0144 5784.0 0.0176 0.0176 6538.0 0.0213 0.0213 </td>
+      </tr>
+      <tr>
+        <td id="L24" class="blob-num js-line-number" data-line-number="24"></td>
+        <td id="LC24" class="blob-code blob-code-inner js-file-line">0.4 0.6 150 9.0 0.0372 0.0372 11.0 0.0339 0.0339 13.5 0.0305 0.0305 16.5 0.0273 0.0273 19.5 0.0250 0.0250 22.5 0.0232 0.0232 26.0 0.0217 0.0217 30.0 0.0210 0.0210 34.5 0.0193 0.0193 40.0 0.0177 0.0177 46.0 0.0164 0.0164 52.5 0.0155 0.0155 60.0 0.0144 0.0144 69.0 0.0133 0.0133 79.0 0.0123 0.0123 90.5 0.0114 0.0114 105.5 0.0104 0.0104 123.5 0.0094 0.0094 143.0 0.0086 0.0086 163.5 0.0079 0.0079 185.0 0.0072 0.0072 208.0 0.0067 0.0067 232.5 0.0062 0.0062 258.5 0.0058 0.0058 286.0 0.0055 0.0055 331.0 0.0051 0.0051 396.0 0.0048 0.0048 468.5 0.0048 0.0048 549.5 0.0050 0.0050 639.0 0.0054 0.0054 738.0 0.0059 0.0059 847.5 0.0066 0.0066 968.5 0.0072 0.0072 1102.0 0.0079 0.0079 1249.5 0.0085 0.0085 1412.0 0.0092 0.0092 1590.5 0.0098 0.0098 1787.0 0.0104 0.0104 2003.0 0.0111 0.0111 2241.0 0.0117 0.0117 2503.0 0.0122 0.0122 2790.5 0.0128 0.0128 3107.0 0.0131 0.0131 3455.0 0.0133 0.0133 3837.0 0.0134 0.0134 4257.0 0.0086 0.0086 4719.0 0.0112 0.0112 5226.5 0.0145 0.0145 5784.0 0.0177 0.0177 6538.0 0.0214 0.0214 </td>
+      </tr>
+      <tr>
+        <td id="L25" class="blob-num js-line-number" data-line-number="25"></td>
+        <td id="LC25" class="blob-code blob-code-inner js-file-line">0.6 0.8 150 9.0 0.0326 0.0326 11.0 0.0299 0.0299 13.5 0.0270 0.0270 16.5 0.0243 0.0243 19.5 0.0223 0.0223 22.5 0.0207 0.0207 26.0 0.0194 0.0194 30.0 0.0187 0.0187 34.5 0.0168 0.0168 40.0 0.0150 0.0150 46.0 0.0135 0.0135 52.5 0.0124 0.0124 60.0 0.0115 0.0115 69.0 0.0106 0.0106 79.0 0.0098 0.0098 90.5 0.0092 0.0092 105.5 0.0085 0.0085 123.5 0.0079 0.0079 143.0 0.0073 0.0073 163.5 0.0069 0.0069 185.0 0.0065 0.0065 208.0 0.0062 0.0062 232.5 0.0059 0.0059 258.5 0.0056 0.0056 286.0 0.0054 0.0054 331.0 0.0051 0.0051 396.0 0.0048 0.0048 468.5 0.0046 0.0046 549.5 0.0045 0.0045 639.0 0.0045 0.0045 738.0 0.0047 0.0047 847.5 0.0049 0.0049 968.5 0.0052 0.0052 1102.0 0.0055 0.0055 1249.5 0.0058 0.0058 1412.0 0.0061 0.0061 1590.5 0.0064 0.0064 1787.0 0.0067 0.0067 2003.0 0.0071 0.0071 2241.0 0.0073 0.0073 2503.0 0.0076 0.0076 2790.5 0.0078 0.0078 3107.0 0.0081 0.0081 3455.0 0.0083 0.0083 3837.0 0.0086 0.0086 4257.0 0.0090 0.0090 4719.0 0.0114 0.0114 5226.5 0.0147 0.0147 5784.0 0.0179 0.0179 6538.0 0.0216 0.0216 </td>
+      </tr>
+      <tr>
+        <td id="L26" class="blob-num js-line-number" data-line-number="26"></td>
+        <td id="LC26" class="blob-code blob-code-inner js-file-line">0.8 1.0 150 9.0 0.0344 0.0344 11.0 0.0317 0.0317 13.5 0.0288 0.0288 16.5 0.0260 0.0260 19.5 0.0238 0.0238 22.5 0.0220 0.0220 26.0 0.0206 0.0206 30.0 0.0199 0.0199 34.5 0.0180 0.0180 40.0 0.0163 0.0163 46.0 0.0149 0.0149 52.5 0.0138 0.0138 60.0 0.0129 0.0129 69.0 0.0119 0.0119 79.0 0.0111 0.0111 90.5 0.0104 0.0104 105.5 0.0096 0.0096 123.5 0.0089 0.0089 143.0 0.0084 0.0084 163.5 0.0079 0.0079 185.0 0.0074 0.0074 208.0 0.0070 0.0070 232.5 0.0067 0.0067 258.5 0.0063 0.0063 286.0 0.0060 0.0060 331.0 0.0056 0.0056 396.0 0.0052 0.0052 468.5 0.0049 0.0049 549.5 0.0048 0.0048 639.0 0.0048 0.0048 738.0 0.0049 0.0049 847.5 0.0051 0.0051 968.5 0.0054 0.0054 1102.0 0.0058 0.0058 1249.5 0.0061 0.0061 1412.0 0.0064 0.0064 1590.5 0.0068 0.0068 1787.0 0.0072 0.0072 2003.0 0.0076 0.0076 2241.0 0.0079 0.0079 2503.0 0.0083 0.0083 2790.5 0.0087 0.0087 3107.0 0.0090 0.0090 3455.0 0.0092 0.0092 3837.0 0.0096 0.0096 4257.0 0.0093 0.0093 4719.0 0.0118 0.0118 5226.5 0.0150 0.0150 5784.0 0.0182 0.0182 6538.0 0.0219 0.0219 </td>
+      </tr>
+      <tr>
+        <td id="L27" class="blob-num js-line-number" data-line-number="27"></td>
+        <td id="LC27" class="blob-code blob-code-inner js-file-line">1.0 1.2 150 9.0 0.0365 0.0365 11.0 0.0341 0.0341 13.5 0.0314 0.0314 16.5 0.0288 0.0288 19.5 0.0267 0.0267 22.5 0.0251 0.0251 26.0 0.0236 0.0236 30.0 0.0230 0.0230 34.5 0.0213 0.0213 40.0 0.0197 0.0197 46.0 0.0185 0.0185 52.5 0.0176 0.0176 60.0 0.0165 0.0165 69.0 0.0153 0.0153 79.0 0.0142 0.0142 90.5 0.0132 0.0132 105.5 0.0121 0.0121 123.5 0.0111 0.0111 143.0 0.0102 0.0102 163.5 0.0094 0.0094 185.0 0.0087 0.0087 208.0 0.0080 0.0080 232.5 0.0074 0.0074 258.5 0.0069 0.0069 286.0 0.0064 0.0064 331.0 0.0057 0.0057 396.0 0.0051 0.0051 468.5 0.0046 0.0046 549.5 0.0045 0.0045 639.0 0.0046 0.0046 738.0 0.0049 0.0049 847.5 0.0055 0.0055 968.5 0.0061 0.0061 1102.0 0.0068 0.0068 1249.5 0.0075 0.0075 1412.0 0.0082 0.0082 1590.5 0.0089 0.0089 1787.0 0.0096 0.0096 2003.0 0.0103 0.0103 2241.0 0.0110 0.0110 2503.0 0.0117 0.0117 2790.5 0.0121 0.0121 3107.0 0.0124 0.0124 3455.0 0.0127 0.0127 3837.0 0.0130 0.0130 4257.0 0.0102 0.0102 4719.0 0.0126 0.0126 5226.5 0.0157 0.0157 5784.0 0.0189 0.0189 6538.0 0.0226 0.0226 </td>
+      </tr>
+      <tr>
+        <td id="L28" class="blob-num js-line-number" data-line-number="28"></td>
+        <td id="LC28" class="blob-code blob-code-inner js-file-line">1.2 1.4 150 9.0 0.0354 0.0354 11.0 0.0335 0.0335 13.5 0.0312 0.0312 16.5 0.0290 0.0290 19.5 0.0270 0.0270 22.5 0.0254 0.0254 26.0 0.0240 0.0240 30.0 0.0233 0.0233 34.5 0.0216 0.0216 40.0 0.0200 0.0200 46.0 0.0187 0.0187 52.5 0.0177 0.0177 60.0 0.0166 0.0166 69.0 0.0153 0.0153 79.0 0.0142 0.0142 90.5 0.0132 0.0132 105.5 0.0121 0.0121 123.5 0.0110 0.0110 143.0 0.0101 0.0101 163.5 0.0094 0.0094 185.0 0.0087 0.0087 208.0 0.0080 0.0080 232.5 0.0075 0.0075 258.5 0.0069 0.0069 286.0 0.0065 0.0065 331.0 0.0058 0.0058 396.0 0.0051 0.0051 468.5 0.0047 0.0047 549.5 0.0045 0.0045 639.0 0.0046 0.0046 738.0 0.0050 0.0050 847.5 0.0055 0.0055 968.5 0.0062 0.0062 1102.0 0.0069 0.0069 1249.5 0.0076 0.0076 1412.0 0.0084 0.0084 1590.5 0.0092 0.0092 1787.0 0.0100 0.0100 2003.0 0.0107 0.0107 2241.0 0.0115 0.0115 2503.0 0.0122 0.0122 2790.5 0.0128 0.0128 3107.0 0.0132 0.0132 3455.0 0.0136 0.0136 3837.0 0.0141 0.0141 4257.0 0.0113 0.0113 4719.0 0.0137 0.0137 5226.5 0.0168 0.0168 5784.0 0.0199 0.0199 6538.0 0.0235 0.0235 </td>
+      </tr>
+      <tr>
+        <td id="L29" class="blob-num js-line-number" data-line-number="29"></td>
+        <td id="LC29" class="blob-code blob-code-inner js-file-line">1.4 1.6 150 9.0 0.0348 0.0348 11.0 0.0323 0.0323 13.5 0.0309 0.0309 16.5 0.0299 0.0299 19.5 0.0289 0.0289 22.5 0.0280 0.0280 26.0 0.0270 0.0270 30.0 0.0266 0.0266 34.5 0.0252 0.0252 40.0 0.0239 0.0239 46.0 0.0227 0.0227 52.5 0.0218 0.0218 60.0 0.0207 0.0207 69.0 0.0193 0.0193 79.0 0.0181 0.0181 90.5 0.0170 0.0170 105.5 0.0159 0.0159 123.5 0.0149 0.0149 143.0 0.0141 0.0141 163.5 0.0134 0.0134 185.0 0.0128 0.0128 208.0 0.0122 0.0122 232.5 0.0118 0.0118 258.5 0.0113 0.0113 286.0 0.0110 0.0110 331.0 0.0105 0.0105 396.0 0.0100 0.0100 468.5 0.0097 0.0097 549.5 0.0095 0.0095 639.0 0.0096 0.0096 738.0 0.0099 0.0099 847.5 0.0103 0.0103 968.5 0.0109 0.0109 1102.0 0.0116 0.0116 1249.5 0.0123 0.0123 1412.0 0.0131 0.0131 1590.5 0.0139 0.0139 1787.0 0.0148 0.0148 2003.0 0.0156 0.0156 2241.0 0.0161 0.0161 2503.0 0.0167 0.0167 2790.5 0.0173 0.0173 3107.0 0.0179 0.0179 3455.0 0.0187 0.0187 3837.0 0.0189 0.0189 4257.0 0.0150 0.0150 4719.0 0.0174 0.0174 5226.5 0.0203 0.0203 5784.0 0.0234 0.0234 6538.0 0.0270 0.0270 </td>
+      </tr>
+      <tr>
+        <td id="L30" class="blob-num js-line-number" data-line-number="30"></td>
+        <td id="LC30" class="blob-code blob-code-inner js-file-line">1.6 1.8 150 9.0 0.0346 0.0346 11.0 0.0335 0.0335 13.5 0.0336 0.0336 16.5 0.0336 0.0336 19.5 0.0332 0.0332 22.5 0.0324 0.0324 26.0 0.0313 0.0313 30.0 0.0307 0.0307 34.5 0.0292 0.0292 40.0 0.0277 0.0277 46.0 0.0263 0.0263 52.5 0.0252 0.0252 60.0 0.0239 0.0239 69.0 0.0221 0.0221 79.0 0.0206 0.0206 90.5 0.0192 0.0192 105.5 0.0178 0.0178 123.5 0.0165 0.0165 143.0 0.0155 0.0155 163.5 0.0147 0.0147 185.0 0.0139 0.0139 208.0 0.0133 0.0133 232.5 0.0127 0.0127 258.5 0.0122 0.0122 286.0 0.0117 0.0117 331.0 0.0111 0.0111 396.0 0.0105 0.0105 468.5 0.0102 0.0102 549.5 0.0101 0.0101 639.0 0.0103 0.0103 738.0 0.0107 0.0107 847.5 0.0114 0.0114 968.5 0.0122 0.0122 1102.0 0.0132 0.0132 1249.5 0.0143 0.0143 1412.0 0.0154 0.0154 1590.5 0.0166 0.0166 1787.0 0.0175 0.0175 2003.0 0.0182 0.0182 2241.0 0.0189 0.0189 2503.0 0.0197 0.0197 2790.5 0.0206 0.0206 3107.0 0.0215 0.0215 3455.0 0.0225 0.0225 3837.0 0.0237 0.0237 4257.0 0.0189 0.0189 4719.0 0.0214 0.0214 5226.5 0.0243 0.0243 5784.0 0.0274 0.0274 6538.0 0.0310 0.0310 </td>
+      </tr>
+      <tr>
+        <td id="L31" class="blob-num js-line-number" data-line-number="31"></td>
+        <td id="LC31" class="blob-code blob-code-inner js-file-line">1.8 2.0 150 9.0 0.0336 0.0336 11.0 0.0327 0.0327 13.5 0.0342 0.0342 16.5 0.0355 0.0355 19.5 0.0355 0.0355 22.5 0.0348 0.0348 26.0 0.0336 0.0336 30.0 0.0329 0.0329 34.5 0.0312 0.0312 40.0 0.0293 0.0293 46.0 0.0275 0.0275 52.5 0.0261 0.0261 60.0 0.0245 0.0245 69.0 0.0225 0.0225 79.0 0.0208 0.0208 90.5 0.0193 0.0193 105.5 0.0178 0.0178 123.5 0.0166 0.0166 143.0 0.0156 0.0156 163.5 0.0148 0.0148 185.0 0.0140 0.0140 208.0 0.0134 0.0134 232.5 0.0129 0.0129 258.5 0.0123 0.0123 286.0 0.0119 0.0119 331.0 0.0112 0.0112 396.0 0.0106 0.0106 468.5 0.0102 0.0102 549.5 0.0101 0.0101 639.0 0.0103 0.0103 738.0 0.0108 0.0108 847.5 0.0117 0.0117 968.5 0.0127 0.0127 1102.0 0.0140 0.0140 1249.5 0.0153 0.0153 1412.0 0.0167 0.0167 1590.5 0.0182 0.0182 1787.0 0.0194 0.0194 2003.0 0.0205 0.0205 2241.0 0.0216 0.0216 2503.0 0.0228 0.0228 2790.5 0.0240 0.0240 3107.0 0.0254 0.0254 3455.0 0.0269 0.0269 3837.0 0.0285 0.0285 4257.0 0.0241 0.0241 4719.0 0.0267 0.0267 5226.5 0.0298 0.0298 5784.0 0.0329 0.0329 6538.0 0.0367 0.0367 </td>
+      </tr>
+      <tr>
+        <td id="L32" class="blob-num js-line-number" data-line-number="32"></td>
+        <td id="LC32" class="blob-code blob-code-inner js-file-line">2.0 2.2 150 9.0 0.0302 0.0302 11.0 0.0313 0.0313 13.5 0.0341 0.0341 16.5 0.0356 0.0356 19.5 0.0355 0.0355 22.5 0.0345 0.0345 26.0 0.0328 0.0328 30.0 0.0317 0.0317 34.5 0.0295 0.0295 40.0 0.0271 0.0271 46.0 0.0249 0.0249 52.5 0.0230 0.0230 60.0 0.0211 0.0211 69.0 0.0191 0.0191 79.0 0.0174 0.0174 90.5 0.0161 0.0161 105.5 0.0148 0.0148 123.5 0.0138 0.0138 143.0 0.0131 0.0131 163.5 0.0126 0.0126 185.0 0.0121 0.0121 208.0 0.0117 0.0117 232.5 0.0113 0.0113 258.5 0.0109 0.0109 286.0 0.0105 0.0105 331.0 0.0100 0.0100 396.0 0.0095 0.0095 468.5 0.0092 0.0092 549.5 0.0093 0.0093 639.0 0.0096 0.0096 738.0 0.0103 0.0103 847.5 0.0113 0.0113 968.5 0.0125 0.0125 1102.0 0.0139 0.0139 1249.5 0.0154 0.0154 1412.0 0.0168 0.0168 1590.5 0.0181 0.0181 1787.0 0.0195 0.0195 2003.0 0.0210 0.0210 2241.0 0.0224 0.0224 2503.0 0.0239 0.0239 2790.5 0.0255 0.0255 3107.0 0.0271 0.0271 3455.0 0.0290 0.0290 3837.0 0.0309 0.0309 4257.0 0.0276 0.0276 4719.0 0.0303 0.0303 5226.5 0.0335 0.0335 5784.0 0.0367 0.0367 6538.0 0.0406 0.0406 </td>
+      </tr>
+      <tr>
+        <td id="L33" class="blob-num js-line-number" data-line-number="33"></td>
+        <td id="LC33" class="blob-code blob-code-inner js-file-line">2.2 2.4 150 9.0 0.0331 0.0331 11.0 0.0358 0.0358 13.5 0.0375 0.0375 16.5 0.0376 0.0376 19.5 0.0365 0.0365 22.5 0.0348 0.0348 26.0 0.0328 0.0328 30.0 0.0314 0.0314 34.5 0.0292 0.0292 40.0 0.0269 0.0269 46.0 0.0250 0.0250 52.5 0.0234 0.0234 60.0 0.0217 0.0217 69.0 0.0198 0.0198 79.0 0.0182 0.0182 90.5 0.0168 0.0168 105.5 0.0155 0.0155 123.5 0.0143 0.0143 143.0 0.0134 0.0134 163.5 0.0126 0.0126 185.0 0.0119 0.0119 208.0 0.0113 0.0113 232.5 0.0107 0.0107 258.5 0.0101 0.0101 286.0 0.0096 0.0096 331.0 0.0090 0.0090 396.0 0.0084 0.0084 468.5 0.0081 0.0081 549.5 0.0083 0.0083 639.0 0.0089 0.0089 738.0 0.0099 0.0099 847.5 0.0111 0.0111 968.5 0.0125 0.0125 1102.0 0.0140 0.0140 1249.5 0.0151 0.0151 1412.0 0.0163 0.0163 1590.5 0.0175 0.0175 1787.0 0.0188 0.0188 2003.0 0.0202 0.0202 2241.0 0.0216 0.0216 2503.0 0.0230 0.0230 2790.5 0.0245 0.0245 3107.0 0.0260 0.0260 3455.0 0.0277 0.0277 3837.0 0.0294 0.0294 4257.0 0.0269 0.0269 4719.0 0.0295 0.0295 5226.5 0.0325 0.0325 5784.0 0.0356 0.0356 6538.0 0.0393 0.0393 </td>
+      </tr>
+      <tr>
+        <td id="L34" class="blob-num js-line-number" data-line-number="34"></td>
+        <td id="LC34" class="blob-code blob-code-inner js-file-line">2.4 2.6 150 9.0 0.1302 0.1302 11.0 0.1058 0.1058 13.5 0.0846 0.0846 16.5 0.0675 0.0675 19.5 0.0558 0.0558 22.5 0.0477 0.0477 26.0 0.0411 0.0411 30.0 0.0370 0.0370 34.5 0.0333 0.0333 40.0 0.0305 0.0305 46.0 0.0286 0.0286 52.5 0.0275 0.0275 60.0 0.0264 0.0264 69.0 0.0244 0.0244 79.0 0.0225 0.0225 90.5 0.0208 0.0208 105.5 0.0190 0.0190 123.5 0.0172 0.0172 143.0 0.0157 0.0157 163.5 0.0143 0.0143 185.0 0.0131 0.0131 208.0 0.0122 0.0122 232.5 0.0114 0.0114 258.5 0.0107 0.0107 286.0 0.0103 0.0103 331.0 0.0101 0.0101 396.0 0.0104 0.0104 468.5 0.0112 0.0112 549.5 0.0125 0.0125 639.0 0.0140 0.0140 738.0 0.0156 0.0156 847.5 0.0173 0.0173 968.5 0.0180 0.0180 1102.0 0.0183 0.0183 1249.5 0.0186 0.0186 1412.0 0.0190 0.0190 1590.5 0.0194 0.0194 1787.0 0.0198 0.0198 2003.0 0.0202 0.0202 2241.0 0.0206 0.0206 2503.0 0.0210 0.0210 2790.5 0.0214 0.0214 3107.0 0.0218 0.0218 3455.0 0.0221 0.0221 3837.0 0.0226 0.0226 4257.0 0.0173 0.0173 4719.0 0.0192 0.0192 5226.5 0.0217 0.0217 5784.0 0.0243 0.0243 6538.0 0.0275 0.0275 </td>
+      </tr>
+      <tr>
+        <td id="L35" class="blob-num js-line-number" data-line-number="35"></td>
+        <td id="LC35" class="blob-code blob-code-inner js-file-line">2.6 2.8 150 9.0 0.1414 0.1414 11.0 0.1180 0.1180 13.5 0.0977 0.0977 16.5 0.0815 0.0815 19.5 0.0707 0.0707 22.5 0.0634 0.0634 26.0 0.0576 0.0576 30.0 0.0541 0.0541 34.5 0.0512 0.0512 40.0 0.0490 0.0490 46.0 0.0476 0.0476 52.5 0.0468 0.0468 60.0 0.0462 0.0462 69.0 0.0429 0.0429 79.0 0.0393 0.0393 90.5 0.0358 0.0358 105.5 0.0320 0.0320 123.5 0.0284 0.0284 143.0 0.0253 0.0253 163.5 0.0227 0.0227 185.0 0.0208 0.0208 208.0 0.0193 0.0193 232.5 0.0184 0.0184 258.5 0.0181 0.0181 286.0 0.0183 0.0183 331.0 0.0194 0.0194 396.0 0.0219 0.0219 468.5 0.0251 0.0251 549.5 0.0287 0.0287 639.0 0.0324 0.0324 738.0 0.0359 0.0359 847.5 0.0397 0.0397 968.5 0.0396 0.0396 1102.0 0.0398 0.0398 1249.5 0.0400 0.0400 1412.0 0.0402 0.0402 1590.5 0.0404 0.0404 1787.0 0.0406 0.0406 2003.0 0.0409 0.0409 2241.0 0.0411 0.0411 2503.0 0.0414 0.0414 2790.5 0.0416 0.0416 3107.0 0.0419 0.0419 3455.0 0.0421 0.0421 3837.0 0.0428 0.0428 4257.0 0.0191 0.0191 4719.0 0.0210 0.0210 5226.5 0.0233 0.0233 5784.0 0.0259 0.0259 6538.0 0.0290 0.0290 </td>
+      </tr>
+      <tr>
+        <td id="L36" class="blob-num js-line-number" data-line-number="36"></td>
+        <td id="LC36" class="blob-code blob-code-inner js-file-line">2.8 3.0 150 9.0 0.1420 0.1420 11.0 0.1198 0.1198 13.5 0.1000 0.1000 16.5 0.0849 0.0849 19.5 0.0738 0.0738 22.5 0.0666 0.0666 26.0 0.0611 0.0611 30.0 0.0571 0.0571 34.5 0.0546 0.0546 40.0 0.0521 0.0521 46.0 0.0507 0.0507 52.5 0.0498 0.0498 60.0 0.0492 0.0492 69.0 0.0453 0.0453 79.0 0.0402 0.0402 90.5 0.0354 0.0354 105.5 0.0304 0.0304 123.5 0.0261 0.0261 143.0 0.0231 0.0231 163.5 0.0218 0.0218 185.0 0.0221 0.0221 208.0 0.0236 0.0236 232.5 0.0260 0.0260 258.5 0.0291 0.0291 286.0 0.0325 0.0325 331.0 0.0380 0.0380 396.0 0.0444 0.0444 468.5 0.0509 0.0509 549.5 0.0579 0.0579 639.0 0.0637 0.0637 738.0 0.0711 0.0711 847.5 0.0806 0.0806 968.5 0.0807 0.0807 1102.0 0.0808 0.0808 1249.5 0.0809 0.0809 1412.0 0.0811 0.0811 1590.5 0.0812 0.0812 1787.0 0.0813 0.0813 2003.0 0.0815 0.0815 2241.0 0.0817 0.0817 2503.0 0.0818 0.0818 2790.5 0.0820 0.0820 3107.0 0.0822 0.0822 3455.0 0.0823 0.0823 3837.0 0.0616 0.0616 4257.0 0.0233 0.0233 4719.0 0.0245 0.0245 5226.5 0.0267 0.0267 5784.0 0.0291 0.0291 6538.0 0.0321 0.0321 </td>
+      </tr>
+      <tr>
+        <td id="L37" class="blob-num js-line-number" data-line-number="37"></td>
+        <td id="LC37" class="blob-code blob-code-inner js-file-line">3.0 3.5 150 9.0 0.1046 0.1046 11.0 0.0935 0.0935 13.5 0.0839 0.0839 16.5 0.0763 0.0763 19.5 0.0713 0.0713 22.5 0.0679 0.0679 26.0 0.0653 0.0653 30.0 0.0638 0.0638 34.5 0.0623 0.0623 40.0 0.0612 0.0612 46.0 0.0604 0.0604 52.5 0.0599 0.0599 60.0 0.0591 0.0591 69.0 0.0523 0.0523 79.0 0.0456 0.0456 90.5 0.0388 0.0388 105.5 0.0312 0.0312 123.5 0.0235 0.0235 143.0 0.0166 0.0166 163.5 0.0115 0.0115 185.0 0.0099 0.0099 208.0 0.0125 0.0125 232.5 0.0174 0.0174 258.5 0.0229 0.0229 286.0 0.0286 0.0286 331.0 0.0373 0.0373 396.0 0.0485 0.0485 468.5 0.0595 0.0595 549.5 0.0704 0.0704 639.0 0.0711 0.0711 738.0 0.0711 0.0711 847.5 0.0712 0.0712 968.5 0.0713 0.0713 1102.0 0.0714 0.0714 1249.5 0.0715 0.0715 1412.0 0.0716 0.0716 1590.5 0.0717 0.0717 1787.0 0.0718 0.0718 2003.0 0.0719 0.0719 2241.0 0.0720 0.0720 2503.0 0.0722 0.0722 2790.5 0.0723 0.0723 3107.0 0.0724 0.0724 3455.0 0.0433 0.0433 3837.0 0.0167 0.0167 4257.0 0.0178 0.0178 4719.0 0.0197 0.0197 5226.5 0.0221 0.0221 5784.0 0.0247 0.0247 6538.0 0.0278 0.0278 </td>
+      </tr>
+      <tr>
+        <td id="L38" class="blob-num js-line-number" data-line-number="38"></td>
+        <td id="LC38" class="blob-code blob-code-inner js-file-line">3.5 4.0 150 9.0 0.1152 0.1152 11.0 0.1053 0.1053 13.5 0.0972 0.0972 16.5 0.0910 0.0910 19.5 0.0871 0.0871 22.5 0.0845 0.0845 26.0 0.0827 0.0827 30.0 0.0816 0.0816 34.5 0.0805 0.0805 40.0 0.0797 0.0797 46.0 0.0792 0.0792 52.5 0.0788 0.0788 60.0 0.0793 0.0793 69.0 0.0744 0.0744 79.0 0.0640 0.0640 90.5 0.0532 0.0532 105.5 0.0408 0.0408 123.5 0.0279 0.0279 143.0 0.0169 0.0169 163.5 0.0120 0.0120 185.0 0.0176 0.0176 208.0 0.0275 0.0275 232.5 0.0385 0.0385 258.5 0.0497 0.0497 286.0 0.0609 0.0609 331.0 0.0779 0.0779 396.0 0.0843 0.0843 468.5 0.0843 0.0843 549.5 0.0843 0.0843 639.0 0.0844 0.0844 738.0 0.0844 0.0844 847.5 0.0844 0.0844 968.5 0.0845 0.0845 1102.0 0.0845 0.0845 1249.5 0.0846 0.0846 1412.0 0.0846 0.0846 1590.5 0.0847 0.0847 1787.0 0.0847 0.0847 2003.0 0.0848 0.0848 2241.0 0.0848 0.0848 2503.0 0.0849 0.0849 2790.5 0.0849 0.0849 3107.0 0.0850 0.0850 3455.0 0.0850 0.0850 3837.0 0.0362 0.0362 4257.0 0.0151 0.0151 4719.0 0.0169 0.0169 5226.5 0.0193 0.0193 5784.0 0.0219 0.0219 6538.0 0.0251 0.0251 </td>
+      </tr>
+      <tr>
+        <td id="L39" class="blob-num js-line-number" data-line-number="39"></td>
+        <td id="LC39" class="blob-code blob-code-inner js-file-line">4.0 4.4 150 9.0 0.1321 0.1321 11.0 0.1261 0.1261 13.5 0.1214 0.1214 16.5 0.1178 0.1178 19.5 0.1157 0.1157 22.5 0.1145 0.1145 26.0 0.1135 0.1135 30.0 0.1130 0.1130 34.5 0.1125 0.1125 40.0 0.1120 0.1120 46.0 0.1117 0.1117 52.5 0.1115 0.1115 60.0 0.1112 0.1112 69.0 0.1181 0.1181 79.0 0.1025 0.1025 90.5 0.0822 0.0822 105.5 0.0576 0.0576 123.5 0.0323 0.0323 143.0 0.0222 0.0222 163.5 0.0431 0.0431 185.0 0.0729 0.0729 208.0 0.1064 0.1064 232.5 0.1430 0.1430 258.5 0.1828 0.1828 286.0 0.1751 0.1751 331.0 0.1685 0.1685 396.0 0.1685 0.1685 468.5 0.1684 0.1684 549.5 0.1685 0.1685 639.0 0.1685 0.1685 738.0 0.1685 0.1685 847.5 0.1685 0.1685 968.5 0.1685 0.1685 1102.0 0.1685 0.1685 1249.5 0.1685 0.1685 1412.0 0.1685 0.1685 1590.5 0.1685 0.1685 1787.0 0.1685 0.1685 2003.0 0.1685 0.1685 2241.0 0.1685 0.1685 2503.0 0.1685 0.1685 2790.5 0.1685 0.1685 3107.0 0.1686 0.1686 3455.0 0.0947 0.0947 3837.0 0.0577 0.0577 4257.0 0.0221 0.0221 4719.0 0.0232 0.0232 5226.5 0.0249 0.0249 5784.0 0.0269 0.0269 6538.0 0.0294 0.0294 </td>
+      </tr>
+      <tr>
+        <td id="L40" class="blob-num js-line-number" data-line-number="40"></td>
+        <td id="LC40" class="blob-code blob-code-inner js-file-line">4.4 5.0 150 9.0 0.1223 0.1223 11.0 0.1189 0.1189 13.5 0.1162 0.1162 16.5 0.1146 0.1146 19.5 0.1135 0.1135 22.5 0.1129 0.1129 26.0 0.1126 0.1126 30.0 0.1124 0.1124 34.5 0.1120 0.1120 40.0 0.1118 0.1118 46.0 0.1115 0.1115 52.5 0.1114 0.1114 60.0 0.1111 0.1111 69.0 0.1180 0.1180 79.0 0.1024 0.1024 90.5 0.0820 0.0820 105.5 0.0577 0.0577 123.5 0.0325 0.0325 143.0 0.0227 0.0227 163.5 0.0434 0.0434 185.0 0.0732 0.0732 208.0 0.1067 0.1067 232.5 0.1432 0.1432 258.5 0.1831 0.1831 286.0 0.1754 0.1754 331.0 0.1690 0.1690 396.0 0.1690 0.1690 468.5 0.1691 0.1691 549.5 0.1693 0.1693 639.0 0.1694 0.1694 738.0 0.1695 0.1695 847.5 0.1696 0.1696 968.5 0.1697 0.1697 1102.0 0.1699 0.1699 1249.5 0.1700 0.1700 1412.0 0.1701 0.1701 1590.5 0.1702 0.1702 1787.0 0.1704 0.1704 2003.0 0.1705 0.1705 2241.0 0.1706 0.1706 2503.0 0.1707 0.1707 2790.5 0.1708 0.1708 3107.0 0.1710 0.1710 3455.0 0.0990 0.0990 3837.0 0.0642 0.0642 4257.0 0.0376 0.0376 4719.0 0.0388 0.0388 5226.5 0.0403 0.0403 5784.0 0.0420 0.0420 6538.0 0.0442 0.0442 </td>
+      </tr>
+      <tr>
+        <td id="L41" class="blob-num js-line-number" data-line-number="41"></td>
+        <td id="LC41" class="blob-code blob-code-inner js-file-line">5.0 5.4 150 9.0 0.1222 0.1222 11.0 0.1187 0.1187 13.5 0.1161 0.1161 16.5 0.1144 0.1144 19.5 0.1134 0.1134 22.5 0.1129 0.1129 26.0 0.1125 0.1125 30.0 0.1123 0.1123 34.5 0.1120 0.1120 40.0 0.1117 0.1117 46.0 0.1115 0.1115 52.5 0.1113 0.1113 60.0 0.1111 0.1111 69.0 0.1180 0.1180 79.0 0.1024 0.1024 90.5 0.0820 0.0820 105.5 0.0575 0.0575 123.5 0.0322 0.0322 143.0 0.0224 0.0224 163.5 0.0433 0.0433 185.0 0.0732 0.0732 208.0 0.1066 0.1066 232.5 0.1432 0.1432 258.5 0.1830 0.1830 286.0 0.1748 0.1748 331.0 0.1678 0.1678 396.0 0.1679 0.1679 468.5 0.1680 0.1680 549.5 0.1681 0.1681 639.0 0.1682 0.1682 738.0 0.1683 0.1683 847.5 0.1685 0.1685 968.5 0.1686 0.1686 1102.0 0.1687 0.1687 1249.5 0.1688 0.1688 1412.0 0.1690 0.1690 1590.5 0.1691 0.1691 1787.0 0.1692 0.1692 2003.0 0.1693 0.1693 2241.0 0.1695 0.1695 2503.0 0.1696 0.1696 2790.5 0.1697 0.1697 3107.0 0.1698 0.1698 3455.0 0.0970 0.0970 3837.0 0.0617 0.0617 4257.0 0.0404 0.0404 4719.0 0.0415 0.0415 5226.5 0.0429 0.0429 5784.0 0.0445 0.0445 6538.0 0.0453 0.0453 </td>
+      </tr>
+</table>
+
+  </div>
+
+  </div>
+
+  <button type="button" data-facebox="#jump-to-line" data-facebox-class="linejump" data-hotkey="l" class="d-none">Jump to Line</button>
+  <div id="jump-to-line" style="display:none">
+    <!-- '"` --><!-- </textarea></xmp> --></option></form><form accept-charset="UTF-8" action="" class="js-jump-to-line-form" method="get"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /></div>
+      <input class="form-control linejump-input js-jump-to-line-field" type="text" placeholder="Jump to line&hellip;" aria-label="Jump to line" autofocus>
+      <button type="submit" class="btn">Go</button>
+</form>  </div>
+
+
+  </div>
+  <div class="modal-backdrop js-touch-events"></div>
+</div>
+
+
+    </div>
+  </div>
+
+  </div>
+
+      
+<div class="container site-footer-container">
+  <div class="site-footer " role="contentinfo">
+    <ul class="site-footer-links float-right">
+        <li><a href="https://github.com/contact" data-ga-click="Footer, go to contact, text:contact">Contact GitHub</a></li>
+      <li><a href="https://developer.github.com" data-ga-click="Footer, go to api, text:api">API</a></li>
+      <li><a href="https://training.github.com" data-ga-click="Footer, go to training, text:training">Training</a></li>
+      <li><a href="https://shop.github.com" data-ga-click="Footer, go to shop, text:shop">Shop</a></li>
+        <li><a href="https://github.com/blog" data-ga-click="Footer, go to blog, text:blog">Blog</a></li>
+        <li><a href="https://github.com/about" data-ga-click="Footer, go to about, text:about">About</a></li>
+
+    </ul>
+
+    <a href="https://github.com" aria-label="Homepage" class="site-footer-mark" title="GitHub">
+      <svg aria-hidden="true" class="octicon octicon-mark-github" height="24" version="1.1" viewBox="0 0 16 16" width="24"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+</a>
+    <ul class="site-footer-links">
+      <li>&copy; 2017 <span title="0.15493s from unicorn-430358977-wvbr0">GitHub</span>, Inc.</li>
+        <li><a href="https://github.com/site/terms" data-ga-click="Footer, go to terms, text:terms">Terms</a></li>
+        <li><a href="https://github.com/site/privacy" data-ga-click="Footer, go to privacy, text:privacy">Privacy</a></li>
+        <li><a href="https://github.com/security" data-ga-click="Footer, go to security, text:security">Security</a></li>
+        <li><a href="https://status.github.com/" data-ga-click="Footer, go to status, text:status">Status</a></li>
+        <li><a href="https://help.github.com" data-ga-click="Footer, go to help, text:help">Help</a></li>
+    </ul>
+  </div>
+</div>
+
+
+
+  <div id="ajax-error-message" class="ajax-error-message flash flash-error">
+    <svg aria-hidden="true" class="octicon octicon-alert" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M8.865 1.52c-.18-.31-.51-.5-.87-.5s-.69.19-.87.5L.275 13.5c-.18.31-.18.69 0 1 .19.31.52.5.87.5h13.7c.36 0 .69-.19.86-.5.17-.31.18-.69.01-1L8.865 1.52zM8.995 13h-2v-2h2v2zm0-3h-2V6h2v4z"/></svg>
+    <button type="button" class="flash-close js-flash-close js-ajax-error-dismiss" aria-label="Dismiss error">
+      <svg aria-hidden="true" class="octicon octicon-x" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48z"/></svg>
+    </button>
+    You can't perform that action at this time.
+  </div>
+
+
+    <script crossorigin="anonymous" src="https://assets-cdn.github.com/assets/compat-91f98c37fc84eac24836eec2567e9912742094369a04c4eba6e3cd1fa18902d9.js"></script>
+    <script crossorigin="anonymous" src="https://assets-cdn.github.com/assets/frameworks-2eb498b62c21c55d820c10a818258cdd381e0fb9bbabe8d5c9a512c857321e63.js"></script>
+    
+    <script async="async" crossorigin="anonymous" src="https://assets-cdn.github.com/assets/github-8b365f39a2d03c8431a4bda175deb92478f0481a1f43c3139260546f2effe744.js"></script>
+    
+    
+    
+    
+  <div class="js-stale-session-flash stale-session-flash flash flash-warn flash-banner d-none">
+    <svg aria-hidden="true" class="octicon octicon-alert" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M8.865 1.52c-.18-.31-.51-.5-.87-.5s-.69.19-.87.5L.275 13.5c-.18.31-.18.69 0 1 .19.31.52.5.87.5h13.7c.36 0 .69-.19.86-.5.17-.31.18-.69.01-1L8.865 1.52zM8.995 13h-2v-2h2v2zm0-3h-2V6h2v4z"/></svg>
+    <span class="signed-in-tab-flash">You signed in with another tab or window. <a href="">Reload</a> to refresh your session.</span>
+    <span class="signed-out-tab-flash">You signed out in another tab or window. <a href="">Reload</a> to refresh your session.</span>
+  </div>
+  <div class="facebox" id="facebox" style="display:none;">
+  <div class="facebox-popup">
+    <div class="facebox-content" role="dialog" aria-labelledby="facebox-header" aria-describedby="facebox-description">
+    </div>
+    <button type="button" class="facebox-close js-facebox-close" aria-label="Close modal">
+      <svg aria-hidden="true" class="octicon octicon-x" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48z"/></svg>
+    </button>
+  </div>
+</div>
+
+
+  </body>
+</html>
+
