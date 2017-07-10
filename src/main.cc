@@ -52,7 +52,7 @@ void parseCommandLine(int argc, char *argv[], vector<string> &inputnames, string
       continue;
     } else if(argv[arg][0] == '-') {
       cout << endl;
-      cout << "You entered an option that doesn't exist.  Please use one of the options:" << endl; 
+      cout << "You entered an option that doesn't exist.  Please use one of the options:" << endl;
       usage();
     }else if(inputnames.size()==0){
       inputnames.push_back(argv[arg]);

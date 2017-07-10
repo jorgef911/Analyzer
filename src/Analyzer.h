@@ -68,7 +68,7 @@ public:
 
 
 private:
-
+  bool select_mc_background();
   void CRfillCuts();
   ///// Functions /////
   void fill_Folder(string, const int);
@@ -143,6 +143,7 @@ private:
   unordered_map<string, double> genMap;
   unordered_map<CUTS, vector<int>*, EnumHash> goodParts;
   unordered_map<CUTS, bool, EnumHash> need_cut;
+  unordered_map<string,bool> gen_selection;
 
   static const unordered_map<string, CUTS> cut_num;
   static const unordered_map<CUTS, vector<CUTS>, EnumHash> adjList;
