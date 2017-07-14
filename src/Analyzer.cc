@@ -202,6 +202,25 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
 
     setupCR(maper.first, maper.second);
   }
+  // check if we need to make gen level cuts to cross clean the samples:
+  if(infiles[0].find("DY") != string::npos){
+    if(infiles[0].find("DYJetsToLL_M-50_HT-") != string::npos){
+      gen_selection["DY_noMass_gt_200"]=true;
+    //get the DY1Jet DY2Jet ...
+    }else if(infiles[0].find("JetsToLL_TuneCUETP8M1_13TeV") != string::npos){
+      gen_selection["DY_noMass_gt_200"]=true;
+      //and the main samples
+    }else if(infiles[0].find("DYJetsToLL_M-50_TuneCUETP8M1_13TeV") != string::npos){
+      gen_selection["DY_noMass_gt_200"]=true;
+    }else{
+      //set it to false!!
+      gen_selection["DY_noMass_gt_200"]=false;
+    }
+  }else{
+    //set it to false!!
+    gen_selection["DY_noMass_gt_200"]=false;
+    gen_selection["DY_noMass_gt_100"]=false;
+  }
 
   setCutNeeds();
   //  exit(1);
@@ -237,6 +256,7 @@ void Analyzer::create_fillInfo() {
   fillInfo["FillCentralJet"] = new FillVals(CUTS::eRCenJet, FILLER::Single, _Jet);
   fillInfo["FillWJet"] =     new FillVals(CUTS::eRWjet, FILLER::Single, _FatJet);
 
+  fillInfo["FillDiElectron"] = new FillVals(CUTS::eDiElec, FILLER::Dipart, _Electron, _Electron);
   fillInfo["FillDiMuon"] =     new FillVals(CUTS::eDiMuon, FILLER::Dipart, _Muon, _Muon);
   fillInfo["FillDiTau"] =      new FillVals(CUTS::eDiTau, FILLER::Dipart, _Tau, _Tau);
   fillInfo["FillMetCuts"] =    new FillVals();
@@ -525,6 +545,42 @@ void Analyzer::printCuts() {
 
 /////////////PRIVATE FUNCTIONS////////////////
 
+
+bool Analyzer::select_mc_background(){
+  //will return true if Z* mass is smaller than 200GeV
+  if(gen_selection["DY_noMass_gt_200"]){
+    TLorentzVector lep1;
+    TLorentzVector lep2;
+    for(size_t i=0; i<_Gen->pt->size(); i++){
+      if(abs(_Gen->pdg_id->at(i))==11 or abs(_Gen->pdg_id->at(i))==13 or abs(_Gen->pdg_id->at(i))==15){
+        if(lep1!=TLorentzVector(0,0,0,0)){
+          lep2.SetPtEtaPhiE(_Gen->pt->at(i),_Gen->eta->at(i),_Gen->phi->at(i),_Gen->energy->at(i));
+          return (lep1+lep2).M()<200;
+        }else{
+          lep1.SetPtEtaPhiE(_Gen->pt->at(i),_Gen->eta->at(i),_Gen->phi->at(i),_Gen->energy->at(i));
+        }
+      }
+    }
+  }
+  //will return true if Z* mass is smaller than 200GeV
+  if(gen_selection["DY_noMass_gt_100"]){
+    TLorentzVector lep1;
+    TLorentzVector lep2;
+    for(size_t i=0; i<_Gen->pt->size(); i++){
+      if(abs(_Gen->pdg_id->at(i))==11 or abs(_Gen->pdg_id->at(i))==13 or abs(_Gen->pdg_id->at(i))==15){
+        if(lep1!=TLorentzVector(0,0,0,0)){
+          lep2.SetPtEtaPhiE(_Gen->pt->at(i),_Gen->eta->at(i),_Gen->phi->at(i),_Gen->energy->at(i));
+          return (lep1+lep2).M()<100;
+        }else{
+          lep1.SetPtEtaPhiE(_Gen->pt->at(i),_Gen->eta->at(i),_Gen->phi->at(i),_Gen->energy->at(i));
+        }
+      }
+    }
+  }
+  //cout<<"Something is rotten in the state of Denmark."<<endl;
+  //cout<<"could not find gen selection particle"<<endl;
+  return true;
+}
 
 
 ///Calculates met from values from each file plus smearing and treating muons as neutrinos
