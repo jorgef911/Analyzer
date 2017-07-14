@@ -71,7 +71,7 @@ public:
 
 
 private:
-
+  bool select_mc_background();
   void CRfillCuts();
   ///// Functions /////
   //void fill_Folder(string, const int, string syst="");
@@ -160,6 +160,7 @@ private:
   unordered_map<CUTS, vector<int>*, EnumHash> goodParts;
   vector<unordered_map<CUTS, vector<int>*, EnumHash>> syst_parts;
   unordered_map<CUTS, bool, EnumHash> need_cut;
+  unordered_map<string,bool> gen_selection;
   vector<Particle*> allParticles;
   vector<string> syst_names;
 
@@ -177,6 +178,7 @@ private:
   bool isData, CalculatePUSystematics, doSystematics;
 
   vector<double>* Trigger_decision = 0;
+  vector<int>* Trigger_decisionV1 = 0;
   vector<string>* Trigger_names = 0;
   float nTruePU = 0;
   int bestVertices = 0;

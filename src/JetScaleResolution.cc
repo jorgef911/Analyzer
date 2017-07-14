@@ -20,6 +20,10 @@ void JetScaleResolution::InitScale(const string& filename, const string& type)
     //TDirectory* dir = gDirectory;
     //gROOT->cd();
     fstream fs(filename.c_str(), fstream::in);
+    if(!fs.good()){
+        cout<<"Jet file "<<filename<<" does not exist!"<<endl;
+        exit(2);
+    }
     string line;
     int selected = -1;
     vector<double> etabins;

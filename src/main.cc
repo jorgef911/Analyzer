@@ -72,13 +72,13 @@ void parseCommandLine(int argc, char *argv[], vector<string> &inputnames, string
   }
 
 
-  for( auto file: inputnames) {
-    ifstream ifile(file);
-    if ( !ifile && file.find("root://") == string::npos && file.find("root\\://") == string::npos) {
-      std::cout << "The file '" << inputnames.back() << "' doesn't exist" << std::endl;
-      exit(EXIT_FAILURE);
-    }
-  }
+  //for( auto file: inputnames) {
+    //ifstream ifile(file);
+    //if ( !ifile && file.find("root://") == string::npos && file.find("root\\://") == string::npos) {
+      //std::cout << "The file '" << inputnames.back() << "' doesn't exist" << std::endl;
+      //exit(EXIT_FAILURE);
+    //}
+  //}
   return;
 }
 

@@ -101,18 +101,18 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
 
   BOOM= new TChain("TNT/BOOM");
 
-  gEnv->SetValue("TFile.Recover", 0);
+  //gEnv->SetValue("TFile.Recover", 0);
 
 
   for( string infile: infiles){
-    TFile* tmp;
-    tmp = TFile::Open(infile.c_str());
-    if(!tmp) {
-      cout << endl << endl << "File " << infile << " did not open correctly, exiting" <<endl;
-      exit(EXIT_FAILURE);
-    }
+    //TFile* tmp;
+    //tmp = TFile::Open(infile.c_str());
+    //if(!tmp) {
+      //cout << endl << endl << "File " << infile << " did not open correctly, exiting" <<endl;
+      //exit(EXIT_FAILURE);
+    //}
 
-    BOOM->Add(infile.c_str());
+    BOOM->AddFile(infile.c_str());
   }
 
 
@@ -160,7 +160,11 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   _FatJet = new FatJet(BOOM, filespace + "FatJet_info.in", syst_names);
   _MET  = new Met(BOOM,"Met_type1PF", syst_names);
 
-  allParticles= {_Gen,_Electron,_Muon,_Tau,_Jet,_FatJet};
+  if(!isData) {
+    allParticles= {_Gen,_Electron,_Muon,_Tau,_Jet,_FatJet};
+  }else{
+    allParticles= {_Electron,_Muon,_Tau,_Jet,_FatJet};
+  }
 
   for(Particle* ipart: allParticles){
     ipart->findExtraCuts();
@@ -218,6 +222,28 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
 
     setupCR(maper.first, maper.second);
   }
+  // check if we need to make gen level cuts to cross clean the samples:
+  if(infiles[0].find("DY") != string::npos){
+    if(infiles[0].find("DYJetsToLL_M-50_HT-") != string::npos){
+      gen_selection["DY_noMass_gt_200"]=true;
+    //get the DY1Jet DY2Jet ...
+    }else if(infiles[0].find("JetsToLL_TuneCUETP8M1_13TeV") != string::npos){
+      gen_selection["DY_noMass_gt_200"]=true;
+    }else{
+      //set it to false!!
+      gen_selection["DY_noMass_gt_200"]=false;
+    }
+    if(infiles[0].find("DYJetsToLL_M-50_TuneCUETP8M1_13TeV") != string::npos){
+      gen_selection["DY_noMass_gt_100"]=true;
+    }else{
+      //set it to false!!
+      gen_selection["DY_noMass_gt_100"]=false;
+    }
+  }else{
+    //set it to false!!
+    gen_selection["DY_noMass_gt_200"]=false;
+    gen_selection["DY_noMass_gt_100"]=false;
+  }
 
   setCutNeeds();
 
@@ -252,6 +278,7 @@ void Analyzer::create_fillInfo() {
   fillInfo["FillCentralJet"] = new FillVals(CUTS::eRCenJet, FILLER::Single, _Jet);
   fillInfo["FillWJet"] =     new FillVals(CUTS::eRWjet, FILLER::Single, _FatJet);
 
+  fillInfo["FillDiElectron"] = new FillVals(CUTS::eDiElec, FILLER::Dipart, _Electron, _Electron);
   fillInfo["FillDiMuon"] =     new FillVals(CUTS::eDiMuon, FILLER::Dipart, _Muon, _Muon);
   fillInfo["FillDiTau"] =      new FillVals(CUTS::eDiTau, FILLER::Dipart, _Tau, _Tau);
   fillInfo["FillMetCuts"] =    new FillVals();
@@ -352,6 +379,11 @@ void Analyzer::preprocess(int event) {
   _MET->init();
 
   active_part = &goodParts;
+  if(!select_mc_background()){
+    //we will put nothing in good particles
+    clear_values();
+    return;
+  }
 
   pu_weight = (!isData && CalculatePUSystematics) ? hPU[(int)(nTruePU+1)] : 1.0;
 
@@ -590,6 +622,41 @@ void Analyzer::printCuts() {
 /////////////PRIVATE FUNCTIONS////////////////
 
 
+bool Analyzer::select_mc_background(){
+  //will return true if Z* mass is smaller than 200GeV
+  if(gen_selection["DY_noMass_gt_200"]){
+    TLorentzVector lep1;
+    TLorentzVector lep2;
+    for(size_t i=0; i<_Gen->size(); i++){
+      if(abs(_Gen->pdg_id->at(i))==11 or abs(_Gen->pdg_id->at(i))==13 or abs(_Gen->pdg_id->at(i))==15){
+        if(lep1!=TLorentzVector(0,0,0,0)){
+          lep2= _Gen->p4(i);
+          return (lep1+lep2).M()<200;
+        }else{
+          lep1= _Gen->p4(i);
+        }
+      }
+    }
+  }
+  //will return true if Z* mass is smaller than 200GeV
+  if(gen_selection["DY_noMass_gt_100"]){
+    TLorentzVector lep1;
+    TLorentzVector lep2;
+    for(size_t i=0; i<_Gen->size(); i++){
+      if(abs(_Gen->pdg_id->at(i))==11 or abs(_Gen->pdg_id->at(i))==13 or abs(_Gen->pdg_id->at(i))==15){
+        if(lep1!=TLorentzVector(0,0,0,0)){
+          lep2= _Gen->p4(i);
+          return (lep1+lep2).M()<100;
+        }else{
+          lep1= _Gen->p4(i);
+        }
+      }
+    }
+  }
+  //cout<<"Something is rotten in the state of Denmark."<<endl;
+  //cout<<"could not find gen selection particle"<<endl;
+  return true;
+}
 
 ///Calculates met from values from each file plus smearing and treating muons as neutrinos
 void Analyzer::updateMet(string syst) {
@@ -702,7 +769,7 @@ void Analyzer::treatMuons_Met(string syst) {
 
 /////sets up other values needed for analysis that aren't particle specific
 void Analyzer::setupGeneral() {
-  SetBranch("Trigger_decision", Trigger_decision);
+
   SetBranch("nTruePUInteractions", nTruePU);
   SetBranch("bestVertices", bestVertices);
   SetBranch("weightevt", gen_weight);
@@ -717,6 +784,7 @@ void Analyzer::setupGeneral() {
   read_info(filespace + "Systematics_info.in");
 
   if( BOOM->GetListOfBranches()->FindObject("Trigger_names") ==0){
+    SetBranch("Trigger_decision", Trigger_decisionV1);
     infoFile=BOOM->GetFile();
     BAAM= (TTree*) infoFile->Get("TNT/BAAM");
     initializeTrigger();
@@ -724,11 +792,13 @@ void Analyzer::setupGeneral() {
     version=1;
   }else{
     SetBranch("Trigger_names", Trigger_names);
+    SetBranch("Trigger_decision", Trigger_decision);
     BOOM->GetEntry(0);
     for(int i = 0; i < nTrigReq; i++) {
       for(int j = 0; j < (int)trigName[i]->size(); j++) {
         for(int k = 0; k < (int)Trigger_names->size(); k++) {
           if(Trigger_names->at(k).find(trigName[i]->at(j)) != string::npos) {
+            // structure: i tigger 1 or 2 | j  name of trigger in trigger one or two
             trigPlace[i]->at(j) = k;
             break;
           }
@@ -742,8 +812,13 @@ void Analyzer::setupGeneral() {
 
 //get the correct trigger position:
 void Analyzer::initializeTrigger() {
-  BAAM->SetBranchStatus("Trigger_names", 1);
-  BAAM->SetBranchAddress("Trigger_names", &Trigger_names);
+  BAAM->SetBranchStatus("triggernames", 1);
+  BAAM->SetBranchAddress("triggernames", &Trigger_names);
+
+  for(string itrig : *Trigger_names){
+    cout<<itrig<<endl;
+  }
+
   BAAM->GetEntry(0);
   for(int i = 0; i < nTrigReq; i++) {
     for(int j = 0; j < (int)trigName[i]->size(); j++) {
@@ -755,7 +830,7 @@ void Analyzer::initializeTrigger() {
       }
     }
   }
-  BAAM->SetBranchStatus("Trigger_names", 0);
+  BAAM->SetBranchStatus("triggernames", 0);
 }
 
 
@@ -833,7 +908,12 @@ void Analyzer::setCutNeeds() {
   }
 
   for(auto it: *histo.get_cutorder()) {
-    need_cut[cut_num.at(it)] = true;
+    try{
+      need_cut[cut_num.at(it)] = true;
+    }catch(...){
+      cout<<"The following cut is strange: "<<it<<endl;
+      exit(2);
+    }
     if(adjList.find(cut_num.at(it)) == adjList.end()) continue;
     for(auto e: adjList.at(cut_num.at(it))) {
       need_cut[e] = true;
@@ -1353,10 +1433,23 @@ bool Analyzer::passedLooseJetID(int nobj) {
 ///sees if the event passed one of the two cuts provided
 void Analyzer::TriggerCuts(vector<int>& prevTrig, const vector<string>& trigvec, CUTS ePos) {
   if(! need_cut[ePos]) return;
-  for(int i = 0; i < (int)trigvec.size(); i++) {
-    if(Trigger_decision->at(prevTrig.at(i)) == 1) {
-      active_part->at(ePos)->push_back(0);
-      return;
+  //cout<<" trigger "<<Trigger_decision->size()<<endl;
+  if(version==1){
+    for(size_t i = 0; i < trigvec.size(); i++) {
+      for(size_t j =0; j<Trigger_decisionV1->size();  j++){
+        //cout<<"i:  "<<prevTrig.at(i)<<" j:  "<<j<<" dec(j):  "<<Trigger_decisionV1->at(j)<<endl;
+        if(prevTrig.at(i)==Trigger_decisionV1->at(j)){
+          active_part->at(ePos)->push_back(0);
+          return;
+        }
+      }
+    }
+  }else{
+    for(int i = 0; i < (int)trigvec.size(); i++) {
+      if(Trigger_decision->at(prevTrig.at(i)) == 1) {
+        active_part->at(ePos)->push_back(0);
+        return;
+      }
     }
   }
 }
