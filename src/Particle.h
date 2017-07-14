@@ -228,6 +228,8 @@ public:
   pair<vector<int>*,vector<int>* > minIso = make_pair(nullptr,nullptr);
   pair<vector<int>*,vector<int>* > maxIso = make_pair(nullptr,nullptr);
   vector<double>  *leadChargedCandPt = 0;
+  vector<double>  *leadChargedCandPtError = 0;
+  vector<int>  *leadChargedCandValidHits = 0;
 };
 
 

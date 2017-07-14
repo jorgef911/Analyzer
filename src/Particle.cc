@@ -344,6 +344,8 @@ Taus::Taus(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_B
   SetBranch("Tau_decayModeFindingNewDMs", decayModeFindingNewDMs);
   SetBranch("Tau_nProngs", nProngs);
   SetBranch("Tau_leadChargedCandPt", leadChargedCandPt);
+  SetBranch("Tau_leadChargedCandTrack_ptError", leadChargedCandPtError);
+  SetBranch("Tau_leadChargedCandValidHits", leadChargedCandValidHits);
 
 }
 

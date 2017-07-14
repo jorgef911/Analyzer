@@ -112,7 +112,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
       //exit(EXIT_FAILURE);
     //}
 
-    BOOM->Add(infile.c_str());
+    BOOM->AddFile(infile.c_str());
   }
 
 
@@ -160,7 +160,11 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   _FatJet = new FatJet(BOOM, filespace + "FatJet_info.in", syst_names);
   _MET  = new Met(BOOM,"Met_type1PF", syst_names);
 
-  allParticles= {_Gen,_Electron,_Muon,_Tau,_Jet,_FatJet};
+  if(!isData) {
+    allParticles= {_Gen,_Electron,_Muon,_Tau,_Jet,_FatJet};
+  }else{
+    allParticles= {_Electron,_Muon,_Tau,_Jet,_FatJet};
+  }
 
   for(Particle* ipart: allParticles){
     ipart->findExtraCuts();
@@ -2039,12 +2043,16 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, int
             histAddVal((_Tau->p4(matchedTauInd)+unmatchedEle).M(), "DiEleGoodTauMatchMass");
             histAddVal((matchedEle+unmatchedEle).M(), "DiEleEleGoodMatchMass");
             histAddVal(matchedEle.Pt(), "DiEleEleGoodMatchPt");
+            histAddVal(_Tau->leadChargedCandPtError->at(matchedTauInd),"DiEleleadChargedCandPtErrorGoodMatched");
+            histAddVal(_Tau->leadChargedCandValidHits->at(matchedTauInd),"DiEleleadChargedCandValidHitGoodMatched");
           }else{
             histAddVal(_Tau->p4(matchedTauInd).Pt(), "DiEleTauMatchPt");
             histAddVal(_Tau->p4(matchedTauInd).Pt()-matchedEle.Pt(), "DiEleTauMatchDeltaPt");
             histAddVal((_Tau->p4(matchedTauInd)+unmatchedEle).M(), "DiEleTauMatchMass");
             histAddVal((matchedEle+unmatchedEle).M(), "DiEleEleMatchMass");
             histAddVal(matchedEle.Pt(), "DiEleEleMatchPt");
+            histAddVal(_Tau->leadChargedCandPtError->at(matchedTauInd),"DiEleleadChargedCandPtErrorMatched");
+            histAddVal(_Tau->leadChargedCandValidHits->at(matchedTauInd),"DiEleleadChargedCandValidHitsMatched");
           }
         }else{
           histAddVal((part1+part2).M(), "DiEleEleUnMatchMass");
