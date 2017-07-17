@@ -17,12 +17,14 @@ Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string
   //backward compatible yeah!!
   if( _BOOM->GetListOfBranches()->FindObject((GenName+"_pt").c_str()) ==0){
     mpt=new vector<double>();
+    cout<<"no "<<GenName<<" will deactivate branch!"<<endl;
   }else{
     SetBranch((GenName+"_pt").c_str(), mpt);
     SetBranch((GenName+"_eta").c_str(), meta);
     SetBranch((GenName+"_phi").c_str(), mphi);
     SetBranch((GenName+"_energy").c_str(), menergy);
   }
+
   activeSystematic="orig";
 }
 

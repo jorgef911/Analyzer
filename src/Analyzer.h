@@ -15,6 +15,7 @@ struct CRTester;
 #include <stdlib.h>
 #include <iostream>
 #include <ctime>
+#include <time.h>
 
 #include <TDirectory.h>
 #include <TEnv.h>
@@ -92,6 +93,8 @@ private:
   TLorentzVector matchLeptonToGen(const TLorentzVector&, const PartStats&, CUTS);
   TLorentzVector matchTauToGen(const TLorentzVector&, double);
   TLorentzVector matchJetToGen(const TLorentzVector&, const PartStats&, CUTS);
+
+  int matchToGenPdg(const TLorentzVector& lvec, double minDR);
 
 
   void getGoodParticles(int);
@@ -196,7 +199,8 @@ private:
   vector<CRTester*> testVec;
   int SignalRegion = -1;
   bool blinded = true;
-  clock_t start_time;
+  time_t start_timer_real;
+
 };
 
 
