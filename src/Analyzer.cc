@@ -249,7 +249,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   setCutNeeds();
 
   std::cout << "setup complete" << std::endl << endl;
-  start_timer_real = time(NULL);
+  start = std::chrono::system_clock::now();
 }
 
 unordered_map<CUTS, vector<int>*, EnumHash> Analyzer::getArray() {
@@ -583,8 +583,9 @@ void Analyzer::printCuts() {
   vector<string> cut_order;
   if(crbins > 1) cut_order = *(histo.get_folders());
   else cut_order = *(histo.get_cutorder());
-  time_t end_time_real=  time(NULL);
-  double run_time_real=difftime(end_time_real,start_timer_real);
+  std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end-start;
+  double run_time_real=elapsed_seconds.count();
 
 
   cout.setf(ios::floatfield,ios::fixed);
@@ -628,6 +629,9 @@ bool Analyzer::select_mc_background(){
     TLorentzVector lep1;
     TLorentzVector lep2;
     for(size_t i=0; i<_Gen->size(); i++){
+      if(abs(_Gen->pdg_id->at(i))==23){
+        return _Gen->p4(i).M()<200;
+      }
       if(abs(_Gen->pdg_id->at(i))==11 or abs(_Gen->pdg_id->at(i))==13 or abs(_Gen->pdg_id->at(i))==15){
         if(lep1!=TLorentzVector(0,0,0,0)){
           lep2= _Gen->p4(i);
@@ -643,6 +647,9 @@ bool Analyzer::select_mc_background(){
     TLorentzVector lep1;
     TLorentzVector lep2;
     for(size_t i=0; i<_Gen->size(); i++){
+      if(abs(_Gen->pdg_id->at(i))==23){
+        return _Gen->p4(i).M()<100;
+      }
       if(abs(_Gen->pdg_id->at(i))==11 or abs(_Gen->pdg_id->at(i))==13 or abs(_Gen->pdg_id->at(i))==15){
         if(lep1!=TLorentzVector(0,0,0,0)){
           lep2= _Gen->p4(i);
@@ -1853,19 +1860,26 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, int
     }
     histAddVal(active_part->at(CUTS::eGMuon)->size(), "NMuon");
 
+    double mass=0;
     TLorentzVector lep1;
     TLorentzVector lep2;
     for(size_t i=0; i<_Gen->size(); i++){
+      //if a Z boson is explicitly there
+      if(abs(_Gen->pdg_id->at(i))==23){
+        mass= _Gen->p4(i).M();
+        break;
+      }
       if(abs(_Gen->pdg_id->at(i))==11 or abs(_Gen->pdg_id->at(i))==13 or abs(_Gen->pdg_id->at(i))==15){
         if(lep1!=TLorentzVector(0,0,0,0)){
           lep2= _Gen->p4(i);
+          mass=(lep1+lep2).M();
           break;
         }else{
           lep1= _Gen->p4(i);
         }
       }
     }
-    histAddVal((lep1+lep2).M(), "LeptonMass");
+    histAddVal(mass, "LeptonMass");
   } else if(fillInfo[group]->type == FILLER::Single) {
     Particle* part = fillInfo[group]->part;
     CUTS ePos = fillInfo[group]->ePos;
@@ -2102,6 +2116,8 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, int
             histAddVal(_Tau->leadChargedCandPtError->at(matchedTauInd),"DiEleleadChargedCandPtErrorGoodMatched");
             histAddVal(_Tau->leadChargedCandValidHits->at(matchedTauInd),"DiEleleadChargedCandValidHitGoodMatched");
             histAddVal2( matchedEle.Pt(),   (_Tau->p4(matchedTauInd).Pt()-matchedEle.Pt())/matchedEle.Pt(), "DiEleTauGoodMatchPt_vs_DeltaPt");
+            histAddVal2( matchedEle.Pt(),   matchedEle.Eta(), "DiEleTauGoodMatchPt_vs_eta");
+            histAddVal2( _Tau->pt(matchedTauInd),   _Tau->decayMode->at(matchedTauInd), "DiEleTauGoodMatchPt_vs_Decay");
           }else{
             histAddVal(_Tau->p4(matchedTauInd).Pt(), "DiEleTauMatchPt");
             histAddVal(_Tau->p4(matchedTauInd).Pt()-matchedEle.Pt(), "DiEleTauMatchDeltaPt");
@@ -2111,15 +2127,16 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, int
             histAddVal(_Tau->leadChargedCandPtError->at(matchedTauInd),"DiEleleadChargedCandPtErrorMatched");
             histAddVal(_Tau->leadChargedCandValidHits->at(matchedTauInd),"DiEleleadChargedCandValidHitsMatched");
             histAddVal2( matchedEle.Pt(),   (_Tau->p4(matchedTauInd).Pt()-matchedEle.Pt())/matchedEle.Pt(), "DiEleTauMatchPt_vs_DeltaPt");
+            histAddVal2( matchedEle.Pt(),   matchedEle.Eta(), "DiEleTauMatchPt_vs_eta");
+            histAddVal2( _Tau->pt(matchedTauInd),   _Tau->decayMode->at(matchedTauInd), "DiEleTauMatchPt_vs_Decay");
           }
         }else{
           histAddVal((part1+part2).M(), "DiEleEleUnMatchMass");
           histAddVal(part2.Pt(), "DiEleEleUnMatchPt");
+          histAddVal2( part2.Pt(),   part2.Eta(), "DiEleUnMatchPt_vs_eta");
           if(!isData){
             histAddVal(part2.Pt(), "DiEleEleUnMatchPt_gen_"+to_string(abs(matchToGenPdg(part2,0.3))));
           }
-
-
           int found=-1;
           for(size_t i=0; i< _Jet->size(); i++) {
             if(part2.DeltaR(_Jet->p4(i)) <=0.4) {

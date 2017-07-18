@@ -223,6 +223,7 @@ public:
 
   vector<int>     *decayModeFindingNewDMs = 0;
   vector<double>  *nProngs = 0;
+  vector<int>  *decayMode = 0;
   pair<vector<int>*,vector<int>* > againstElectron = make_pair(nullptr,nullptr);
   pair<vector<int>*,vector<int>* > againstMuon = make_pair(nullptr,nullptr);
   pair<vector<int>*,vector<int>* > minIso = make_pair(nullptr,nullptr);

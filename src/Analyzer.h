@@ -14,8 +14,7 @@ struct CRTester;
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include <ctime>
-#include <time.h>
+#include <chrono>
 
 #include <TDirectory.h>
 #include <TEnv.h>
@@ -199,7 +198,7 @@ private:
   vector<CRTester*> testVec;
   int SignalRegion = -1;
   bool blinded = true;
-  time_t start_timer_real;
+  std::chrono::time_point<std::chrono::system_clock> start;
 
 };
 
