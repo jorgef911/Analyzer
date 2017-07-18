@@ -178,7 +178,7 @@ private:
   int leadIndex, maxCut, crbins=1;
   bool isData, CalculatePUSystematics, doSystematics;
 
-  vector<double>* Trigger_decision = 0;
+  vector<int>* Trigger_decision = 0;
   vector<int>* Trigger_decisionV1 = 0;
   vector<string>* Trigger_names = 0;
   float nTruePU = 0;

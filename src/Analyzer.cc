@@ -451,7 +451,7 @@ void Analyzer::preprocess(int event) {
     ( event < 1000 && event % 100 == 0 ) ||
     ( event < 10000 && event % 1000 == 0 ) ||
     ( event >= 10000 && event % 10000 == 0 ) ) {
-       cout << event << " Events analyzed\n";
+       cout << event << " Events analyzed"<<endl;;
   }
 }
 
@@ -812,6 +812,10 @@ void Analyzer::setupGeneral() {
         }
       }
     }
+    //cout<<Trigger_names->size()<<endl;
+    //for(string itrig : *Trigger_names){
+      //cout<<itrig<<endl;
+    //}
     BOOM->SetBranchStatus("Trigger_names", 0);
   }
 }
@@ -1483,6 +1487,7 @@ void Analyzer::TriggerCuts(vector<int>& prevTrig, const vector<string>& trigvec,
     }
   }else{
     for(int i = 0; i < (int)trigvec.size(); i++) {
+      //cout<<Trigger_decision->size()<< "    "<<prevTrig.at(i)<<endl;
       if(Trigger_decision->at(prevTrig.at(i)) == 1) {
         active_part->at(ePos)->push_back(0);
         return;
