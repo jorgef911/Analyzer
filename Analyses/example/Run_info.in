@@ -3,10 +3,10 @@
 ####################################
 
 CalculatePUSystematics true
-DataHistos PU2016data_6p2ifb.root
-MCHistos PU2016MC.root
-DataPUHistName NVertices_0
-MCPUHistName NVertices_0
+DataHistos data_75bins_69200.root
+MCHistos MC_75bins.root
+DataPUHistName pileup
+MCPUHistName pileup
 
 isData false
 ApplyGenWeight  true
@@ -34,8 +34,6 @@ MhtCut 50.0
 DiscrByHT false
 HtCut 30.0
 
-JetPtForMhtAndHt 30.0        
-JetEtaForMhtAndHt 5.0        
-ApplyJetLooseIDforMhtAndHt false
-
-
+JetPtForMhtAndHt 30.0
+JetEtaForMhtAndHt 5.0
+ApplyJetLo
