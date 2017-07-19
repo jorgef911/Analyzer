@@ -1866,6 +1866,10 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, int
     if(crbins != 1) {
       for(int i = 0; i < crbins; i++) {
         ihisto.addVal(false, group, i, "Events", 1);
+        if(distats["Run"].bmap["ApplyGenWeight"]) {
+          //put the weighted events in bin 3
+          ihisto.addVal(2, group,i, "Events", (gen_weight > 0) ? 1.0 : -1.0);
+        }
       }
     }
     else{
