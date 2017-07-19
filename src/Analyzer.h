@@ -109,6 +109,7 @@ private:
   bool passProng(string, int);
   bool isInTheCracks(float);
   bool passedLooseJetID(int);
+  bool select_mc_background();
 
   pair<double, double> getPZeta(const TLorentzVector&, const TLorentzVector&);
   void create_fillInfo();
@@ -143,6 +144,7 @@ private:
   unordered_map<string, double> genMap;
   unordered_map<CUTS, vector<int>*, EnumHash> goodParts;
   unordered_map<CUTS, bool, EnumHash> need_cut;
+  unordered_map<string,bool> gen_selection;
 
   static const unordered_map<string, CUTS> cut_num;
   static const unordered_map<CUTS, vector<CUTS>, EnumHash> adjList;
