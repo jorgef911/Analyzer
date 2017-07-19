@@ -15,6 +15,22 @@
 
 typedef vector<int>::iterator vec_iter;
 
+
+#include <time.h>
+const std::string currentDateTime() {
+  time_t     now = time(0);
+  struct tm  tstruct;
+  char       buf[80];
+  tstruct = *localtime(&now);
+  // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+  // for more information about date/time format
+  strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+
+  return buf;
+}
+
+
+
 //////////////////////////////////////////////////////////////////
 ///////////////////CONSTANTS DEFINITONS///////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -100,9 +116,6 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
 
   BOOM= new TChain("TNT/BOOM");
 
-  gEnv->SetValue("TFile.Recover", 0);
-
-
   for( string infile: infiles){
 
     cout << infile << endl;
@@ -112,7 +125,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
     //   exit(EXIT_FAILURE);
     // }
 
-    BOOM->Add(infile.c_str());
+    BOOM->AddFile(infile.c_str());
   }
   nentries = (int) BOOM->GetEntries();
   BOOM->SetBranchStatus("*", 0);
@@ -292,9 +305,10 @@ void Analyzer::setupCR(string var, double val) {
 
 
 
+
 ////destructor
 Analyzer::~Analyzer() {
-
+  cout << "start destructor" << endl;
   delete BOOM;
   delete _Electron;
   delete _Muon;
@@ -412,7 +426,7 @@ void Analyzer::preprocess(int event) {
     ( event < 1000 && event % 100 == 0 ) ||
     ( event < 10000 && event % 1000 == 0 ) ||
     ( event >= 10000 && event % 10000 == 0 ) ) {
-       cout << event << " Events analyzed\n";
+    cout << event << " Events analyzed " << currentDateTime() <<  endl;
     }
 }
 
@@ -520,7 +534,9 @@ void Analyzer::printCuts() {
 
   //write all the histograms
   //attention this is not the fill_histogram method from the Analyser
+  clock_t start_hist = clock();
   histo.fill_histogram();
+  cout << static_cast<double>(clock() - start_hist)/CLOCKS_PER_SEC << endl;
 }
 
 /////////////PRIVATE FUNCTIONS////////////////
