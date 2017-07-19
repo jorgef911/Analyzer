@@ -71,7 +71,6 @@ public:
 
 
 private:
-  bool select_mc_background();
   void CRfillCuts();
   ///// Functions /////
   //void fill_Folder(string, const int, string syst="");
@@ -119,6 +118,7 @@ private:
   bool passProng(string, int);
   bool isInTheCracks(float);
   bool passedLooseJetID(int);
+  bool select_mc_background();
 
   pair<double, double> getPZeta(const TLorentzVector&, const TLorentzVector&);
   void create_fillInfo();
