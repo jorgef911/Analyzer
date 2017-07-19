@@ -451,7 +451,7 @@ void Analyzer::preprocess(int event) {
     ( event < 1000 && event % 100 == 0 ) ||
     ( event < 10000 && event % 1000 == 0 ) ||
     ( event >= 10000 && event % 10000 == 0 ) ) {
-       cout << event << " Events analyzed"<<endl;;
+       cout << setprecision(2)<<event << " Events analyzed "<< static_cast<double>(event)/nentries*100. <<"% done"<<endl;;
   }
 }
 
@@ -629,9 +629,9 @@ bool Analyzer::select_mc_background(){
     TLorentzVector lep1;
     TLorentzVector lep2;
     for(size_t i=0; i<_Gen->size(); i++){
-      if(abs(_Gen->pdg_id->at(i))==23){
-        return _Gen->p4(i).M()<200;
-      }
+      //if(abs(_Gen->pdg_id->at(i))==23){
+        //return _Gen->p4(i).M()<200;
+      //}
       if(abs(_Gen->pdg_id->at(i))==11 or abs(_Gen->pdg_id->at(i))==13 or abs(_Gen->pdg_id->at(i))==15){
         if(lep1!=TLorentzVector(0,0,0,0)){
           lep2= _Gen->p4(i);
@@ -647,9 +647,9 @@ bool Analyzer::select_mc_background(){
     TLorentzVector lep1;
     TLorentzVector lep2;
     for(size_t i=0; i<_Gen->size(); i++){
-      if(abs(_Gen->pdg_id->at(i))==23){
-        return _Gen->p4(i).M()<100;
-      }
+      //if(abs(_Gen->pdg_id->at(i))==23){
+        //return _Gen->p4(i).M()<100;
+      //}
       if(abs(_Gen->pdg_id->at(i))==11 or abs(_Gen->pdg_id->at(i))==13 or abs(_Gen->pdg_id->at(i))==15){
         if(lep1!=TLorentzVector(0,0,0,0)){
           lep2= _Gen->p4(i);
@@ -1880,14 +1880,11 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, int
     TLorentzVector lep2;
     for(size_t i=0; i<_Gen->size(); i++){
       //if a Z boson is explicitly there
-      if(abs(_Gen->pdg_id->at(i))==23){
-        mass= _Gen->p4(i).M();
-        break;
-      }
       if(abs(_Gen->pdg_id->at(i))==11 or abs(_Gen->pdg_id->at(i))==13 or abs(_Gen->pdg_id->at(i))==15){
         if(lep1!=TLorentzVector(0,0,0,0)){
           lep2= _Gen->p4(i);
           mass=(lep1+lep2).M();
+          //cout<<"mass  leptons "<<mass<<endl;
           break;
         }else{
           lep1= _Gen->p4(i);
