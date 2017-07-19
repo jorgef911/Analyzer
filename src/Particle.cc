@@ -17,12 +17,14 @@ Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string
   //backward compatible yeah!!
   if( _BOOM->GetListOfBranches()->FindObject((GenName+"_pt").c_str()) ==0){
     mpt=new vector<double>();
+    cout<<"no "<<GenName<<" will deactivate branch!"<<endl;
   }else{
     SetBranch((GenName+"_pt").c_str(), mpt);
     SetBranch((GenName+"_eta").c_str(), meta);
     SetBranch((GenName+"_phi").c_str(), mphi);
     SetBranch((GenName+"_energy").c_str(), menergy);
   }
+
   activeSystematic="orig";
 }
 
@@ -343,7 +345,10 @@ Taus::Taus(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_B
 
   SetBranch("Tau_decayModeFindingNewDMs", decayModeFindingNewDMs);
   SetBranch("Tau_nProngs", nProngs);
+  SetBranch("Tau_decayMode", decayMode);
   SetBranch("Tau_leadChargedCandPt", leadChargedCandPt);
+  SetBranch("Tau_leadChargedCandTrack_ptError", leadChargedCandPtError);
+  SetBranch("Tau_leadChargedCandValidHits", leadChargedCandValidHits);
 
 }
 

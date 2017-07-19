@@ -69,6 +69,7 @@ public:
   vector<double>* meta = 0;
   vector<double>* mphi = 0;
   vector<double>* menergy = 0;
+  vector<double>* charge = 0;
   unordered_map<string, PartStats> pstats;
   vector<TLorentzVector> Reco;
   vector<TLorentzVector> *cur_P;
@@ -172,8 +173,6 @@ public:
 
   void findExtraCuts();
 
-  vector<double>* charge = 0;
-
   virtual bool get_Iso(int, double, double) const {return false;}
 };
 
@@ -223,11 +222,14 @@ public:
 
   vector<int>     *decayModeFindingNewDMs = 0;
   vector<double>  *nProngs = 0;
+  vector<int>  *decayMode = 0;
   pair<vector<int>*,vector<int>* > againstElectron = make_pair(nullptr,nullptr);
   pair<vector<int>*,vector<int>* > againstMuon = make_pair(nullptr,nullptr);
   pair<vector<int>*,vector<int>* > minIso = make_pair(nullptr,nullptr);
   pair<vector<int>*,vector<int>* > maxIso = make_pair(nullptr,nullptr);
   vector<double>  *leadChargedCandPt = 0;
+  vector<double>  *leadChargedCandPtError = 0;
+  vector<int>  *leadChargedCandValidHits = 0;
 };
 
 

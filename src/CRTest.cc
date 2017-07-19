@@ -63,6 +63,11 @@ bool CRTester::test(Analyzer* analyzer) {
       else if(variable == "DeltaEta") pass = pass && (abs(part1.Eta() - part2.Eta()) > cutVal);
       else if(variable == "DeltaPhi") pass = pass && (abs(part1.Phi() - part2.Phi()) > cutVal);
       else if(variable == "OSEta") pass = pass && (part1.Eta() * part2.Eta() > cutVal);
+      else if(variable == "DiscrByOSLSType"){
+        if(info->ePos==CUTS::eDiElec || info->ePos==CUTS::eDiMuon || info->ePos==CUTS::eDiTau ){
+          pass = pass && (info->part->charge->at(index / BIG_NUM) * info->part2->charge->at(index % BIG_NUM) > cutVal);
+        }
+      }
     }
   } else {
 

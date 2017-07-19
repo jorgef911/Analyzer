@@ -138,20 +138,21 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
 
 
   isData = distats["Run"].bmap.at("isData");
+
   CalculatePUSystematics = distats["Run"].bmap.at("CalculatePUSystematics");
   initializePileupInfo(distats["Run"].smap.at("MCHistos"), distats["Run"].smap.at("DataHistos"),distats["Run"].smap.at("DataPUHistName"),distats["Run"].smap.at("MCPUHistName"));
-
-  for(auto &it : distats["Systematics"].bmap) {
-    if( it.first == "useSystematics")
-      doSystematics= it.second;
-    else if(doSystematics && it.second) {
-      syst_names.push_back(it.first);
-      syst_parts.push_back(getArray());
-    }
-  }
-
   if(!isData) {
+    for(auto &it : distats["Systematics"].bmap) {
+      if( it.first == "useSystematics")
+        doSystematics= it.second;
+      else if( it.second) {
+        syst_names.push_back(it.first);
+        syst_parts.push_back(getArray());
+      }
+    }
     _Gen = new Generated(BOOM, filespace + "Gen_info.in", syst_names);
+  }else{
+    doSystematics=false;
   }
   _Electron = new Electron(BOOM, filespace + "Electron_info.in", syst_names);
   _Muon = new Muon(BOOM, filespace + "Muon_info.in", syst_names);
@@ -248,7 +249,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   setCutNeeds();
 
   std::cout << "setup complete" << std::endl << endl;
-  start_time = clock();
+  start = std::chrono::system_clock::now();
 }
 
 unordered_map<CUTS, vector<int>*, EnumHash> Analyzer::getArray() {
@@ -367,14 +368,12 @@ void Analyzer::clear_values() {
 ///Function that does most of the work.  Calculates the number of each particle
 void Analyzer::preprocess(int event) {
   BOOM->GetEntry(event);
-
-
   for(Particle* ipart: allParticles){
     ipart->init();
   }
+
   //call this extra because it is not in the list
   _MET->init();
-
   active_part = &goodParts;
   if(!select_mc_background()){
     //we will put nothing in good particles
@@ -444,12 +443,11 @@ void Analyzer::preprocess(int event) {
     getGoodParticles(i);
   }
   active_part = &goodParts;
-  int ievent=event +1;
-  if( ievent < 10 || ( ievent < 100 && ievent % 10 == 0 ) ||
-    ( ievent < 1000 && ievent % 100 == 0 ) ||
-    ( ievent < 10000 && ievent % 1000 == 0 ) ||
-    ( ievent >= 10000 && ievent % 10000 == 0 ) ) {
-       cout << ievent << " Events analyzed\n";
+  if( event < 10 || ( event < 100 && event % 10 == 0 ) ||
+    ( event < 1000 && event % 100 == 0 ) ||
+    ( event < 10000 && event % 1000 == 0 ) ||
+    ( event >= 10000 && event % 10000 == 0 ) ) {
+       cout << setprecision(2)<<event << " Events analyzed "<< static_cast<double>(event)/nentries*100. <<"% done"<<endl;;
   }
 }
 
@@ -581,8 +579,10 @@ void Analyzer::printCuts() {
   vector<string> cut_order;
   if(crbins > 1) cut_order = *(histo.get_folders());
   else cut_order = *(histo.get_cutorder());
-  clock_t end_time = clock();
-  double run_time=  static_cast<double>(end_time-start_time)/CLOCKS_PER_SEC;
+  std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end-start;
+  double run_time_real=elapsed_seconds.count();
+
 
   cout.setf(ios::floatfield,ios::fixed);
   cout<<setprecision(3);
@@ -590,9 +590,9 @@ void Analyzer::printCuts() {
   cout << "Selection Efficiency " << "\n";
   cout << "Total events: " << nentries << "\n";
   cout << "\n";
-  cout << "Run Time (cpu): " <<run_time <<" s\n";
-  cout << "Time per 1k Events: " << run_time/(nentries/1000) <<" s\n";
-  cout << "Events/s: " << static_cast<double>(nentries)/(run_time) <<" 1/s\n";
+  cout << "Run Time (real): " <<run_time_real <<" s\n";
+  cout << "Time per 1k Events (real): " << run_time_real/(nentries/1000) <<" s\n";
+  cout << "Events/s: " << static_cast<double>(nentries)/(run_time_real) <<" 1/s (real) \n";
   cout << "                        Name                  Indiv.";
   if(crbins == 1) cout << "            Cumulative";
   cout << endl << "---------------------------------------------------------------------------\n";
@@ -802,6 +802,10 @@ void Analyzer::setupGeneral() {
         }
       }
     }
+    //cout<<Trigger_names->size()<<endl;
+    //for(string itrig : *Trigger_names){
+      //cout<<itrig<<endl;
+    //}
     BOOM->SetBranchStatus("Trigger_names", 0);
   }
 }
@@ -812,9 +816,9 @@ void Analyzer::initializeTrigger() {
   BAAM->SetBranchStatus("triggernames", 1);
   BAAM->SetBranchAddress("triggernames", &Trigger_names);
 
-  for(string itrig : *Trigger_names){
-    cout<<itrig<<endl;
-  }
+  //for(string itrig : *Trigger_names){
+    //cout<<itrig<<endl;
+  //}
 
   BAAM->GetEntry(0);
   for(int i = 0; i < nTrigReq; i++) {
@@ -903,7 +907,6 @@ void Analyzer::setCutNeeds() {
       need_cut[e] = true;
     }
   }
-
   for(auto it: *histo.get_cutorder()) {
     try{
       need_cut[cut_num.at(it)] = true;
@@ -947,6 +950,7 @@ void Analyzer::setCutNeeds() {
   }
 
   if( !(need_cut[CUTS::eRTau1] || need_cut[CUTS::eRTau2]) ) {
+    cout<<"Taus not needed. They will be deactivated!"<<endl;
     _Tau->unBranch();
   } else {
     for(auto it: _Tau->extraCuts) {
@@ -959,6 +963,7 @@ void Analyzer::setCutNeeds() {
   }
 
   if( !(need_cut[CUTS::eRElec1] || need_cut[CUTS::eRElec2]) ) {
+    cout<<"Electrons not needed. They will be deactivated!"<<endl;
     _Electron->unBranch();
   } else {
     for(auto it: _Electron->extraCuts) {
@@ -971,6 +976,7 @@ void Analyzer::setCutNeeds() {
   }
 
   if( !(need_cut[CUTS::eRMuon1] || need_cut[CUTS::eRMuon2]) ) {
+    cout<<"Muons not needed. They will be deactivated!"<<endl;
     _Muon->unBranch();
   } else {
     for(auto it: _Muon->extraCuts) {
@@ -987,10 +993,15 @@ void Analyzer::setCutNeeds() {
   bool passGen = false;
   for(auto e: genCuts) {
     passGen = passGen || need_cut[e];
-
+  }
+  for(auto needed : gen_selection){
+    passGen = passGen || needed.second;
   }
 
-  if(!passGen) _Gen->unBranch();
+  if(!passGen){
+    cout<<"Gen particles not needed. They will be deactivated!"<<endl;
+    _Gen->unBranch();
+  }
   else {
     if(need_cut[CUTS::eGTau]) genMaper[15] = new GenFill(2, CUTS::eGTau);
     if(need_cut[CUTS::eGTop]) genMaper[6] = new GenFill(2, CUTS::eGTop);
@@ -1186,6 +1197,29 @@ TLorentzVector Analyzer::matchJetToGen(const TLorentzVector& lvec, const PartSta
     }
   }
   return TLorentzVector(0,0,0,0);
+}
+
+
+
+////checks if reco object matchs a gen object.  If so, then reco object is for sure a correctly identified particle
+int Analyzer::matchToGenPdg(const TLorentzVector& lvec, double minDR) {
+  double _minDR=minDR;
+  int found=-1;
+  for(size_t i=0; i< _Gen->size(); i++) {
+
+    if(lvec.DeltaR(_Gen->p4(i)) <=_minDR) {
+      //only hard interaction
+
+      if( _Gen->status->at(i)<10){
+        found=i;
+        _minDR=lvec.DeltaR(_Gen->p4(i));
+      }
+    }
+  }
+  if (found>=0){
+    return _Gen->pdg_id->at(found);
+  }
+  return 0;
 }
 
 
@@ -1637,8 +1671,18 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
       part2 = lep2.p4(i2);
 
       if(stats.bmap.at("DiscrByDeltaR") && (part1.DeltaR(part2)) < stats.dmap.at("DeltaRCut")) continue;
-      if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge->at(i1) * lep2.charge->at(i2) <= 0)) continue;
-      else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge->at(i1) * lep2.charge->at(i2) >= 0)) continue;
+
+
+
+      if (stats.bmap.find("DiscrByOSLSType") != stats.bmap.end() ){
+        //if it is 1 or 0 it will end up in the bool map!!
+        if(stats.bmap.at("DiscrByOSLSType") && (lep1.charge->at(i1) * lep2.charge->at(i2) <= 0)) continue;
+      }else if (stats.dmap.find("DiscrByOSLSType") != stats.dmap.end() ){
+        if(lep1.charge->at(i1) * lep2.charge->at(i2) > 0) continue;
+      }else if (stats.smap.find("DiscrByOSLSType") != stats.smap.end() ){
+        if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge->at(i1) * lep2.charge->at(i2) <= 0)) continue;
+        else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge->at(i1) * lep2.charge->at(i2) >= 0)) continue;
+      }
 
       if( !passCutRange("CosDphi", cos(absnormPhi( part1.Phi() - part2.Phi())), stats)) continue;
 
@@ -1770,10 +1814,15 @@ void Analyzer::fill_histogram() {
 
   if(isData && blinded && maxCut == SignalRegion) return;
   const vector<string>* groups = histo.get_groups();
-  wgt = pu_weight;
-  if(distats["Run"].bmap["ApplyGenWeight"]) wgt *= (gen_weight > 0) ? 1.0 : -1.0;
-  //backup current weight
-  backup_wgt=wgt;
+  if(!isData){
+    wgt = pu_weight;
+    if(distats["Run"].bmap["ApplyGenWeight"]) wgt *= (gen_weight > 0) ? 1.0 : -1.0;
+    //backup current weight
+    backup_wgt=wgt;
+  }else{
+    wgt=1.;
+    backup_wgt=wgt;
+  }
 
   for(auto it: *groups) {
     fill_Folder(it, maxCut, histo);
@@ -1819,7 +1868,13 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, int
         ihisto.addVal(false, group, i, "Events", 1);
       }
     }
-    else ihisto.addVal(false, group,ihisto.get_maxfolder(), "Events", 1);
+    else{
+      ihisto.addVal(false, group,ihisto.get_maxfolder(), "Events", 1);
+      if(distats["Run"].bmap["ApplyGenWeight"]) {
+        //put the weighted events in bin 3
+        ihisto.addVal(2, group,ihisto.get_maxfolder(), "Events", (gen_weight > 0) ? 1.0 : -1.0);
+      }
+    }
     histAddVal(true, "Events");
     histAddVal(bestVertices, "NVertices");
   } else if(!isData && group == "FillGen") {
@@ -1856,8 +1911,23 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, int
     }
     histAddVal(active_part->at(CUTS::eGMuon)->size(), "NMuon");
 
-
-
+    double mass=0;
+    TLorentzVector lep1;
+    TLorentzVector lep2;
+    for(size_t i=0; i<_Gen->size(); i++){
+      //if a Z boson is explicitly there
+      if(abs(_Gen->pdg_id->at(i))==11 or abs(_Gen->pdg_id->at(i))==13 or abs(_Gen->pdg_id->at(i))==15){
+        if(lep1!=TLorentzVector(0,0,0,0)){
+          lep2= _Gen->p4(i);
+          mass=(lep1+lep2).M();
+          //cout<<"mass  leptons "<<mass<<endl;
+          break;
+        }else{
+          lep1= _Gen->p4(i);
+        }
+      }
+    }
+    histAddVal(mass, "LeptonMass");
   } else if(fillInfo[group]->type == FILLER::Single) {
     Particle* part = fillInfo[group]->part;
     CUTS ePos = fillInfo[group]->ePos;
@@ -2104,4 +2174,5 @@ double normPhi(double phi) {
 double absnormPhi(double phi) {
   return abs(normPhi(phi));
 }
+
 

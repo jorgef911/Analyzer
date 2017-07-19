@@ -14,7 +14,7 @@ struct CRTester;
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include <ctime>
+#include <chrono>
 
 #include <TDirectory.h>
 #include <TEnv.h>
@@ -93,6 +93,8 @@ private:
   TLorentzVector matchTauToGen(const TLorentzVector&, double);
   TLorentzVector matchJetToGen(const TLorentzVector&, const PartStats&, CUTS);
 
+  int matchToGenPdg(const TLorentzVector& lvec, double minDR);
+
 
   void getGoodParticles(int);
   void getGoodTauNu();
@@ -164,7 +166,6 @@ private:
   vector<Particle*> allParticles;
   vector<string> syst_names;
 
-
   static const unordered_map<string, CUTS> cut_num;
   static const unordered_map<CUTS, vector<CUTS>, EnumHash> adjList;
 
@@ -177,7 +178,7 @@ private:
   int leadIndex, maxCut, crbins=1;
   bool isData, CalculatePUSystematics, doSystematics;
 
-  vector<double>* Trigger_decision = 0;
+  vector<int>* Trigger_decision = 0;
   vector<int>* Trigger_decisionV1 = 0;
   vector<string>* Trigger_names = 0;
   float nTruePU = 0;
@@ -198,8 +199,11 @@ private:
   int SignalRegion = -1;
   bool blinded = true;
   clock_t start_time;
+  std::chrono::time_point<std::chrono::system_clock> start;
+
 };
 
 
 
 #endif
+
