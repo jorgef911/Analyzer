@@ -69,6 +69,7 @@ public:
   vector<double>* meta = 0;
   vector<double>* mphi = 0;
   vector<double>* menergy = 0;
+  vector<double>* charge = 0;
   unordered_map<string, PartStats> pstats;
   vector<TLorentzVector> Reco;
   vector<TLorentzVector> *cur_P;
@@ -171,8 +172,6 @@ public:
   Lepton(TTree*, string, string, vector<string>);
 
   void findExtraCuts();
-
-  vector<double>* charge = 0;
 
   virtual bool get_Iso(int, double, double) const {return false;}
 };

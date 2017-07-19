@@ -1635,8 +1635,18 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
       part2 = lep2.p4(i2);
 
       if(stats.bmap.at("DiscrByDeltaR") && (part1.DeltaR(part2)) < stats.dmap.at("DeltaRCut")) continue;
-      if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge->at(i1) * lep2.charge->at(i2) <= 0)) continue;
-      else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge->at(i1) * lep2.charge->at(i2) >= 0)) continue;
+
+
+
+      if (stats.bmap.find("DiscrByOSLSType") != stats.bmap.end() ){
+        //if it is 1 or 0 it will end up in the bool map!!
+        if(stats.bmap.at("DiscrByOSLSType") && (lep1.charge->at(i1) * lep2.charge->at(i2) <= 0)) continue;
+      }else if (stats.dmap.find("DiscrByOSLSType") != stats.dmap.end() ){
+        if(lep1.charge->at(i1) * lep2.charge->at(i2) > 0) continue;
+      }else if (stats.smap.find("DiscrByOSLSType") != stats.smap.end() ){
+        if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge->at(i1) * lep2.charge->at(i2) <= 0)) continue;
+        else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge->at(i1) * lep2.charge->at(i2) >= 0)) continue;
+      }
 
       if( !passCutRange("CosDphi", cos(absnormPhi( part1.Phi() - part2.Phi())), stats)) continue;
 

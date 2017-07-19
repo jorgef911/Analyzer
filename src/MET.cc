@@ -65,7 +65,10 @@ void Met::init(){
     systVec["MetUncl_Down"]->SetPtEtaPhiE(MetUnclDown[0],0,MetUnclDown[1],MetUnclDown[0]);
   }
   cur_P=&Reco;
-
+  activeSystematic="orig";
+  syst_HT[activeSystematic]=0.;
+  syst_MHT[activeSystematic]=0.;
+  syst_MHTphi[activeSystematic]=99.;
 }
 
 
