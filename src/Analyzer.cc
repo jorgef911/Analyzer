@@ -100,6 +100,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   cout << "setup start" << endl;
 
   BOOM= new TChain("TNT/BOOM");
+  infoFile=0;
 
   //gEnv->SetValue("TFile.Recover", 0);
 
@@ -145,7 +146,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
     for(auto &it : distats["Systematics"].bmap) {
       if( it.first == "useSystematics")
         doSystematics= it.second;
-      else if( it.second) {
+      else if( it.second and doSystematics) {
         syst_names.push_back(it.first);
         syst_parts.push_back(getArray());
       }
@@ -335,6 +336,42 @@ void Analyzer::setupCR(string var, double val) {
 
 ////destructor
 Analyzer::~Analyzer() {
+  clear_values();
+  delete BOOM;
+  delete _Electron;
+  delete _Muon;
+  delete _Tau;
+  delete _Jet;
+  if(!isData) delete _Gen;
+
+  for(auto pair: fillInfo) {
+    delete pair.second;
+    pair.second=nullptr;
+  }
+
+  for(auto e: Enum<CUTS>()) {
+    delete goodParts[e];
+    goodParts[e]=nullptr;
+  }
+  //for(auto &it: syst_parts) {
+    //for(auto e: Enum<CUTS>()) {
+      //if( it[e] != nullptr) {
+      //if(it.find(e) != it.end()){
+        //delete it[e];
+        //it[e]=nullptr;
+      //}
+      //}
+    //}
+  //}
+  for(auto it: testVec){
+    delete it;
+    it=nullptr;
+  }
+
+  for(int i=0; i < nTrigReq; i++) {
+    delete trigPlace[i];
+    delete trigName[i];
+  }
 
 }
 
@@ -447,7 +484,8 @@ void Analyzer::preprocess(int event) {
     ( event < 1000 && event % 100 == 0 ) ||
     ( event < 10000 && event % 1000 == 0 ) ||
     ( event >= 10000 && event % 10000 == 0 ) ) {
-       cout << setprecision(2)<<event << " Events analyzed "<< static_cast<double>(event)/nentries*100. <<"% done"<<endl;;
+       cout << setprecision(2)<<event << " Events analyzed "<< static_cast<double>(event)/nentries*100. <<"% done"<<endl;
+       cout << fixed;
   }
 }
 
@@ -1076,11 +1114,11 @@ void Analyzer::smearLepton(Lepton& lep, CUTS eGenPos, const PartStats& stats, st
         TLorentzVector genVec =  matchLeptonToGen(lep.Reco.at(i), lep.pstats["Smear"],eGenPos);
         if(genVec != TLorentzVector(0,0,0,0)) {
           if(syst=="orig"){
-            smearedPt = (genVec.Pt()*scale) + (lep.Reco[i].Pt() - genVec.Pt())*(resolution);
+            smearedPt = ((genVec.Pt()*scale) + (lep.Reco[i].Pt() - genVec.Pt())*(resolution))/lep.Reco[i].Pt();
           }else if(dores){
-            smearedPt = (genVec.Pt()*scale) + (lep.Reco[i].Pt() - genVec.Pt())*(syst_res);
+            smearedPt = ((genVec.Pt()*scale) + (lep.Reco[i].Pt() - genVec.Pt())*(syst_res))/lep.Reco[i].Pt();
           }else if(doscale){
-            smearedPt = (genVec.Pt()*(syst_scale)) + (lep.Reco[i].Pt() - genVec.Pt())*(resolution);
+            smearedPt = ((genVec.Pt()*(syst_scale)) + (lep.Reco[i].Pt() - genVec.Pt())*(resolution))/lep.Reco[i].Pt();
           }
           //double smearedEta =(genVec.Eta()*stats.dmap.at("EtaScaleOffset")) + (lep.Reco[i].Eta() - genVec.Eta())*stats.dmap.at("EtaSigmaOffset");
           //double smearedPhi = (genVec.Phi() * stats.dmap.at("PhiScaleOffset")) + (lep.Reco[i].Phi() - genVec.Phi())*stats.dmap.at("PhiSigmaOffset");
@@ -1089,9 +1127,7 @@ void Analyzer::smearLepton(Lepton& lep, CUTS eGenPos, const PartStats& stats, st
         //}else{
           //cout<<"no gen"<<endl;
         }
-        //cout<<"before: "<<lep.Reco[i].Pt()<<" sf  "<<smearedPt<<" syst "<<syst <<endl;
         systematics.shiftParticle(lep, lep.Reco[i], smearedPt, _MET->systdeltaMEx[syst], _MET->systdeltaMEy[syst], syst);
-        //cout<<"after: "<<lep.systVec[syst]->at(i).Pt()<<endl;
       }
     }
   }
@@ -1106,7 +1142,8 @@ void Analyzer::smearJet(Particle& jet, const CUTS eGenPos, const PartStats& stat
     return;
   }
   //add energy scale uncertainty
-  if( !( isData || !stats.bmap.at("SmearTheJet") ) ) {
+  if( !isData || stats.bmap.at("SmearTheJet") || syst!="orig" ){
+  //if( !( isData || !stats.bmap.at("SmearTheJet") || syst!="orig" ) ) {
     if(syst=="orig"){
       //only for jets we want to use smearing
       jet.systVec["orig"]->clear();
@@ -1124,19 +1161,25 @@ void Analyzer::smearJet(Particle& jet, const CUTS eGenPos, const PartStats& stat
       if(jet.type == PType::Jet){
 
         TLorentzVector genJet=matchJetToGen(jet.Reco[i], jet.pstats["Smear"],eGenPos);
-        if(syst=="orig"){
+        if(syst=="orig" and stats.bmap.at("SmearTheJet")){
           sf=jetScaleRes.GetRes(jet.Reco[i],genJet, rho, 0);
         }else if(syst=="Jet_Res_Up"){
           sf=jetScaleRes.GetRes(jet.Reco[i],genJet, rho, 1);
         }else if(syst=="Jet_Res_Down"){
           sf=jetScaleRes.GetRes(jet.Reco[i],genJet, rho, -1);
         }else if(syst=="Jet_Scale_Up"){
-          sf = 1.+ jetScaleRes.GetScale(jet.Reco[i], false, +1.);
+          sf = jetScaleRes.GetScale(jet.Reco[i], false, +1.);
         }else if(syst=="Jet_Scale_Down"){
-          sf = 1.- jetScaleRes.GetScale(jet.Reco[i], false, -1) ;
+          sf = jetScaleRes.GetScale(jet.Reco[i], false, -1) ;
         }
       }
+      //if(abs(sf-1)>0.5){
+        //cout<<"before: "<<jet.Reco[i].Pt()<<" sf  "<<sf<<" syst "<<syst <<endl;
+      //}
       systematics.shiftParticle(jet, jet.Reco[i], sf, _MET->systdeltaMEx[syst], _MET->systdeltaMEy[syst], syst);
+      //if(abs(sf-1)>0.5){
+        //cout<<"after: "<<jet.systVec[syst]->at(i).Pt()<<endl;
+      //}
     }
   }
   jet.setCurrentP(syst);
@@ -1862,7 +1905,7 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, int
    * histAddVal(val, name) histo.addVal(val, group, max, name, wgt)
    * so each histogram knows the group, max and weight!
    */
-  if(group == "FillRun") {
+  if(group == "FillRun" and syst==-1) {
     if(crbins != 1) {
       for(int i = 0; i < crbins; i++) {
         ihisto.addVal(false, group, i, "Events", 1);
