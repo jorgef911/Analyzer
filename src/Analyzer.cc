@@ -1014,7 +1014,7 @@ void Analyzer::getGoodGen(const PartStats& stats) {
 
   for(size_t j = 0; j < _Gen->pt->size(); j++) {
     int id = abs(_Gen->pdg_id->at(j));
-    if(genMaper[id] != nullptr && _Gen->pdg_id->at(j) == genMaper[id]->status) {
+    if(genMaper[id] != nullptr && _Gen->status->at(j) == genMaper[id]->status) {
       if(id == 15 && (_Gen->pt->at(j) < stats.pmap.at("TauPtCut").first || _Gen->pt->at(j) > stats.pmap.at("TauPtCut").second || abs(_Gen->eta->at(j)) > stats.dmap.at("TauEtaCut"))) continue;
       goodParts[genMaper[id]->ePos]->push_back(j);
     }
