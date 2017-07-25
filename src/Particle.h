@@ -46,8 +46,11 @@ public:
   double eta(uint) const;
   double phi(uint) const;
   double energy(uint) const;
+  virtual double charge(uint) const;
   TLorentzVector p4(uint) const;
   TLorentzVector& p4(uint);
+  TLorentzVector RecoP4(uint) const;
+  TLorentzVector& RecoP4(uint);
 
   uint size() const;
   vector<TLorentzVector>::iterator begin();
@@ -55,26 +58,21 @@ public:
   vector<TLorentzVector>::const_iterator begin() const;
   vector<TLorentzVector>::const_iterator end() const;
 
-  void setPtEtaPhiESyst(uint, double, double, double, double, string);
-  void addPtEtaPhiESyst(double, double, double, double, string);
-  void addP4Syst(TLorentzVector, string);
-  void setCurrentP(string);
+  void addPtEtaPhiESyst(double, double, double, double, int);
+  void addP4Syst(TLorentzVector, int);
+  void setOrigReco();
+  void setCurrentP(int);
   string getName() {return GenName;};
 
   PType type;
   vector<CUTS> extraCuts;
   const map<PType,CUTS> cutMap = {{PType::Electron, CUTS::eGElec}, {PType::Muon, CUTS::eGMuon},
-  {PType::Tau, CUTS::eGTau}};
-  vector<double>* mpt = 0;
-  vector<double>* meta = 0;
-  vector<double>* mphi = 0;
-  vector<double>* menergy = 0;
-  vector<double>* charge = 0;
+				  {PType::Tau, CUTS::eGTau}};
   unordered_map<string, PartStats> pstats;
-  vector<TLorentzVector> Reco;
-  vector<TLorentzVector> *cur_P;
 
-  unordered_map<string, vector<TLorentzVector>* > systVec;
+
+
+
   string activeSystematic;
 
 protected:
@@ -82,6 +80,16 @@ protected:
   TTree* BOOM;
   string GenName;
 
+ private:
+  vector<double>* mpt = 0;
+  vector<double>* meta = 0;
+  vector<double>* mphi = 0;
+  vector<double>* menergy = 0;
+
+  vector<TLorentzVector> Reco;
+  vector<TLorentzVector> *cur_P;
+  vector<string> syst_names;
+  vector<vector<TLorentzVector>* > systVec;
 };
 
 class Photon : public Particle {
@@ -172,6 +180,9 @@ public:
   Lepton(TTree*, string, string, vector<string>);
 
   void findExtraCuts();
+  double charge(uint)const;
+  vector<double>* _charge = 0;
+
 
   virtual bool get_Iso(int, double, double) const {return false;}
 };

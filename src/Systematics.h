@@ -22,8 +22,12 @@ public:
 
   void init();
 
-  void shiftParticle(Particle& jet, TLorentzVector recJet, double const& ratio, double& dPx, double& dPy, string syst);
+  void shiftParticle(Particle& jet, TLorentzVector recJet, double const& ratio, double& dPx, double& dPy, int syst);
+  void shiftLepton(Lepton& lepton, TLorentzVector recoLep, TLorentzVector genLep, double& dPx, double& dPy, int syst);
+  void loadScaleRes(const PartStats& smear, const PartStats& syst, string syst_name);
 
 private:
+  double scale;
+  double resolution;
 };
 #endif /*Systematics_hh*/

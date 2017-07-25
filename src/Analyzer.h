@@ -84,8 +84,8 @@ private:
   void initializeTrigger();
   void setCutNeeds();
 
-  void smearLepton(Lepton&, CUTS, const PartStats&, string syst="orig");
-  void smearJet(Particle&, CUTS, const PartStats&, string syst="orig");
+  void smearLepton(Lepton&, CUTS, const PartStats&, const PartStats&, int syst=0);
+  void smearJet(Particle&, CUTS, const PartStats&, int syst=0);
 
   bool JetMatchesLepton(const Lepton&, const TLorentzVector&, double, CUTS);
   TLorentzVector matchLeptonToGen(const TLorentzVector&, const PartStats&, CUTS);
@@ -98,14 +98,14 @@ private:
   void getGoodParticles(int);
   void getGoodTauNu();
   void getGoodGen(const PartStats&);
-  void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&, const string&);
-  void getGoodRecoJets(CUTS, const PartStats&, const string&);
-  void getGoodRecoFatJets(CUTS, const PartStats&, const string&);
+  void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&, const int);
+  void getGoodRecoJets(CUTS, const PartStats&, const int);
+  void getGoodRecoFatJets(CUTS, const PartStats&, const int);
 
-  void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&, const string&);
-  void getGoodDiJets(const PartStats&, const string&);
+  void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&, const int);
+  void getGoodDiJets(const PartStats&, const int);
 
-  void VBFTopologyCut(const PartStats&, const string&);
+  void VBFTopologyCut(const PartStats&, const int);
   void TriggerCuts(vector<int>&, const vector<string>&, CUTS);
 
 

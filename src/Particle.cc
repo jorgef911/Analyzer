@@ -4,13 +4,13 @@
 #define SetBranch(name, variable) BOOM->SetBranchStatus(name, 1);  BOOM->SetBranchAddress(name, &variable);
 
 //particle is a objet that stores multiple versions of the particle candidates
-Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string> syst_names) : BOOM(_BOOM), GenName(_GenName) {
+Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string> _syst_names) : BOOM(_BOOM), GenName(_GenName), syst_names(_syst_names) {
   type = PType::None;
   getPartStats(filename);
 
-  systVec["orig"] = new vector<TLorentzVector>();
-  for( auto name : syst_names) {
-    systVec[name] = new vector<TLorentzVector>();
+  systVec.push_back(new vector<TLorentzVector>());
+  for( auto item : syst_names) {
+    systVec.push_back(new vector<TLorentzVector>());
   }
 
   //set the pt to an empty vector if the branch does not exist
@@ -25,56 +25,46 @@ Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string
     SetBranch((GenName+"_energy").c_str(), menergy);
   }
 
-  activeSystematic="orig";
+  //  activeSystematic="orig";
 }
 
-//void Particle::setPtEtaPhiESyst(uint index,double ipt,double ieta, double iphi, double ienergy, string syst){
-  //if(systVec[syst]->size()< index ){
-    //cout<<"syst  "<<syst<<" at index "<<index<<" does not exist"<<"  size "<<systVec[syst]->size()<<endl;
-  //}
-  //systVec[syst]->at(index).SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
-//}
-
-void Particle::addPtEtaPhiESyst(double ipt,double ieta, double iphi, double ienergy, string syst){
-  if(systVec[syst]->size()==Reco.size()){
-    systVec[syst]->clear();
-  }
+void Particle::addPtEtaPhiESyst(double ipt,double ieta, double iphi, double ienergy, int syst){
+  // if(systVec[syst]->size()==Reco.size()){
+  //   systVec[syst]->clear();
+  // }
   TLorentzVector mp4;
   mp4.SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
-  systVec[syst]->push_back(mp4);
+  systVec.at(syst)->push_back(mp4);
 }
 
 
-void Particle::addP4Syst(TLorentzVector mp4, string syst){
-  //if(systVec[syst]->size()==Reco.size()){
-    //cout<<"Something is rotten in the state of Denmark."<<endl;
-    //cout<<systVec[syst]->size()<<"  "<<Reco.size()<<"  for "<< syst<<endl;
-    //raise(SIGSEGV);
-    //systVec[syst]->clear();
-  //}
-  systVec[syst]->push_back(mp4);
+void Particle::addP4Syst(TLorentzVector mp4, int syst){
+  systVec.at(syst)->push_back(mp4);
 }
 
 
 void Particle::init(){
     //cleanup of the particles
   Reco.clear();
-  for(auto &it: systVec){
-    it.second->clear();
+  for(auto it: systVec){
+    it->clear();
   }
   TLorentzVector tmp;
   for(uint i=0; i < mpt->size(); i++) {
     tmp.SetPtEtaPhiE(mpt->at(i),meta->at(i),mphi->at(i),menergy->at(i));
     Reco.push_back(tmp);
-    systVec["orig"]->push_back(tmp);
+
   }
-  setCurrentP("orig");
+  setCurrentP(-1);
+
 }
 
 double Particle::pt(uint index)const         {return cur_P->at(index).Pt();}
 double Particle::eta(uint index)const        {return cur_P->at(index).Eta();}
 double Particle::phi(uint index)const        {return cur_P->at(index).Phi();}
 double Particle::energy(uint index)const     {return cur_P->at(index).E();}
+double Particle::charge(uint index)const     {return 0;}
+double Lepton::charge(uint index)const     {return _charge->at(index);}
 uint Particle::size()const                   {return Reco.size();}
 vector<TLorentzVector>::iterator Particle::begin(){ return cur_P->begin();}
 vector<TLorentzVector>::iterator Particle::end(){ return cur_P->end();}
@@ -84,15 +74,29 @@ vector<TLorentzVector>::const_iterator Particle::end()const { return cur_P->end(
 
 TLorentzVector Particle::p4(uint index)const {return (cur_P->at(index));}
 TLorentzVector& Particle::p4(uint index) {return cur_P->at(index);}
+TLorentzVector Particle::RecoP4(uint index)const {return Reco.at(index);}
+TLorentzVector& Particle::RecoP4(uint index) {return Reco.at(index);}
+
+void Particle::setOrigReco() {
+  /////memory loss here if no smear and new vector. Only once, so ignore for now...
+  
+  systVec.at(0) = &Reco;
+}
 
 
-void Particle::setCurrentP(string syst){
+void Particle::setCurrentP(int syst){
   //if (systVec[syst]->size()!=Reco.size()){
     //cout<<"Rebel on. This does not work"<<endl;
     //cout<<syst<<" vector has not been filled for "<<GenName<<endl;
   //}
-  cur_P = systVec[syst];
-  activeSystematic=syst;
+  if(syst == -1) {
+    cur_P = &Reco;
+  } else if( systVec.at(syst)->size() == 0) {
+    cur_P = systVec.at(0);  //orig
+  } else {
+    cur_P = systVec.at(syst);
+  }
+  //  activeSystematic=syst;
 }
 
 
@@ -230,7 +234,7 @@ vector<CUTS> FatJet::overlapCuts(CUTS ePos) {
 
 
 Lepton::Lepton(TTree* _BOOM, string GenName, string EndName, vector<string> syst_names) : Particle(_BOOM, GenName, EndName, syst_names) {
-  SetBranch((GenName+"_charge").c_str(), charge);
+  SetBranch((GenName+"_charge").c_str(), _charge);
 }
 
 void Lepton::findExtraCuts() {
@@ -369,13 +373,13 @@ void Taus::findExtraCuts() {
 
 bool Electron::get_Iso(int index, double min, double max) const {
   double maxIsoval = std::max(0.0, isoNeutralHadrons->at(index) + isoPhotons->at(index) - 0.5 * isoPU->at(index));
-  double isoSum = (isoChargedHadrons->at(index) + maxIsoval) / cur_P->at(index).Pt();
+  double isoSum = (isoChargedHadrons->at(index) + maxIsoval) / pt(index);
   return (isoSum >= min && isoSum < max);
 }
 
 bool Muon::get_Iso(int index, double min, double max) const {
   double maxIsoval = std::max(0.0, isoNeutralHadron->at(index) + isoPhoton->at(index) - 0.5 * isoPU->at(index));
-  double isoSum = (isoCharged->at(index) + maxIsoval) / cur_P->at(index).Pt();
+  double isoSum = (isoCharged->at(index) + maxIsoval) / pt(index);
   return (isoSum >= min && isoSum < max);
 }
 
