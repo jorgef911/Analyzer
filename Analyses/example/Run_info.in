@@ -34,6 +34,8 @@ MhtCut 50.0
 DiscrByHT false
 HtCut 30.0
 
+
+ApplyJetLooseIDforMhtAndHt true
 JetPtForMhtAndHt 30.0
 JetEtaForMhtAndHt 5.0
 ApplyJetLo
