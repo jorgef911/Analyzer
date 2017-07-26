@@ -124,6 +124,7 @@ private:
   void create_fillInfo();
 
   inline bool passCutRange(string, double, const PartStats&);
+  bool passCutRange(double, const pair<double, double>&);
 
   void updateMet(string syst="orig");
   void treatMuons_Met(string syst="orig");

@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <iostream>
 
 #include <TTree.h>
@@ -27,6 +28,7 @@ struct PartStats {
   unordered_map<string,string> smap;
   unordered_map<string,pair<double,double> > pmap;
   unordered_map<string,bool> bmap;
+  unordered_set<string> bset;
 };
 
 

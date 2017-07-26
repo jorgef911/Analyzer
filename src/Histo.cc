@@ -114,10 +114,10 @@ Histogramer::~Histogramer() {
   if(outfile != nullptr)
     outfile->Close();
 
-  for(auto it: data_order) {
-    delete data[it];
-    data[it] = nullptr;
-  }
+  // for(auto it: data_order) {
+  //   delete data[it];
+  //   data[it] = nullptr;
+  // }
 }
 
 

@@ -8,7 +8,6 @@ Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string
   type = PType::None;
   getPartStats(filename);
 
-  systVec.push_back(new vector<TLorentzVector>());
   for( auto item : syst_names) {
     systVec.push_back(new vector<TLorentzVector>());
   }
@@ -56,6 +55,7 @@ void Particle::init(){
 
   }
   setCurrentP(-1);
+  //  cout << "size: " << size() <<endl;
 
 }
 
@@ -89,6 +89,7 @@ void Particle::setCurrentP(int syst){
     //cout<<"Rebel on. This does not work"<<endl;
     //cout<<syst<<" vector has not been filled for "<<GenName<<endl;
   //}
+  //  if(syst != -1)  cout << syst << " has " << systVec.at(syst)->size() << endl;
   if(syst == -1) {
     cur_P = &Reco;
   } else if( systVec.at(syst)->size() == 0) {
@@ -133,8 +134,8 @@ void Particle::getPartStats(string filename) {
       exit(1);
     } else if(stemp.size() == 2) {
 
-      if(stemp[1] == "1" || stemp[1] == "true" ) pstats[group].bmap[stemp[0]] = true;
-      else if(stemp[1] == "0"  || stemp[1] == "false" ) pstats[group].bmap[stemp[0]]=false;
+      if(stemp[1] == "1" || stemp[1] == "true" ) pstats[group].bset.insert(stemp[0]);
+      //      else if(stemp[1] == "0"  || stemp[1] == "false" ) pstats[group]bmap[stemp[0]]=false;
 
       else if(stemp[1].find_first_not_of("0123456789+-.") == string::npos) pstats[group].dmap[stemp[0]]=stod(stemp[1]);
       else pstats[group].smap[stemp[0]] = stemp[1];
@@ -179,24 +180,24 @@ Jet::Jet(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_B
 }
 
 void Jet::findExtraCuts() {
-  if(pstats["Smear"].bmap.at("SmearTheJet")) {
-    extraCuts.push_back(CUTS::eGMuon);
-    extraCuts.push_back(CUTS::eGElec);
-    extraCuts.push_back(CUTS::eGTau);
-    extraCuts.push_back(CUTS::eGJet);
-  }
+  // if(pstats["Smear"].bmap.at("SmearTheJet")) {
+  //   extraCuts.push_back(CUTS::eGMuon);
+  //   extraCuts.push_back(CUTS::eGElec);
+  //   extraCuts.push_back(CUTS::eGTau);
+  //   extraCuts.push_back(CUTS::eGJet);
+  // }
 
 }
 
 vector<CUTS> Jet::overlapCuts(CUTS ePos) {
   string pName = jetNameMap.at(ePos);
   vector<CUTS> returnCuts;
-  if(pstats.at(pName).bmap.at("RemoveOverlapWithMuon1s")) returnCuts.push_back(CUTS::eRMuon1);
-  if(pstats[pName].bmap.at("RemoveOverlapWithMuon2s")) returnCuts.push_back(CUTS::eRMuon2);
-  if(pstats[pName].bmap.at("RemoveOverlapWithElectron1s")) returnCuts.push_back(CUTS::eRElec1);
-  if(pstats[pName].bmap.at("RemoveOverlapWithElectron2s")) returnCuts.push_back(CUTS::eRElec2);
-  if(pstats[pName].bmap.at("RemoveOverlapWithTau1s")) returnCuts.push_back(CUTS::eRTau1);
-  if(pstats[pName].bmap.at("RemoveOverlapWithTau2s")) returnCuts.push_back(CUTS::eRTau2);
+  // if(pstats.at(pName).bmap.at("RemoveOverlapWithMuon1s")) returnCuts.push_back(CUTS::eRMuon1);
+  // if(pstats[pName].bmap.at("RemoveOverlapWithMuon2s")) returnCuts.push_back(CUTS::eRMuon2);
+  // if(pstats[pName].bmap.at("RemoveOverlapWithElectron1s")) returnCuts.push_back(CUTS::eRElec1);
+  // if(pstats[pName].bmap.at("RemoveOverlapWithElectron2s")) returnCuts.push_back(CUTS::eRElec2);
+  // if(pstats[pName].bmap.at("RemoveOverlapWithTau1s")) returnCuts.push_back(CUTS::eRTau1);
+  // if(pstats[pName].bmap.at("RemoveOverlapWithTau2s")) returnCuts.push_back(CUTS::eRTau2);
 
   return returnCuts;
 }
@@ -212,22 +213,22 @@ FatJet::FatJet(TTree* _BOOM, string filename, vector<string> syst_names) : Parti
 }
 
 void FatJet::findExtraCuts() {
-  if(pstats["Smear"].bmap.at("SmearTheJet")) {
-    extraCuts.push_back(CUTS::eGMuon);
-    extraCuts.push_back(CUTS::eGElec);
-    extraCuts.push_back(CUTS::eGTau);
-  }
+  // if(pstats["Smear"].bmap.at("SmearTheJet")) {
+  //   extraCuts.push_back(CUTS::eGMuon);
+  //   extraCuts.push_back(CUTS::eGElec);
+  //   extraCuts.push_back(CUTS::eGTau);
+  // }
 }
 
 vector<CUTS> FatJet::overlapCuts(CUTS ePos) {
   string pName = jetNameMap.at(ePos);
   vector<CUTS> returnCuts;
-  if(pstats.at(pName).bmap.at("RemoveOverlapWithMuon1s")) returnCuts.push_back(CUTS::eRMuon1);
-  if(pstats[pName].bmap.at("RemoveOverlapWithMuon2s")) returnCuts.push_back(CUTS::eRMuon2);
-  if(pstats[pName].bmap.at("RemoveOverlapWithElectron1s")) returnCuts.push_back(CUTS::eRElec1);
-  if(pstats[pName].bmap.at("RemoveOverlapWithElectron2s")) returnCuts.push_back(CUTS::eRElec2);
-  if(pstats[pName].bmap.at("RemoveOverlapWithTau1s")) returnCuts.push_back(CUTS::eRTau1);
-  if(pstats[pName].bmap.at("RemoveOverlapWithTau2s")) returnCuts.push_back(CUTS::eRTau2);
+  // if(pstats.at(pName).bmap.at("RemoveOverlapWithMuon1s")) returnCuts.push_back(CUTS::eRMuon1);
+  // if(pstats[pName].bmap.at("RemoveOverlapWithMuon2s")) returnCuts.push_back(CUTS::eRMuon2);
+  // if(pstats[pName].bmap.at("RemoveOverlapWithElectron1s")) returnCuts.push_back(CUTS::eRElec1);
+  // if(pstats[pName].bmap.at("RemoveOverlapWithElectron2s")) returnCuts.push_back(CUTS::eRElec2);
+  // if(pstats[pName].bmap.at("RemoveOverlapWithTau1s")) returnCuts.push_back(CUTS::eRTau1);
+  // if(pstats[pName].bmap.at("RemoveOverlapWithTau2s")) returnCuts.push_back(CUTS::eRTau2);
 
   return returnCuts;
 }
@@ -238,51 +239,51 @@ Lepton::Lepton(TTree* _BOOM, string GenName, string EndName, vector<string> syst
 }
 
 void Lepton::findExtraCuts() {
-  if(pstats["Smear"].bmap.at("SmearTheParticle") || pstats["Smear"].bmap.at("MatchToGen")) {
-    extraCuts.push_back(cutMap.at(type));
-  }
+  // if(pstats["Smear"].bmap.at("SmearTheParticle") || pstats["Smear"].bmap.at("MatchToGen")) {
+  //   extraCuts.push_back(cutMap.at(type));
+  // }
 }
 
 Electron::Electron(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "patElectron", filename, syst_names) {
   type = PType::Electron;
-  if(pstats["Elec1"].bmap["DoDiscrByIsolation"] || pstats["Elec2"].bmap["DoDiscrByIsolation"]) {
+  //  if(pstats["Elec1"].bmap["DoDiscrByIsolation"] || pstats["Elec2"].bmap["DoDiscrByIsolation"]) {
     SetBranch("patElectron_isoChargedHadrons", isoChargedHadrons);
     SetBranch("patElectron_isoNeutralHadrons", isoNeutralHadrons);
     SetBranch("patElectron_isoPhotons", isoPhotons);
     SetBranch("patElectron_isoPU", isoPU);
-  }
-  if(pstats["Elec1"].bmap["DoDiscrByVetoID"] || pstats["Elec2"].bmap["DoDiscrByVetoID"]) {
+    //  }
+    //  if(pstats["Elec1"].bmap["DoDiscrByVetoID"] || pstats["Elec2"].bmap["DoDiscrByVetoID"]) {
     SetBranch("patElectron_isPassVeto", isPassVeto);
-  }
-  if(pstats["Elec1"].bmap["DoDiscrByLooseID"] || pstats["Elec2"].bmap["DoDiscrByLooseID"]) {
+    //  }
+    //  if(pstats["Elec1"].bmap["DoDiscrByLooseID"] || pstats["Elec2"].bmap["DoDiscrByLooseID"]) {
     SetBranch("patElectron_isPassLoose", isPassLoose);
-  }
-  if(pstats["Elec1"].bmap["DoDiscrByMediumID"] || pstats["Elec2"].bmap["DoDiscrByMediumID"]) {
+    //  }
+    //  if(pstats["Elec1"].bmap["DoDiscrByMediumID"] || pstats["Elec2"].bmap["DoDiscrByMediumID"]) {
     SetBranch("patElectron_isPassMedium", isPassMedium);
-  }
-  if(pstats["Elec1"].bmap["DoDiscrByTightID"] || pstats["Elec2"].bmap["DoDiscrByTightID"]) {
+    //  }
+    //  if(pstats["Elec1"].bmap["DoDiscrByTightID"] || pstats["Elec2"].bmap["DoDiscrByTightID"]) {
     SetBranch("patElectron_isPassTight", isPassTight);
-  }
-  if(pstats["Elec1"].bmap["DoDiscrByHEEPID"] || pstats["Elec2"].bmap["DoDiscrByHEEPID"]) {
+    //  }
+    //  if(pstats["Elec1"].bmap["DoDiscrByHEEPID"] || pstats["Elec2"].bmap["DoDiscrByHEEPID"]) {
     SetBranch("patElectron_isPassHEEPId", isPassHEEPId);
-  }
+    //  }
 }
 
 Muon::Muon(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "Muon", filename, syst_names) {
   type = PType::Muon;
 
-  if(pstats["Muon1"].bmap["DoDiscrByTightID"] || pstats["Muon2"].bmap["DoDiscrByTightID"]) {
+  //  if(pstats["Muon1"].bmap["DoDiscrByTightID"] || pstats["Muon2"].bmap["DoDiscrByTightID"]) {
     SetBranch("Muon_tight", tight);
-  }
-  if(pstats["Muon1"].bmap["DoDiscrBySoftID"] || pstats["Muon2"].bmap["DoDiscrBySoftID"]) {
+    //  }
+    //  if(pstats["Muon1"].bmap["DoDiscrBySoftID"] || pstats["Muon2"].bmap["DoDiscrBySoftID"]) {
     SetBranch("Muon_soft", soft);
-  }
-  if(pstats["Muon1"].bmap["DoDiscrByIsolation"] || pstats["Muon2"].bmap["DoDiscrByIsolation"]) {
+    //  }
+    //  if(pstats["Muon1"].bmap["DoDiscrByIsolation"] || pstats["Muon2"].bmap["DoDiscrByIsolation"]) {
     SetBranch("Muon_isoCharged", isoCharged);
     SetBranch("Muon_isoNeutralHadron", isoNeutralHadron);
     SetBranch("Muon_isoPhoton", isoPhoton);
     SetBranch("Muon_isoPU", isoPU);
-  }
+    //  }
 }
 
 ///////fix against stuff
@@ -359,14 +360,14 @@ Taus::Taus(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_B
 void Taus::findExtraCuts() {
   Lepton::findExtraCuts();
 
-  if(pstats["Tau1"].bmap.at("RemoveOverlapWithMuon1s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithMuon1s"))
-  extraCuts.push_back(CUTS::eRMuon1);
-  if(pstats["Tau1"].bmap.at("RemoveOverlapWithMuon2s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithMuon2s"))
-  extraCuts.push_back(CUTS::eRMuon2);
-  if(pstats["Tau1"].bmap.at("RemoveOverlapWithElectron1s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithElectron1s"))
-  extraCuts.push_back(CUTS::eRElec1);
-  if(pstats["Tau1"].bmap.at("RemoveOverlapWithElectron2s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithElectron2s"))
-  extraCuts.push_back(CUTS::eRElec2);
+  // if(pstats["Tau1"].bmap.at("RemoveOverlapWithMuon1s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithMuon1s"))
+  // extraCuts.push_back(CUTS::eRMuon1);
+  // if(pstats["Tau1"].bmap.at("RemoveOverlapWithMuon2s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithMuon2s"))
+  // extraCuts.push_back(CUTS::eRMuon2);
+  // if(pstats["Tau1"].bmap.at("RemoveOverlapWithElectron1s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithElectron1s"))
+  // extraCuts.push_back(CUTS::eRElec1);
+  // if(pstats["Tau1"].bmap.at("RemoveOverlapWithElectron2s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithElectron2s"))
+  // extraCuts.push_back(CUTS::eRElec2);
 }
 
 
