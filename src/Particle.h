@@ -20,6 +20,7 @@
 #include "Cut_enum.h"
 
 using namespace std;
+typedef unsigned int uint;
 
 struct PartStats {
   unordered_map<string,double> dmap;
@@ -35,26 +36,46 @@ class Particle {
 
 public:
   Particle();
-  Particle(TTree*, string, string);
+  Particle(TTree*, string, string, vector<string>);
   virtual ~Particle() {}
 
   virtual void findExtraCuts() {}
-
-  vector<CUTS> extraCuts;
-
+  void init();
   void unBranch();
-  PType type;
+  double pt(uint) const;
+  double eta(uint) const;
+  double phi(uint) const;
+  double energy(uint) const;
+  TLorentzVector p4(uint) const;
+  TLorentzVector& p4(uint);
 
+  uint size() const;
+  vector<TLorentzVector>::iterator begin();
+  vector<TLorentzVector>::iterator end();
+  vector<TLorentzVector>::const_iterator begin() const;
+  vector<TLorentzVector>::const_iterator end() const;
+
+  void setPtEtaPhiESyst(uint, double, double, double, double, string);
+  void addPtEtaPhiESyst(double, double, double, double, string);
+  void addP4Syst(TLorentzVector, string);
+  void setCurrentP(string);
+  string getName() {return GenName;};
+
+  PType type;
+  vector<CUTS> extraCuts;
   const map<PType,CUTS> cutMap = {{PType::Electron, CUTS::eGElec}, {PType::Muon, CUTS::eGMuon},
   {PType::Tau, CUTS::eGTau}};
-
-
-  vector<double>* pt = 0;
-  vector<double>* eta = 0;
-  vector<double>* phi = 0;
-  vector<double>* energy = 0;
+  vector<double>* mpt = 0;
+  vector<double>* meta = 0;
+  vector<double>* mphi = 0;
+  vector<double>* menergy = 0;
+  vector<double>* charge = 0;
   unordered_map<string, PartStats> pstats;
-  vector<TLorentzVector> smearP;
+  vector<TLorentzVector> Reco;
+  vector<TLorentzVector> *cur_P;
+
+  unordered_map<string, vector<TLorentzVector>* > systVec;
+  string activeSystematic;
 
 protected:
   void getPartStats(string);
@@ -66,7 +87,7 @@ protected:
 class Photon : public Particle {
 public:
   Photon();
-  Photon(TTree*, string);
+  Photon(TTree*, string, vector<string>);
 
   vector<double>* et = 0;
   vector<double>* hoverE = 0;
@@ -86,7 +107,7 @@ class Generated : public Particle {
 
 public:
   Generated();
-  Generated(TTree*, string);
+  Generated(TTree*, string, vector<string>);
 
   vector<double>  *pdg_id = 0;
   vector<double>  *motherpdg_id = 0;
@@ -99,7 +120,7 @@ public:
 class Jet : public Particle {
 
 public:
-  Jet(TTree*, string);
+  Jet(TTree*, string, vector<string>);
 
   unordered_map<CUTS, string, EnumHash> jetNameMap = {
     {CUTS::eRJet1, "Jet1"},               {CUTS::eRJet2, "Jet2"},
@@ -129,7 +150,7 @@ public:
 class FatJet : public Particle {
 
 public:
-  FatJet(TTree*, string);
+  FatJet(TTree*, string, vector<string>);
 
   unordered_map<CUTS, string, EnumHash> jetNameMap = {
     {CUTS::eRWjet, "Wjet"}
@@ -148,11 +169,9 @@ public:
 class Lepton : public Particle {
 
 public:
-  Lepton(TTree*, string, string);
+  Lepton(TTree*, string, string, vector<string>);
 
   void findExtraCuts();
-
-  vector<double>* charge = 0;
 
   virtual bool get_Iso(int, double, double) const {return false;}
 };
@@ -160,7 +179,7 @@ public:
 class Electron : public Lepton {
 
 public:
-  Electron(TTree*, string);
+  Electron(TTree*, string, vector<string>);
 
   bool get_Iso(int, double, double) const;
 
@@ -180,7 +199,7 @@ public:
 class Muon : public Lepton {
 
 public:
-  Muon(TTree*, string);
+  Muon(TTree*, string, vector<string>);
 
   bool get_Iso(int, double, double) const;
 
@@ -195,7 +214,7 @@ public:
 class Taus : public Lepton {
 
 public:
-  Taus(TTree*, string);
+  Taus(TTree*, string, vector<string>);
 
   void findExtraCuts();
 
@@ -203,11 +222,14 @@ public:
 
   vector<int>     *decayModeFindingNewDMs = 0;
   vector<double>  *nProngs = 0;
+  vector<int>  *decayMode = 0;
   pair<vector<int>*,vector<int>* > againstElectron = make_pair(nullptr,nullptr);
   pair<vector<int>*,vector<int>* > againstMuon = make_pair(nullptr,nullptr);
   pair<vector<int>*,vector<int>* > minIso = make_pair(nullptr,nullptr);
   pair<vector<int>*,vector<int>* > maxIso = make_pair(nullptr,nullptr);
   vector<double>  *leadChargedCandPt = 0;
+  vector<double>  *leadChargedCandPtError = 0;
+  vector<int>  *leadChargedCandValidHits = 0;
 };
 
 
