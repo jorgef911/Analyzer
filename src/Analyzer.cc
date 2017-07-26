@@ -196,8 +196,10 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
         if(gtltSign == '>') SignalRegion += factor;
         factor *= 2;
       }
-      if(distats["Control_Region"].bmap.find("Unblind") != distats["Control_Region"].bmap.end()) {
-        blinded = !distats["Control_Region"].bmap["Unblind"];
+      if(distats["Control_Region"].smap.find("Unblind") != distats["Control_Region"].smap.end()) {
+
+        blinded = distats["Control_Region"].smap["Unblind"] == "false";
+	cout << "we have " << blinded << endl;
       }
     }
   }
@@ -245,6 +247,12 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
     //set it to false!!
     gen_selection["DY_noMass_gt_200"]=false;
     gen_selection["DY_noMass_gt_100"]=false;
+  }
+
+  for(auto iselect : gen_selection){
+    if(iselect.second){
+      cout<<"Waning: The selection "<< iselect.first<< " is active!"<<endl;
+    }
   }
 
   setCutNeeds();
