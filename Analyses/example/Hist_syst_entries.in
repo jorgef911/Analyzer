@@ -1,27 +1,3 @@
-/////////////////// Histograms //////////////
-
-//// This file lists all of the histograms that will be made in the output root file
-//// 
-//// The Histograms, to facilitate ease of adding similar values, are organized into "FillGroups" that can be 
-//// turned on or off.  These fill groups are implimented in the Analyzer in the fill_folders function, so any
-//// new histograms that need to be added will be done in that function.  
-//// Histograms are flexible, so if you don't want a histogram, it can be commented out.  If the analyzer has
-//// a histogram implimented, but it is not listed in this file, then the code will not complain.  
-//// The Histograms themselves are implimented similarly to root histos.  First give the name, the number of bins
-//// then the low and high value for the histogram.
-//// ie
-//// <Histogram name>  <N bins> <min> <max>
-//// For 2D histograms, you simply add another set of bins, min, and max for the y-axis.
-//// If you are trying to put a new histogram into the analyzer, NOTE: the analyzer uses the histogram name, but
-//// without the particle names and/or with names replaced with "Part1" or "Part2".  This is to facilitate similar
-//// particles using similar histograms.
-//// ie
-//// Muon1Pt ==> Pt
-//// DiMuon_Muon1MetMt ==> Part1MetMt
-
-///////////////////////////////////////////////
-
-
 FillRun 1
 Events        2   0.    2.
 NVertices   100   0.  100.
@@ -103,7 +79,7 @@ Electron2MetMt              100   0      500
 
 //------------------------------------------------//
 
-FillMuon1 0
+FillMuon1 1
 
 NMuon1                   20   0.      20.
 Muon1Energy            2000   0.    5000.
@@ -114,7 +90,7 @@ FirstLeadingMuon1Eta    144  -7.2     +7.2
 Muon1Phi                 36  -3.15    +3.15
 Muon1MetMt              100   0      500
 
-FillMuon2 0
+FillMuon2 1
 
 NMuon2                   20   0.      20.
 Muon2Energy            2000   0.    5000.
@@ -127,9 +103,9 @@ Muon2MetMt              100   0      500
 
 //------------------------------------------------//
 
-FillJet1 0
+FillJet1 1
 
- NJet1         20   0.    20.
+NJet1         20   0.    20.
 Jet1Energy   200   0.   500.
 Jet1Pt       200   0.   500.
 Jet1Eta      100  -5.0   +5.0
@@ -143,7 +119,7 @@ Jet2Pt       200   0.   500.
 Jet2Eta      100  -5.0   +5.0
 Jet2Phi      144  -6.3   +6.3
 
-FillBJet 0
+FillBJet 1
 
 NBJet         20   0.     20.
 BJetEnergy   200   0.    500.
@@ -157,7 +133,6 @@ NCentralJet      20   0.    20.
 CentralJetPt    200   0.   500.
 CentralJetEta   100  -5.0   +5.0
 
-
 FillWJet 0
 
 NWJet      20   0.    20.
@@ -169,9 +144,10 @@ WJettau1   100  0   1
 WJettau2   100  0   1
 WJettau2Overtau1   100  0   1
 
+
 //------------------------------------------------//
 
-FillMetCuts 0
+FillMetCuts 1
 
 Met                100  0  1000
 MHT                500  0  5000
@@ -184,7 +160,7 @@ FillLeadingJet 0
 
 FirstLeadingJetPt     200   0.   1000.
 SecondLeadingJetPt    200   0.   1000.
-FirstLeadingJetEta    100  -5.      5.
+FirstLeadingJetEta    100  -5.
 SecondLeadingJetEta   100  -5.      5.
 
 LeadingJetMass       1000   0    5000
@@ -224,7 +200,7 @@ LargestMassDiJetDeltaEta     200   0    10.
 
 //------------------------------------------------//
 
-FillDiMuon 1
+FillDiMuon 0
 
 DiMuon_Muon1DiJetDeltaPhi       72     0       +3.15
 DiMuon_Muon2DiJetDeltaPhi       72     0       +3.15
@@ -252,7 +228,7 @@ Muon1MetDeltaPhiVsDiMuonCosDphi   72  0   +3.15  220    -1.1    1.1
 
 //------------------------------------------------//
 
-FillDiTau 1
+FillDiTau 0
 
 DiTau_Tau1DiJetDeltaPhi          72     0    +3.15
 DiTau_Tau2DiJetDeltaPhi          72     0    +3.15
@@ -278,7 +254,7 @@ Tau1PtVsTau2Pt                  100     0   500     100     0   500
 
 //------------------------------------------------//
 
-FillMuon1Tau1 0
+FillMuon1Tau1 1
 
 Muon1Tau1_Tau1DiJetDeltaPhi           72     0       +3.15
 Muon1Tau1_Muon1DiJetDeltaPhi          72     0       +3.15

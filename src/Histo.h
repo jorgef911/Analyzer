@@ -26,27 +26,27 @@ using namespace std;
 
 class Histogramer {
 
- public:
+public:
   Histogramer();
-  Histogramer(int, string, string, string, bool, vector<string>&);
+  Histogramer(int, string, string, string, bool, vector<string>&, const vector<string> &syst_unvertainties={});
   Histogramer(const Histogramer&);
   Histogramer(Histogramer&&);
   Histogramer& operator=(const Histogramer&);
   Histogramer& operator=(Histogramer&&);
   ~Histogramer();
-  
+
   const unordered_map<string,pair<int,int>>* get_cuts() const {return &cuts;}
   const vector<string>* get_cutorder() const {return &cut_order;}
   const vector<string>* get_groups() const {return &data_order;}
   const vector<string>* get_folders() const {return &folders;}
   int get_maxfolder() const {return (folderToCutNum.back()+1);}
 
-  void addVal(double, string, int, string, double);
-  void addVal(double, double, string, int, string, double);
+  void addVal(double, string, int, string, double, int syst=-1);
+  void addVal(double, double, string, int, string, double, int syst=-1);
   void fill_histogram();
   void setControlRegions();
 
- private:
+private:
   TFile * outfile;
   string outname;
   int NFolders;
@@ -64,10 +64,10 @@ class Histogramer {
 
   void read_hist(string);
   void read_cuts(string filename, vector<string>&);
+  void read_syst(const vector<string>& syst_uncertainties);
   void fillCRFolderNames(string, int, bool, const vector<string>&);
-  
+
   string extractHistname(string, string) const;
 };
 
 #endif
-

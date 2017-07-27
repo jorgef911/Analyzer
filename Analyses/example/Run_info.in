@@ -3,11 +3,15 @@
 ####################################
 
 CalculatePUSystematics true
-DataHistos PU2016data_6p2ifb.root
-MCHistos PU2016MC.root
+DataHistos data_75bins_69200.root
+MCHistos MC_75bins.root
+DataPUHistName pileup
+MCPUHistName pileup
 
 isData false
 ApplyGenWeight  true
+ApplyTauIDSF true
+
 
 ///------Triggers-----///
 
@@ -20,6 +24,7 @@ Trigger2SecondRequirement HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v
 ///---Treat Muon as Neutrino---///
 
 TreatMuonsAsNeutrinos 0
+TreatMuonsAsTaus 0
 
 ///-----MET cuts------///
 
@@ -31,8 +36,8 @@ MhtCut 50.0
 DiscrByHT false
 HtCut 30.0
 
-JetPtForMhtAndHt 30.0        
-JetEtaForMhtAndHt 5.0        
-ApplyJetLooseIDforMhtAndHt false
 
-
+ApplyJetLooseIDforMhtAndHt true
+JetPtForMhtAndHt 30.0
+JetEtaForMhtAndHt 5.0
+ApplyJetLo
