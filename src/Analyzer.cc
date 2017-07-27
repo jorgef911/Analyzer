@@ -314,7 +314,6 @@ void Analyzer::preprocess(int event) {
   SF = 1.0;
   TriggerSF = 1.0;
   TauCounter = 1.0;
-  //cout << "Setting to 1 Trigger SF" << endl;
 
   // SET NUMBER OF GEN PARTICLES 
   if(!isData){
@@ -769,14 +768,6 @@ void Analyzer::smearLepton(Lepton& lepton, CUTS eGenPos, const PartStats& stats)
       continue;
     }
 
-
-    /*    
-    if(TauCounter<3){
-    SF=(1+(0.05*tmpSmear.Pt()/1000))*SF;
-    cout << "Tau PT " << tmpSmear.Pt() << " SF " << SF << endl;
-      TauCounter=1+TauCounter;
-    }
-    */
     double smearedPt = (genVec.Pt()*stats.dmap.at("PtScaleOffset")) + (tmpSmear.Pt() - genVec.Pt())*stats.dmap.at("PtSigmaOffset");
     double smearedEta =(genVec.Eta()*stats.dmap.at("EtaScaleOffset")) + (tmpSmear.Eta() - genVec.Eta())*stats.dmap.at("EtaSigmaOffset");
     double smearedPhi = (genVec.Phi() * stats.dmap.at("PhiScaleOffset")) + (tmpSmear.Phi() - genVec.Phi())*stats.dmap.at("PhiSigmaOffset");
@@ -784,14 +775,10 @@ void Analyzer::smearLepton(Lepton& lepton, CUTS eGenPos, const PartStats& stats)
 
     TLorentzVector final;
     final.SetPtEtaPhiE(smearedPt, smearedEta, smearedPhi, smearedEnergy);
-    //final.SetPtEtaPhiE(smearedPt, tmpSmear.Eta(), tmpSmear.Phi(), tmpSmear.Energy());
-    //    final.SetPtEtaPhiE(tmpSmear.Pt(), tmpSmear.Eta(), tmpSmear.Phi(), tmpSmear.Energy());
     lepton.smearP.push_back(final);
 
     deltaMEx += tmpSmear.Px() - final.Px();
     deltaMEy += tmpSmear.Py() - final.Py();
-
-    //  cout << "Smeared pt:" << smearedPt << ", original pt:" << tmpSmear.Pt() << ", and the SF used is:" << smearedPt/tmpSmear.Pt() << endl;
 
   }
  
@@ -892,57 +879,12 @@ void Analyzer::getGoodGen(const PartStats& stats) {
 
   for(size_t j = 0; j < _Gen->pt->size(); j++) {
     int id = abs(_Gen->pdg_id->at(j)); 
-
-    //    cout << "ID " << genMaper[id] << " ID GEN " <<  _Gen->pdg_id->at(j) << "  status " << genMaper[id]->status << endl;
-   if(genMaper[id] != nullptr && _Gen->status->at(j) == genMaper[id]->status) {    
-     //    if(genMaper[id] != nullptr) {    
+    
+    if(genMaper[id] != nullptr && _Gen->status->at(j) == genMaper[id]->status) {    
       if(id == 15 && (_Gen->pt->at(j) < stats.pmap.at("TauPtCut").first || _Gen->pt->at(j) > stats.pmap.at("TauPtCut").second || abs(_Gen->eta->at(j)) > stats.dmap.at("TauEtaCut"))) continue;
       goodParts[genMaper[id]->ePos]->push_back(j);
     }
   }
-  /*
-  if(goodParts[CUTS::eGTau]->size() != 0){
-    cout << " THERE IS GOODGEN " << goodParts[CUTS::eGTau]->size()  << endl;
-  }
-  */
-
-
-
-    /*
-    if(id ==11) {
-      if(lep1!=TLorentzVector(0,0,0,0)){
-	lep2.SetPtEtaPhiE(_Gen->pt->at(j),_Gen->eta->at(j),_Gen->phi->at(j),_Gen->energy->at(j));
-	if(((lep1+lep2).M())>200.0) continue;
-	  goodParts[genMaper[id]->ePos]->push_back(j);
-      }else{ // if vector 0000
-	lep1.SetPtEtaPhiE(_Gen->pt->at(j),_Gen->eta->at(j),_Gen->phi->at(j),_Gen->energy->at(j));
-      }//else
-    }//if id
-    if(id ==13) {
-      if(lep1!=TLorentzVector(0,0,0,0)){
-	lep2.SetPtEtaPhiE(_Gen->pt->at(j),_Gen->eta->at(j),_Gen->phi->at(j),_Gen->energy->at(j));
-	if(((lep1+lep2).M())>200.0) continue;
-	goodParts[genMaper[id]->ePos]->push_back(j);                                                     
-      }else{ // if vector 0000
-	lep1.SetPtEtaPhiE(_Gen->pt->at(j),_Gen->eta->at(j),_Gen->phi->at(j),_Gen->energy->at(j));
-      }//else
-    }//if id
-    if(id==15) {
-      if(lep1!=TLorentzVector(0,0,0,0)){
-	lep2.SetPtEtaPhiE(_Gen->pt->at(j),_Gen->eta->at(j),_Gen->phi->at(j),_Gen->energy->at(j));
-	if(((lep1+lep2).M())>200.0) continue;
-	goodParts[genMaper[id]->ePos]->push_back(j);                                                                              
-      }else{ // if vector 0000
-	lep1.SetPtEtaPhiE(_Gen->pt->at(j),_Gen->eta->at(j),_Gen->phi->at(j),_Gen->energy->at(j));
-      }//else
-    }//if id
-    
-  }
-    */
-    // if((abs(_Gen->pdg_id->at(j)) == particle_id) && (_Gen->status->at(j) == particle_status)) {
-    //   goodParts[ePos]->push_back(j);
-    // }
-  //}
 
 }
 
@@ -991,7 +933,6 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
 	}
       }
     }
-    //    cout << "MATCH TAU PT " << lvec.Pt() << "  SF " << SF << endl;
     if (stats.bmap.at("DoDiscrByIsolation")) {
       double firstIso = (stats.pmap.find("IsoSumPtCutValue") != stats.pmap.end()) ? stats.pmap.at("IsoSumPtCutValue").first : ival(ePos) - ival(CUTS::eRTau1) + 1;
       double secondIso = (stats.pmap.find("IsoSumPtCutValue") != stats.pmap.end()) ? stats.pmap.at("IsoSumPtCutValue").second : 0;
@@ -1300,24 +1241,7 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
         double CosDPhi1 = cos(absnormPhi(part1.Phi() - theMETVector.Phi()));
         if(( CosDPhi1 > -1*(stats.pmap.at("CosDphiPtAndMetCut").first) )) continue; //cuts  higher0.9                                                                            
       }
-      /*
-      if(stats.bmap.at("DiscrByCosDphiMetAndR")){
-        double rateCosDphiPtandMet = cos(absnormPhi(part1.Phi() - theMETVector.Phi()))/(cos(absnormPhi(part2.Phi() - theMETVector.Phi())));
-        if(( rateCosDphiPtandMet < stats.pmap.at("DiscrByCosDphiMetAndRCut").first || rateCosDphiPtandMet > stats.pmap.at("DiscrByCosDphiMetAndRCut").second )) continue;
-      }
 
-      if(stats.bmap.at("DiscrByCosDphiPt_lower_AndMet")){
-        double part_pt1 = part1.Pt();
-        double part_pt2 = part2.Pt();
-        if(part_pt1 > part_pt2){
-	  double CosDPhi_low = cos(absnormPhi(part2.Phi() - theMETVector.Phi()));
-	  if(( CosDPhi_low < stats.pmap.at("CosDphiPt_lower_AndMetCut").first || CosDPhi_low > stats.pmap.at("CosDphiPt_lower_AndMetCut").second ))       continue;
-        }else{
-          double CosDPhi_low = cos(absnormPhi(part1.Phi() - theMETVector.Phi()));
-          if(( CosDPhi_low < stats.pmap.at("CosDphiPt_lower_AndMetCut").first || CosDPhi_low > stats.pmap.at("CosDphiPt_lower_AndMetCut").second ))     continue;
-        }
-      }
-      */
       //Finish of my cuts
       //      cout << " Tau pt 1 " << part1.Pt() << " Tau pt 2 " << part2.Pt() << endl;
 
@@ -1326,12 +1250,6 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
 	  + stats.dmap.at("PZetaVisCutCoefficient") * getPZeta(part1, part2).second;
       	if( CDFzeta < stats.pmap.at("CDFzeta2DCutValue").first || CDFzeta > stats.pmap.at("CDFzeta2DCutValue").second ) continue;
       }
-
-      ///      optional cut
-      // if(stats.bmap.find("DeltaPtAndMet") != stats.bmap.end() && stats.bmap.at("DiscrByCosDphi_DeltaPtAndMet")) {
-      // 	double DPhi = absnormPhi(atan2(part1.Py() + part2.Py(), part1.Px() + part2.Px()) - theMETVector.Phi());
-      // 	if( cos(DPhi) < stats.pmap.at("CosDphi_DeltaPtMetCut").first || cos(DPhi) > stats.pmap.at("CosDphi_DeltaPtMetCut").second) continue;
-      // }
 
       //////////abs on the difference????
       ///////////////////
@@ -1468,36 +1386,13 @@ void Analyzer::fill_Folder(string group, const int max) {
     else histo.addVal(false, group,histo.get_maxfolder(), "Events", 1);
     histAddVal(true, "Events");
     histAddVal(bestVertices, "NVertices");
-    
-    /*
-    TLorentzVector lep1;
-    TLorentzVector lep2;
-    for(size_t j = 0; j < _Gen->pt->size(); j++) {
-      int id = abs(_Gen->pdg_id->at(j)); 
-      //      if(abs(_Gen->motherpdg_id->at(j)) != 23 && ) continue;
 
-      if(id ==11 or id == 13 or id == 15) {
-	if(lep1!=TLorentzVector(0,0,0,0)){
-	  lep2.SetPtEtaPhiE(_Gen->pt->at(j),_Gen->eta->at(j),_Gen->phi->at(j),_Gen->energy->at(j));
-	  histAddVal((lep1+lep2).M(), "GenMass");
-	  break;
-	}else{
-	  lep1.SetPtEtaPhiE(_Gen->pt->at(j),_Gen->eta->at(j),_Gen->phi->at(j),_Gen->energy->at(j));
-	}//else
-      }//if id
-    }     
-    */
-    
   }else if(!isData && group == "FillGen") {
 
     int nhadtau = 0;
     TLorentzVector genVec;
     int i = 0;
-    /*
-    if(goodParts[CUTS::eGTau]->size() != 0){
-      cout << " THERE IS Gen " << goodParts[CUTS::eGTau]->size()  << endl;
-    }
-    */
+
     for(vec_iter it=goodParts[CUTS::eGTau]->begin(); it!=goodParts[CUTS::eGTau]->end(); it++, i++) {
 
       int nu = goodParts[CUTS::eNuTau]->at(i);
@@ -1524,11 +1419,6 @@ void Analyzer::fill_Folder(string group, const int max) {
       }
     }
     histAddVal(goodParts[CUTS::eGTau]->size(), "NTau");
-    /*
-    if(goodParts[CUTS::eGTau]->size() > 2){
-      cout << " MAS DE DOS TAUS " << endl;
-    }
-    */
     histAddVal(nhadtau, "NHadTau");
 
     for(vec_iter it=goodParts[CUTS::eGMuon]->begin(); it!=goodParts[CUTS::eGMuon]->end(); it++) {
@@ -1709,8 +1599,6 @@ void Analyzer::fill_Folder(string group, const int max) {
       }
       histAddVal(cos(absnormPhi(part2.Phi() - part1.Phi())), "CosDphi");
 
-      //      select_mc_background(group, max);
-
       //Felipe                                                                                                                                                                
       histo.addVal(cos(absnormPhi(part1.Phi() - theMETVector.Phi())), group,max, "Part1CosDphiPtandMet", wgt);
       histo.addVal(cos(absnormPhi(part2.Phi() - theMETVector.Phi())), group,max, "Part2CosDphiPtandMet", wgt);
@@ -1864,3 +1752,4 @@ bool CRTester::test(Analyzer* analyzer) {
 
   return pass;
 }
+
