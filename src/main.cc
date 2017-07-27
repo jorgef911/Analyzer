@@ -20,7 +20,7 @@ void usage() {
   exit(EXIT_FAILURE);
 }
 
-void parseCommandLine(int argc, char *argv[], vector<string> &inputnames, string &outputname, bool &setCR, string &configFolder) {
+void parseCommandLine(int argc, char *argv[], vector<string> &inputnames, string &outputname, bool &setCR, bool &testRun, string &configFolder) {
   if(argc < 3) {
     cout << endl;
     cout << "You have entered too little arguments, please type:\n";
@@ -30,6 +30,9 @@ void parseCommandLine(int argc, char *argv[], vector<string> &inputnames, string
     //// extra arg++ are there to move past flags
     if (strcmp(argv[arg], "-CR") == 0) {
       setCR = true;
+      continue;
+    }else if (strcmp(argv[arg], "-t") == 0) {
+      testRun = true;
       continue;
     }else if (strcmp(argv[arg], "-C") == 0) {
       configFolder=argv[arg+1];
@@ -52,7 +55,7 @@ void parseCommandLine(int argc, char *argv[], vector<string> &inputnames, string
       continue;
     } else if(argv[arg][0] == '-') {
       cout << endl;
-      cout << "You entered an option that doesn't exist.  Please use one of the options:" << endl; 
+      cout << "You entered an option that doesn't exist.  Please use one of the options:" << endl;
       usage();
     }else if(inputnames.size()==0){
       inputnames.push_back(argv[arg]);
@@ -72,19 +75,20 @@ void parseCommandLine(int argc, char *argv[], vector<string> &inputnames, string
   }
 
 
-  for( auto file: inputnames) {
-    ifstream ifile(file);
-    if ( !ifile && file.find("root://") == string::npos && file.find("root\\://") == string::npos) {
-      std::cout << "The file '" << inputnames.back() << "' doesn't exist" << std::endl;
-      exit(EXIT_FAILURE);
-    }
-  }
+  //for( auto file: inputnames) {
+    //ifstream ifile(file);
+    //if ( !ifile && file.find("root://") == string::npos && file.find("root\\://") == string::npos) {
+      //std::cout << "The file '" << inputnames.back() << "' doesn't exist" << std::endl;
+      //exit(EXIT_FAILURE);
+    //}
+  //}
   return;
 }
 
 int main (int argc, char* argv[]) {
 
   bool setCR = false;
+  bool testRun = false;
   do_break =false;
 
   string outputname;
@@ -93,7 +97,7 @@ int main (int argc, char* argv[]) {
 
 
   //get the command line options in a nice loop
-  parseCommandLine(argc, argv, inputnames, outputname, setCR, configFolder);
+  parseCommandLine(argc, argv, inputnames, outputname, setCR, testRun, configFolder);
 
 
   //setup the analyser
@@ -103,14 +107,18 @@ int main (int argc, char* argv[]) {
   //this way we still have the output
   signal(SIGINT,KeyboardInterrupt_endJob);
 
-
-  for(int i=0; i < testing.nentries; i++) {
+  size_t Nentries=testing.nentries;
+  if(testRun){
+    Nentries=100;
+  }
+  //main event loop
+  for(size_t i=0; i < Nentries; i++) {
     testing.clear_values();
     testing.preprocess(i);
     testing.fill_histogram();
     //this will be set if ctrl+c is pressed
     if(do_break){
-      testing.nentries=i;
+      testing.nentries=i+1;
       break;
     }
   }

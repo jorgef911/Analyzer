@@ -3,75 +3,51 @@
 using namespace std;
 
 Piece1D::Piece1D(string _name, int _bins, double _begin, double _end, int _Nfold) :
-DataPiece(_name, _Nfold, (_bins+2)), begin(_begin), end(_end), bins(_bins), width((end - begin)/bins) {}
-
-
-int Piece1D::get_bin(double y) const {
-  return (int)((y-begin)/width);
+DataPiece(_name, _Nfold), begin(_begin), end(_end), bins(_bins) {
+  for(int i = 0; i < _Nfold; i++) {
+    string hname = name + to_string(i);
+    TH1D tmp(hname.c_str(), name.c_str(), bins, begin, end);
+    tmp.Sumw2();
+    histograms.push_back(tmp);
+  }
 }
 
 void Piece1D::bin(int folder, double y, double weight) {
-  int by = (y < begin) ? -1 : get_bin(y);
-  by = (y > end) ? bins+1 : by+1;
-  data[fold_width*folder + by] += weight;
+  histograms.at(folder).Fill(y,weight);
 }
 
 void Piece1D::write_histogram(vector<string>& folders, TFile* outfile) {
-  double entries;
-  TH1D histogram(name.c_str(), name.c_str(), bins, begin, end);
-
   for(int i =0; i < (int)folders.size(); i++) {
     outfile->cd(folders.at(i).c_str());
-    entries = 0;
-    for(int j = 0; j < (bins+2); j++) {
-      histogram.SetBinContent(j, data[i*fold_width + j]);
-      entries += data[i*fold_width + j];
-    }
-    histogram.SetEntries((int)(entries+0.5));
-    histogram.Write();
-
+    histograms.at(i).Write();
   }
 }
 
 /*------------------------------------------------------------------------------------------*/
 
 Piece2D::Piece2D(string _name, int _binx, double _beginx, double _endx, int _biny, double _beginy, double _endy, int _Nfold) :
-DataPiece(_name, _Nfold, (_binx+2)*(_biny+2)), beginx(_beginx), endx(_endx), beginy(_beginy), endy(_endy), binx(_binx), biny(_biny),  widthx((endx - beginx)/binx), widthy((endy - beginy)/biny) {
+DataPiece(_name, _Nfold), beginx(_beginx), endx(_endx), beginy(_beginy), endy(_endy), binx(_binx), biny(_biny) {
 
   is1D = false;
-}
 
 
-int Piece2D::get_bin(double val, bool isX) const {
-  if(isX) return (int)((val-beginx)/widthx);
-  else return (int)((val-beginy)/widthy);
-  return -1;
+  for(int i = 0; i < _Nfold; ++i) {
+    string hname = name + to_string(i);
+    TH2D tmp(hname.c_str(), name.c_str(), binx, beginx, endx, biny, beginy, endy);
+    tmp.Sumw2();
+    histograms.push_back(tmp);
+  }
 }
 
 void Piece2D::bin(int folder, double x, double y, double weight) {
-  int bx = (x < beginx) ? -1 : get_bin(x, true);
-  bx = (x > endx) ? binx+1 : bx+1;
-  int by = (y < beginy) ? -1 : get_bin(y, false);
-  by = (y > endy) ? biny+1 : by+1;
-  data[fold_width*folder + bx + by*(binx+2)] += weight;
+  histograms.at(folder).Fill(x,y,weight);
 
 }
 
 void Piece2D::write_histogram(vector<string>& folders, TFile* outfile) {
-  double entries;
-  TH2D histogram(name.c_str(), name.c_str(), binx, beginx, endx, biny, beginy, endy);
-
   for(size_t i =0; i < folders.size(); i++) {
-
     outfile->cd(folders.at(i).c_str());
-    entries = 0;
-    for(int j = 0; j < (binx+2)*(biny+2); j++) {
-      histogram.SetBinContent(j, data[i*fold_width + j]);
-      entries += data[i*fold_width + j];
-    }
-
-    histogram.SetEntries((int)(entries+0.5));
-    histogram.Write();
+    histograms.at(i).Write();
   }
 }
 

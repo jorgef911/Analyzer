@@ -28,7 +28,7 @@ class Histogramer {
 
 public:
   Histogramer();
-  Histogramer(int, string, string, string, bool, vector<string>&);
+  Histogramer(int, string, string, string, bool, vector<string>&, const vector<string> &syst_unvertainties={});
   Histogramer(const Histogramer&);
   Histogramer(Histogramer&&);
   Histogramer& operator=(const Histogramer&);
@@ -41,8 +41,8 @@ public:
   const vector<string>* get_folders() const {return &folders;}
   int get_maxfolder() const {return (folderToCutNum.back()+1);}
 
-  void addVal(double, string, int, string, double);
-  void addVal(double, double, string, int, string, double);
+  void addVal(double, string, int, string, double, int syst=-1);
+  void addVal(double, double, string, int, string, double, int syst=-1);
   void fill_histogram();
   void setControlRegions();
 
@@ -64,6 +64,7 @@ private:
 
   void read_hist(string);
   void read_cuts(string filename, vector<string>&);
+  void read_syst(const vector<string>& syst_uncertainties);
   void fillCRFolderNames(string, int, bool, const vector<string>&);
 
   string extractHistname(string, string) const;
