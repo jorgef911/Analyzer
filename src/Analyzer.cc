@@ -403,8 +403,6 @@ void Analyzer::preprocess(int event) {
   }
 
   pu_weight = (!isData && CalculatePUSystematics) ? hPU[(int)(nTruePU+1)] : 1.0;
-  SF = 1.0;
-  TriggerSF = 1.0;
 
   // SET NUMBER OF GEN PARTICLES
   if(!isData){
@@ -1320,13 +1318,7 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
     if (lvec.Pt() < stats.pmap.at("PtCut").first || lvec.Pt() > stats.pmap.at("PtCut").second) continue;
 
     if((lep.pstats.at("Smear").bmap.at("MatchToGen")) && (!isData)) {   /////check
-      //      if(matchLeptonToGen(lvec, lep.pstats.at("Smear") ,eGenPos) == TLorentzVector(0,0,0,0)) continue;
-      if(matchLeptonToGen(lvec, lep.pstats.at("Smear") ,eGenPos) != TLorentzVector(0,0,0,0)){
-	if(ePos == CUTS::eRTau2){
-	  SF=(1.0-(0.35*lvec.Pt()/1000.0))*SF;
-	  //	  cout << "TAU PT " << lvec.Pt() << "  SF " << SF << endl;
-	}
-      }
+      if(matchLeptonToGen(lvec, lep.pstats.at("Smear") ,eGenPos) == TLorentzVector(0,0,0,0)) continue;
     }
     if (stats.bmap.at("DoDiscrByIsolation")) {
       double firstIso = (stats.pmap.find("IsoSumPtCutValue") != stats.pmap.end()) ? stats.pmap.at("IsoSumPtCutValue").first : ival(ePos) - ival(CUTS::eRTau1) + 1;
@@ -1656,16 +1648,6 @@ double Analyzer::diParticleMass(const TLorentzVector& Tobj1, const TLorentzVecto
   if(howCalc == "VectorSumOfVisProductsAndMet" || ratioNotInRange) {
     return (Tobj1 + Tobj2 + _MET->p4()).M();
   }
-
-  if(howCalc == "InvariantMass" || ratioNotInRange) {
-    double px = Tobj1.Px() + Tobj2.Px();
-    double py = Tobj1.Py() + Tobj2.Py();
-    double pz = Tobj1.Pz() + Tobj2.Pz();
-    double e  = Tobj1.Energy() + Tobj2.Energy();
-    The_LorentzVect.SetPxPyPzE(px, py, pz, e);
-    return The_LorentzVect.M();
-  }
-  //  cout << " Reco Mass  " << (Tobj1 + Tobj2).M() << endl;
   return (Tobj1 + Tobj2).M();
 }
 

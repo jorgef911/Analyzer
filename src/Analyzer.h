@@ -36,7 +36,6 @@ struct CRTester;
 #include "Systematics.h"
 #include "JetScaleResolution.h"
 
-#include "TMath.h"
 
 double normPhi(double phi);
 double absnormPhi(double phi);
@@ -197,7 +196,7 @@ private:
 
   const static vector<CUTS> genCuts;
   const static vector<CUTS> jetCuts;
-  double pu_weight, wgt, backup_wgt, TriggerSF, SF;
+  double pu_weight, wgt, backup_wgt;
   unordered_map<int, GenFill*> genMaper;
 
   vector<CRTester*> testVec;
