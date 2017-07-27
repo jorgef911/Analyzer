@@ -27,6 +27,8 @@ struct CRTester;
 #include "Cut_enum.h"
 #include "FillInfo.h"
 
+#include "TMath.h"
+
 double normPhi(double phi);
 double absnormPhi(double phi);
 
@@ -104,6 +106,9 @@ class Analyzer {
   bool passProng(string, int);
   bool isInTheCracks(float);
   bool passedLooseJetID(int);
+  bool select_mc_background();
+
+
 
   pair<double, double> getPZeta(const TLorentzVector&, const TLorentzVector&);
   void create_fillInfo();
@@ -136,6 +141,9 @@ class Analyzer {
   unordered_map<string, double> genMap;
   unordered_map<CUTS, vector<int>*, EnumHash> goodParts;
   unordered_map<CUTS, bool, EnumHash> need_cut;
+  unordered_map<string,bool> gen_selection;
+
+
 
   static const unordered_map<string, CUTS> cut_num;
   static const unordered_map<CUTS, vector<CUTS>, EnumHash> adjList;
@@ -166,7 +174,7 @@ class Analyzer {
 
   const static vector<CUTS> genCuts;
   const static vector<CUTS> jetCuts;
-  double pu_weight, wgt;
+  double pu_weight, wgt, TriggerSF, TauCounter, SF;
   unordered_map<int, GenFill*> genMaper;
 
   vector<CRTester*> testVec;
