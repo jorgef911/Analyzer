@@ -28,9 +28,7 @@ Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string
 }
 
 void Particle::addPtEtaPhiESyst(double ipt,double ieta, double iphi, double ienergy, int syst){
-  // if(systVec[syst]->size()==Reco.size()){
-  //   systVec[syst]->clear();
-  // }
+
   TLorentzVector mp4;
   mp4.SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
   systVec.at(syst)->push_back(mp4);
@@ -85,11 +83,6 @@ void Particle::setOrigReco() {
 
 
 void Particle::setCurrentP(int syst){
-  //if (systVec[syst]->size()!=Reco.size()){
-    //cout<<"Rebel on. This does not work"<<endl;
-    //cout<<syst<<" vector has not been filled for "<<GenName<<endl;
-  //}
-  //  if(syst != -1)  cout << syst << " has " << systVec.at(syst)->size() << endl;
   if(syst == -1) {
     cur_P = &Reco;
   } else if( systVec.at(syst)->size() == 0) {
@@ -180,24 +173,25 @@ Jet::Jet(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_B
 }
 
 void Jet::findExtraCuts() {
-  // if(pstats["Smear"].bmap.at("SmearTheJet")) {
-  //   extraCuts.push_back(CUTS::eGMuon);
-  //   extraCuts.push_back(CUTS::eGElec);
-  //   extraCuts.push_back(CUTS::eGTau);
-  //   extraCuts.push_back(CUTS::eGJet);
-  // }
+  Particle::findExtraCuts();
+  if(pstats["Smear"].bset.find("SmearTheJet") != pstats["Smear"].bset.end()) {
+    extraCuts.push_back(CUTS::eGMuon);
+    extraCuts.push_back(CUTS::eGElec);
+    extraCuts.push_back(CUTS::eGTau);
+    extraCuts.push_back(CUTS::eGJet);
+  }
 
 }
 
 vector<CUTS> Jet::overlapCuts(CUTS ePos) {
-  string pName = jetNameMap.at(ePos);
   vector<CUTS> returnCuts;
-  // if(pstats.at(pName).bmap.at("RemoveOverlapWithMuon1s")) returnCuts.push_back(CUTS::eRMuon1);
-  // if(pstats[pName].bmap.at("RemoveOverlapWithMuon2s")) returnCuts.push_back(CUTS::eRMuon2);
-  // if(pstats[pName].bmap.at("RemoveOverlapWithElectron1s")) returnCuts.push_back(CUTS::eRElec1);
-  // if(pstats[pName].bmap.at("RemoveOverlapWithElectron2s")) returnCuts.push_back(CUTS::eRElec2);
-  // if(pstats[pName].bmap.at("RemoveOverlapWithTau1s")) returnCuts.push_back(CUTS::eRTau1);
-  // if(pstats[pName].bmap.at("RemoveOverlapWithTau2s")) returnCuts.push_back(CUTS::eRTau2);
+  unordered_set<string>& tmpset = pstats[jetNameMap.at(ePos)].bset;
+  if(tmpset.find("RemoveOverlapWithMuon1s") != tmpset.end()) returnCuts.push_back(CUTS::eRMuon1);
+  if(tmpset.find("RemoveOverlapWithMuon2s") != tmpset.end()) returnCuts.push_back(CUTS::eRMuon2);
+  if(tmpset.find("RemoveOverlapWithElectron1s") != tmpset.end()) returnCuts.push_back(CUTS::eRElec1);
+  if(tmpset.find("RemoveOverlapWithElectron2s") != tmpset.end()) returnCuts.push_back(CUTS::eRElec2);
+  if(tmpset.find("RemoveOverlapWithTau1s") != tmpset.end()) returnCuts.push_back(CUTS::eRTau1);
+  if(tmpset.find("RemoveOverlapWithTau2s") != tmpset.end()) returnCuts.push_back(CUTS::eRTau2);
 
   return returnCuts;
 }
@@ -213,22 +207,22 @@ FatJet::FatJet(TTree* _BOOM, string filename, vector<string> syst_names) : Parti
 }
 
 void FatJet::findExtraCuts() {
-  // if(pstats["Smear"].bmap.at("SmearTheJet")) {
-  //   extraCuts.push_back(CUTS::eGMuon);
-  //   extraCuts.push_back(CUTS::eGElec);
-  //   extraCuts.push_back(CUTS::eGTau);
-  // }
+  if(pstats["Smear"].bset.find("SmearTheJet") != pstats["Smear"].bset.end()) {
+    extraCuts.push_back(CUTS::eGMuon);
+    extraCuts.push_back(CUTS::eGElec);
+    extraCuts.push_back(CUTS::eGTau);
+  }
 }
 
 vector<CUTS> FatJet::overlapCuts(CUTS ePos) {
-  string pName = jetNameMap.at(ePos);
   vector<CUTS> returnCuts;
-  // if(pstats.at(pName).bmap.at("RemoveOverlapWithMuon1s")) returnCuts.push_back(CUTS::eRMuon1);
-  // if(pstats[pName].bmap.at("RemoveOverlapWithMuon2s")) returnCuts.push_back(CUTS::eRMuon2);
-  // if(pstats[pName].bmap.at("RemoveOverlapWithElectron1s")) returnCuts.push_back(CUTS::eRElec1);
-  // if(pstats[pName].bmap.at("RemoveOverlapWithElectron2s")) returnCuts.push_back(CUTS::eRElec2);
-  // if(pstats[pName].bmap.at("RemoveOverlapWithTau1s")) returnCuts.push_back(CUTS::eRTau1);
-  // if(pstats[pName].bmap.at("RemoveOverlapWithTau2s")) returnCuts.push_back(CUTS::eRTau2);
+  unordered_set<string>& tmpset = pstats[jetNameMap.at(ePos)].bset;
+  if(tmpset.find("RemoveOverlapWithMuon1s") != tmpset.end()) returnCuts.push_back(CUTS::eRMuon1);
+  if(tmpset.find("RemoveOverlapWithMuon2s") != tmpset.end()) returnCuts.push_back(CUTS::eRMuon2);
+  if(tmpset.find("RemoveOverlapWithElectron1s") != tmpset.end()) returnCuts.push_back(CUTS::eRElec1);
+  if(tmpset.find("RemoveOverlapWithElectron2s") != tmpset.end()) returnCuts.push_back(CUTS::eRElec2);
+  if(tmpset.find("RemoveOverlapWithTau1s") != tmpset.end()) returnCuts.push_back(CUTS::eRTau1);
+  if(tmpset.find("RemoveOverlapWithTau2s") != tmpset.end()) returnCuts.push_back(CUTS::eRTau2);
 
   return returnCuts;
 }
@@ -239,114 +233,105 @@ Lepton::Lepton(TTree* _BOOM, string GenName, string EndName, vector<string> syst
 }
 
 void Lepton::findExtraCuts() {
-  // if(pstats["Smear"].bmap.at("SmearTheParticle") || pstats["Smear"].bmap.at("MatchToGen")) {
-  //   extraCuts.push_back(cutMap.at(type));
-  // }
+  Particle::findExtraCuts();
+  unordered_set<string>& tmpset = pstats["Smear"].bset;
+  if(tmpset.find("SmearTheParticle") != tmpset.end() || tmpset.find("MatchToGen") != tmpset.end()) {
+    extraCuts.push_back(cutMap.at(type));
+  }
 }
 
 Electron::Electron(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "patElectron", filename, syst_names) {
   type = PType::Electron;
-  //  if(pstats["Elec1"].bmap["DoDiscrByIsolation"] || pstats["Elec2"].bmap["DoDiscrByIsolation"]) {
+  unordered_set<string>& elec1 = pstats["Elec1"].bset;
+  unordered_set<string>& elec2 = pstats["Elec2"].bset;
+  if(elec1.find("DoDiscrByIsolation") != elec1.end() || elec2.find("DoDiscrByIsolation") != elec2.end()) {
     SetBranch("patElectron_isoChargedHadrons", isoChargedHadrons);
     SetBranch("patElectron_isoNeutralHadrons", isoNeutralHadrons);
     SetBranch("patElectron_isoPhotons", isoPhotons);
     SetBranch("patElectron_isoPU", isoPU);
-    //  }
-    //  if(pstats["Elec1"].bmap["DoDiscrByVetoID"] || pstats["Elec2"].bmap["DoDiscrByVetoID"]) {
+  }
+  if(elec1.find("DoDiscrByVetoID") != elec1.end() || elec2.find("DoDiscrByVetoID") != elec2.end()) {
     SetBranch("patElectron_isPassVeto", isPassVeto);
-    //  }
-    //  if(pstats["Elec1"].bmap["DoDiscrByLooseID"] || pstats["Elec2"].bmap["DoDiscrByLooseID"]) {
+  }
+  if(elec1.find("DoDiscrByLooseID") != elec1.end() || elec2.find("DoDiscrByLooseID") != elec2.end()) {
     SetBranch("patElectron_isPassLoose", isPassLoose);
-    //  }
-    //  if(pstats["Elec1"].bmap["DoDiscrByMediumID"] || pstats["Elec2"].bmap["DoDiscrByMediumID"]) {
+  }
+  if(elec1.find("DoDiscrByMediumID") != elec1.end() || elec2.find("DoDiscrByMediumID") != elec2.end()) {
     SetBranch("patElectron_isPassMedium", isPassMedium);
-    //  }
-    //  if(pstats["Elec1"].bmap["DoDiscrByTightID"] || pstats["Elec2"].bmap["DoDiscrByTightID"]) {
+  }
+  if(elec1.find("DoDiscrByTightID") != elec1.end() || elec2.find("DoDiscrByTightID") != elec2.end()) {
     SetBranch("patElectron_isPassTight", isPassTight);
-    //  }
-    //  if(pstats["Elec1"].bmap["DoDiscrByHEEPID"] || pstats["Elec2"].bmap["DoDiscrByHEEPID"]) {
+  }
+  if(elec1.find("DoDiscrByHEEPID") != elec1.end() || elec2.find("DoDiscrByHEEPID") != elec2.end()) {
     SetBranch("patElectron_isPassHEEPId", isPassHEEPId);
-    //  }
+  }
 }
 
 Muon::Muon(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "Muon", filename, syst_names) {
   type = PType::Muon;
+  unordered_set<string>& mu1 = pstats["Muon1"].bset;
+  unordered_set<string>& mu2 = pstats["Muon2"].bset;
 
-  //  if(pstats["Muon1"].bmap["DoDiscrByTightID"] || pstats["Muon2"].bmap["DoDiscrByTightID"]) {
+  if(mu1.find("DoDiscrByTightID") != mu1.end() || mu2.find("DoDiscrByTightID") != mu2.end()) {
     SetBranch("Muon_tight", tight);
-    //  }
-    //  if(pstats["Muon1"].bmap["DoDiscrBySoftID"] || pstats["Muon2"].bmap["DoDiscrBySoftID"]) {
+     }
+  if(mu1.find("DoDiscrBySoftID") != mu1.end() || mu2.find("DoDiscrBySoftID") != mu2.end()) {
     SetBranch("Muon_soft", soft);
-    //  }
-    //  if(pstats["Muon1"].bmap["DoDiscrByIsolation"] || pstats["Muon2"].bmap["DoDiscrByIsolation"]) {
+  }
+  if(mu1.find("DoDiscrByIsolation") != mu1.end() || mu2.find("DoDiscrByIsolation") != mu2.end()) {
+
     SetBranch("Muon_isoCharged", isoCharged);
     SetBranch("Muon_isoNeutralHadron", isoNeutralHadron);
     SetBranch("Muon_isoPhoton", isoPhoton);
     SetBranch("Muon_isoPU", isoPU);
-    //  }
+  }
 }
 
 ///////fix against stuff
 Taus::Taus(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "Tau", filename, syst_names) {
   type = PType::Tau;
 
-  ////Electron discrimination
-  if((pstats["Tau1"].bmap["DoDiscrAgainstElectron"] || pstats["Tau1"].bmap["SelectTausThatAreElectrons"]) &&
-  (pstats["Tau2"].bmap["DoDiscrAgainstElectron"] || pstats["Tau2"].bmap["SelectTausThatAreElectrons"]) &&
-  (pstats["Tau1"].smap["DiscrAgainstElectron"] == pstats["Tau2"].smap["DiscrAgainstElectron"]) ) {
-    SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrAgainstElectron"]).c_str(), againstElectron.first);
+  ////Electron discrimination  
+  string string_tau1 = pstats["Tau1"].smap["DiscrAgainstElectron"];
+  string string_tau2 = pstats["Tau2"].smap["DiscrAgainstElectron"];
+
+  SetBranch(("Tau_" + string_tau1).c_str(), againstElectron.first);
+  if(string_tau1 != string_tau2) {
+    SetBranch(("Tau_" + string_tau2).c_str(), againstElectron.second);
+  } else {
     againstElectron.second = againstElectron.first;
-  } else {
-    if(pstats["Tau1"].bmap["DoDiscrAgainstElectron"] || pstats["Tau1"].bmap["SelectTausThatAreElectrons"]) {
-      SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrAgainstElectron"]).c_str(), againstElectron.first);
-    }
-    if(pstats["Tau2"].bmap["DoDiscrAgainstElectron"] || pstats["Tau2"].bmap["SelectTausThatAreElectrons"]) {
-      SetBranch(("Tau_"+pstats["Tau2"].smap["DiscrAgainstElectron"]).c_str(), againstElectron.second);
-    }
   }
+
   ////Muon discrimination
-  if((pstats["Tau1"].bmap["DoDiscrAgainstMuon"] || pstats["Tau1"].bmap["SelectTausThatAreMuons"]) &&
-  (pstats["Tau2"].bmap["DoDiscrAgainstMuon"] || pstats["Tau2"].bmap["SelectTausThatAreMuons"]) &&
-  (pstats["Tau1"].smap["DiscrAgainstMuon"] == pstats["Tau2"].smap["DiscrAgainstMuon"]) ) {
-    SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrAgainstMuon"]).c_str(), againstMuon.first);
+  string_tau1 = pstats["Tau1"].smap["DiscrAgainstMuon"];
+  string_tau2 = pstats["Tau2"].smap["DiscrAgainstMuon"];
+
+  SetBranch(("Tau_" + string_tau1).c_str(), againstMuon.first);
+  if(string_tau1 != string_tau2) {
+    SetBranch(("Tau_" + string_tau2).c_str(), againstMuon.second);
+  } else {
     againstMuon.second = againstMuon.first;
-  } else {
-    if(pstats["Tau1"].bmap["DoDiscrAgainstMuon"] || pstats["Tau1"].bmap["SelectTausThatAreMuons"]) {
-      SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrAgainstMuon"]).c_str(), againstMuon.first);
-    }
-    if(pstats["Tau2"].bmap["DoDiscrAgainstMuon"] || pstats["Tau2"].bmap["SelectTausThatAreMuons"]) {
-      SetBranch(("Tau_"+pstats["Tau2"].smap["DiscrAgainstMuon"]).c_str(), againstMuon.second);
-    }
   }
 
-  /////Isolation discrimination
-  if(pstats["Tau1"].bmap["DoDiscrByIsolation"] && pstats["Tau2"].bmap["DoDiscrByIsolation"] &&
-  pstats["Tau1"].smap["DiscrByMaxIsolation"] == pstats["Tau2"].smap["DiscrByMaxIsolation"]) {
-    SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrByMaxIsolation"]).c_str(), (maxIso.first));
+  string_tau1 = pstats["Tau1"].smap["DiscrByMaxIsolation"];
+  string_tau2 = pstats["Tau2"].smap["DiscrByMaxIsolation"];
+  SetBranch(("Tau_" + string_tau1).c_str(), maxIso.first);
+  if(string_tau1 != string_tau2) {
+    SetBranch(("Tau_" + string_tau2).c_str(), maxIso.second);
+  } else {
     maxIso.second = maxIso.first;
-  } else {
-    if(pstats["Tau1"].bmap["DoDiscrByIsolation"]) {
-      SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrByMaxIsolation"]).c_str(), (maxIso.first));
-    }
-    if(pstats["Tau2"].bmap["DoDiscrByIsolation"]) {
-      SetBranch(("Tau_"+pstats["Tau2"].smap["DiscrByMaxIsolation"]).c_str(), (maxIso.second));
-    }
-  }      ////min stuff
-  if(pstats["Tau1"].bmap["DoDiscrByIsolation"] && pstats["Tau2"].bmap["DoDiscrByIsolation"] &&
-  pstats["Tau1"].smap["DiscrByMinIsolation"] == pstats["Tau2"].smap["DiscrByMinIsolation"] &&
-  pstats["Tau1"].smap["DiscrByMinIsolation"] != "ZERO") {
-    SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrByMinIsolation"]).c_str(), (minIso.first));
-    minIso.second = minIso.first;
-  } else {
-    if(pstats["Tau1"].bmap["DoDiscrByIsolation"] && pstats["Tau1"].smap["DiscrByMinIsolation"] != "ZERO") {
-
-      SetBranch(("Tau_"+pstats["Tau1"].smap["DiscrByMinIsolation"]).c_str(), (minIso.first));
-    }
-    if(pstats["Tau2"].bmap["DoDiscrByIsolation"] && pstats["Tau2"].smap["DiscrByMinIsolation"] != "ZERO") {
-      SetBranch(("Tau_"+pstats["Tau2"].smap["DiscrByMaxIsolation"]).c_str(), (minIso.second));
-    }
   }
 
+  string_tau1 = pstats["Tau1"].smap["DiscrByMinIsolation"];
+  string_tau2 = pstats["Tau2"].smap["DiscrByMinIsolation"];
+  if(string_tau1 != "ZERO") {
+    SetBranch(("Tau_" + string_tau1).c_str(), maxIso.first);
+  }
+  if(string_tau2 != "ZERO" && string_tau1 != string_tau2) {
+    SetBranch(("Tau_"+ string_tau2).c_str(), maxIso.second);
+  } else {
+    maxIso.second = maxIso.first;
+  }
 
   SetBranch("Tau_decayModeFindingNewDMs", decayModeFindingNewDMs);
   SetBranch("Tau_nProngs", nProngs);
@@ -360,14 +345,16 @@ Taus::Taus(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_B
 void Taus::findExtraCuts() {
   Lepton::findExtraCuts();
 
-  // if(pstats["Tau1"].bmap.at("RemoveOverlapWithMuon1s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithMuon1s"))
-  // extraCuts.push_back(CUTS::eRMuon1);
-  // if(pstats["Tau1"].bmap.at("RemoveOverlapWithMuon2s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithMuon2s"))
-  // extraCuts.push_back(CUTS::eRMuon2);
-  // if(pstats["Tau1"].bmap.at("RemoveOverlapWithElectron1s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithElectron1s"))
-  // extraCuts.push_back(CUTS::eRElec1);
-  // if(pstats["Tau1"].bmap.at("RemoveOverlapWithElectron2s") ||pstats["Tau2"].bmap.at("RemoveOverlapWithElectron2s"))
-  // extraCuts.push_back(CUTS::eRElec2);
+  unordered_set<string>& tau1 = pstats["Tau1"].bset;
+  unordered_set<string>& tau2 = pstats["Tau2"].bset;
+  if(tau1.find("RemoveOverlapWithMuon1s") != tau1.end() || tau2.find("RemoveOverlapWithMuon1s") != tau2.end())
+    extraCuts.push_back(CUTS::eRMuon1);
+  if(tau1.find("RemoveOverlapWithMuon2s") != tau1.end() || tau2.find("RemoveOverlapWithMuon2s") != tau2.end())
+    extraCuts.push_back(CUTS::eRMuon2);
+  if(tau1.find("RemoveOverlapWithElectron1s") != tau1.end() || tau2.find("RemoveOverlapWithElectron1s") != tau2.end())
+    extraCuts.push_back(CUTS::eRElec1);
+  if(tau1.find("RemoveOverlapWithElectron2s") != tau1.end() || tau2.find("RemoveOverlapWithElectron2s") != tau2.end())
+    extraCuts.push_back(CUTS::eRElec2);
 }
 
 

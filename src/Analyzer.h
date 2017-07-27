@@ -35,6 +35,7 @@ struct CRTester;
 #include "CRTest.h"
 #include "Systematics.h"
 #include "JetScaleResolution.h"
+#include "DepGraph.h"
 
 double normPhi(double phi);
 double absnormPhi(double phi);
@@ -166,6 +167,8 @@ private:
   unordered_map<string,bool> gen_selection;
   vector<Particle*> allParticles;
   vector<string> syst_names;
+
+  DepGraph neededCuts;
 
   static const unordered_map<string, CUTS> cut_num;
   static const unordered_map<CUTS, vector<CUTS>, EnumHash> adjList;

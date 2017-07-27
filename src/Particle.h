@@ -41,7 +41,7 @@ public:
   Particle(TTree*, string, string, vector<string>);
   virtual ~Particle() {}
 
-  virtual void findExtraCuts() {}
+  virtual void findExtraCuts() {extraCuts.clear();}
   void init();
   void unBranch();
   double pt(uint) const;
@@ -135,7 +135,8 @@ public:
   unordered_map<CUTS, string, EnumHash> jetNameMap = {
     {CUTS::eRJet1, "Jet1"},               {CUTS::eRJet2, "Jet2"},
     {CUTS::eRCenJet, "CentralJet"},      {CUTS::eRBJet, "BJet"},
-    {CUTS::eR1stJet, "FirstLeadingJet"},  {CUTS::eR2ndJet, "SecondLeadingJet"}
+    {CUTS::eR1stJet, "FirstLeadingJet"},  {CUTS::eR2ndJet, "SecondLeadingJet"},
+    {CUTS::eRWjet, "WJet"}
   };
 
   void findExtraCuts();

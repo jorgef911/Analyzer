@@ -432,9 +432,6 @@ void Analyzer::preprocess(int event) {
     updateMet(syst_names.at(i));
   }
   
-  cout << _Muon->size() << " ";
-  _Muon->setCurrentP(0);
-  cout << _Muon->size() << " " << syst_names.size() << " ";
 
   //reset all particles to normal:
   // for(Particle* ipart: allParticles){
@@ -474,28 +471,18 @@ void Analyzer::preprocess(int event) {
 void Analyzer::getGoodParticles(int syst){
 
   string systname=syst_names.at(syst);
-  cout << systname << endl;
   if(syst == 0) active_part = &goodParts;
   else active_part=&syst_parts.at(syst);
     //    syst=syst_names[syst];
 
 
+
+  // // SET NUMBER OF RECO PARTICLES
+  // // MUST BE IN ORDER: Muon/Electron, Tau, Jet
   getGoodRecoLeptons(*_Electron, CUTS::eRElec1, CUTS::eGElec, _Electron->pstats["Elec1"],syst);
   getGoodRecoLeptons(*_Electron, CUTS::eRElec2, CUTS::eGElec, _Electron->pstats["Elec2"],syst);
   getGoodRecoLeptons(*_Muon, CUTS::eRMuon1, CUTS::eGMuon, _Muon->pstats["Muon1"],syst);
   getGoodRecoLeptons(*_Muon, CUTS::eRMuon2, CUTS::eGMuon, _Muon->pstats["Muon2"],syst);
-
-  getGoodRecoJets(CUTS::eRJet1, _Jet->pstats["Jet1"],syst);
-  getGoodRecoJets(CUTS::eRJet2, _Jet->pstats["Jet2"],syst);
-  getGoodRecoJets(CUTS::eRCenJet, _Jet->pstats["CentralJet"],syst);
-  getGoodRecoJets(CUTS::eRBJet, _Jet->pstats["BJet"],syst);
-  getGoodRecoJets(CUTS::eR1stJet, _Jet->pstats["FirstLeadingJet"],syst);
-  getGoodRecoJets(CUTS::eR2ndJet, _Jet->pstats["SecondLeadingJet"],syst);
-
-  return;
-
-  // // SET NUMBER OF RECO PARTICLES
-  // // MUST BE IN ORDER: Muon/Electron, Tau, Jet
   getGoodRecoLeptons(*_Tau, CUTS::eRTau1, CUTS::eGTau, _Tau->pstats["Tau1"],syst);
   getGoodRecoLeptons(*_Tau, CUTS::eRTau2, CUTS::eGTau, _Tau->pstats["Tau2"],syst);
 
@@ -924,6 +911,61 @@ void Analyzer::read_info(string filename) {
 void Analyzer::setCutNeeds() {
 
 
+  for(auto it: *histo.get_groups()) {
+    if(fillInfo[it]->type == FILLER::None) continue;
+    neededCuts.loadCuts(fillInfo[it]->ePos);
+  }
+  for(auto it : *histo.get_cutorder()) {
+    try{
+      neededCuts.loadCuts(cut_num.at(it));
+    }catch(...){
+      cout<<"The following cut is strange: "<<it<<endl;
+      exit(2);
+    }
+  }
+  for(auto it: testVec) {
+    neededCuts.loadCuts(it->info->ePos);
+  }
+  
+  neededCuts.loadCuts(_Jet->extraCuts);
+
+  for(auto it: jetCuts) {
+    if(!neededCuts.isPresent(it)) continue;
+    neededCuts.loadCuts(_Jet->overlapCuts(it));
+  }
+
+  if(neededCuts.isPresent(CUTS::eRWjet)) {
+    neededCuts.loadCuts(_FatJet->extraCuts);
+    neededCuts.loadCuts(_FatJet->overlapCuts(CUTS::eRWjet));
+  } else {
+    cout<<"WJets not needed. They will be deactivated!"<<endl;
+    _FatJet->unBranch();
+  }
+
+  if( neededCuts.isPresent(CUTS::eRTau1) || neededCuts.isPresent(CUTS::eRTau2) ) {
+    neededCuts.loadCuts(_Tau->extraCuts);
+  } else {
+    cout<<"Taus not needed. They will be deactivated!"<<endl;
+    _Tau->unBranch();
+  }
+
+  if( neededCuts.isPresent(CUTS::eRElec1) || neededCuts.isPresent(CUTS::eRElec2) ) {
+    neededCuts.loadCuts(_Electron->extraCuts);
+  } else {
+    cout<<"Electrons not needed. They will be deactivated!"<<endl;
+    _Electron->unBranch();
+  }
+
+  if( neededCuts.isPresent(CUTS::eRMuon1) || neededCuts.isPresent(CUTS::eRMuon2) ) {
+    neededCuts.loadCuts(_Muon->extraCuts);
+  } else {
+    cout<<"Muons not needed. They will be deactivated!"<<endl;
+    _Muon->unBranch();
+  }
+
+
+
+
 
   for(auto e: Enum<CUTS>()) {
     need_cut[e] = false;
@@ -1042,6 +1084,12 @@ void Analyzer::setCutNeeds() {
     if(need_cut[CUTS::eGW]) genMaper[24] = new GenFill(2, CUTS::eGW);
     if(need_cut[CUTS::eGHiggs]) genMaper[25] = new GenFill(2, CUTS::eGHiggs);
     //  , CUTS::eNuTau
+  }
+
+  for(auto e: Enum<CUTS>()) {
+    if(need_cut[e] != neededCuts.isPresent(e))
+      cout << static_cast<int>(e) << " is doing wonky stuff" << endl;
+
   }
 
 }
@@ -1249,9 +1297,8 @@ void Analyzer::getGoodTauNu() {
 ///Function used to find the number of reco leptons that pass the various cuts.
 ///Divided into if blocks for the different lepton requirements.
 void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS eGenPos, const PartStats& stats, const int syst) {
-  // if(! need_cut[ePos]) {
-  //   return;
-  // }
+  if(! neededCuts.isPresent(ePos)) return;
+
   string systname = syst_names.at(syst);
   if(syst != 0){
     //save time to not rerun stuff
@@ -1267,7 +1314,7 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
     }
   }
   int i = 0;
-  cout << "start" << endl;
+
   for(auto lvec: lep) {
     bool passCuts = true;
     if (fabs(lvec.Eta()) > stats.dmap.at("EtaCut")) passCuts = false;
@@ -1331,7 +1378,9 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
 ////Jet specific function for finding the number of jets that pass the cuts.
 //used to find the nubmer of good jet1, jet2, central jet, 1st and 2nd leading jets and bjet.
 void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats, const int syst) {
-  if(! need_cut[ePos]) return;
+
+  if(! neededCuts.isPresent(ePos)) return;
+
   string systname = syst_names.at(syst);
   if(systname!=""){
     //save time to not rerun stuff
@@ -1395,7 +1444,8 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats, const int syst
 
 ////FatJet specific function for finding the number of V-jets that pass the cuts.
 void Analyzer::getGoodRecoFatJets(CUTS ePos, const PartStats& stats, const int syst) {
-  if(! need_cut[ePos]) return;
+  if(! neededCuts.isPresent(ePos)) return;
+
   string systname = syst_names.at(syst);
   if(systname!=""){
     //save time to not rerun stuff
@@ -1406,33 +1456,30 @@ void Analyzer::getGoodRecoFatJets(CUTS ePos, const PartStats& stats, const int s
   }
   int i=0;
 
-  for(vector<TLorentzVector>::iterator it=_FatJet->begin(); it != _FatJet->end(); it++, i++) {
-    TLorentzVector lvec = (*it);
+  for(auto lvec: *_FatJet) {
+    bool passCuts = true;
+    passCuts &= passCutRange(fabs(lvec.Eta()), stats.pmap.at("EtaCut"));
+    passCuts &= (lvec.Pt() > stats.dmap.at("PtCut")) ;
+
     ///if else loop for central jet requirements
+    for( auto cut: stats.bset) {
+      if(!passCuts) break;
 
-    if (fabs(lvec.Eta()) < stats.pmap.at("EtaCut").first || fabs(lvec.Eta()) > stats.pmap.at("EtaCut").second) continue;
 
-    if (lvec.Pt() < stats.dmap.at("PtCut")) continue;
-
-    /// WJet specific
-    if(ePos == CUTS::eRWjet) { //W Tagging
-      if(stats.bmap.at("ApplyJetWTagging") &&
-        not (_FatJet->tau2->at(i)/_FatJet->tau1->at(i)> stats.pmap.at("JetTau2Tau1Ratio").first &&
-          _FatJet->tau2->at(i)/_FatJet->tau1->at(i)< stats.pmap.at("JetTau2Tau1Ratio").second &&
-          _FatJet->PrunedMass->at(i) > stats.pmap.at("JetWmassCut").first &&
-          _FatJet->PrunedMass->at(i) < stats.pmap.at("JetWmassCut").second)) continue;
-    }
+      else if(cut == "ApplyJetWTagging") passCuts = (passCutRange(_FatJet->tau2->at(i)/_FatJet->tau1->at(i), stats.pmap.at("JetTau2Tau1Ratio")) &&
+						     passCutRange(_FatJet->PrunedMass->at(i), stats.pmap.at("JetWmassCut")));
 
     // ----anti-overlap requirements
-    if(stats.bmap.at("RemoveOverlapWithMuon1s") && isOverlaping(lvec, *_Muon, CUTS::eRMuon1, stats.dmap.at("Muon1MatchingDeltaR"))) continue;
-    if(stats.bmap.at("RemoveOverlapWithMuon2s") && isOverlaping(lvec, *_Muon, CUTS::eRMuon2, stats.dmap.at("Muon2MatchingDeltaR"))) continue;
-    if(stats.bmap.at("RemoveOverlapWithElectron1s") && isOverlaping(lvec, *_Electron, CUTS::eRElec1, stats.dmap.at("Electron1MatchingDeltaR"))) continue;
-    if(stats.bmap.at("RemoveOverlapWithElectron2s") && isOverlaping(lvec, *_Electron, CUTS::eRElec2, stats.dmap.at("Electron2MatchingDeltaR"))) continue;
-    if(stats.bmap.at("RemoveOverlapWithTau1s") && isOverlaping(lvec, *_Tau, CUTS::eRTau1, stats.dmap.at("Tau1MatchingDeltaR"))) continue;
-    if(stats.bmap.at("RemoveOverlapWithTau2s") && isOverlaping(lvec, *_Tau, CUTS::eRTau2, stats.dmap.at("Tau2MatchingDeltaR"))) continue;
-
-    /////fill up array
-    active_part->at(ePos)->push_back(i);
+      else if(cut == "RemoveOverlapWithMuon1s") passCuts = !isOverlaping(lvec, *_Muon, CUTS::eRMuon1, stats.dmap.at("Muon1MatchingDeltaR"));
+      else if (cut =="RemoveOverlapWithMuon2s") passCuts = !isOverlaping(lvec, *_Muon, CUTS::eRMuon2, stats.dmap.at("Muon2MatchingDeltaR"));
+      else if(cut == "RemoveOverlapWithElectron1s") passCuts = !isOverlaping(lvec, *_Electron, CUTS::eRElec1, stats.dmap.at("Electron1MatchingDeltaR"));
+      else if(cut == "RemoveOverlapWithElectron2s") passCuts = !isOverlaping(lvec, *_Electron, CUTS::eRElec2, stats.dmap.at("Electron2MatchingDeltaR"));
+      else if(cut == "RemoveOverlapWithTau1s") passCuts = !isOverlaping(lvec, *_Tau, CUTS::eRTau1, stats.dmap.at("Tau1MatchingDeltaR"));
+      else if (cut =="RemoveOverlapWithTau2s") passCuts = !isOverlaping(lvec, *_Tau, CUTS::eRTau2, stats.dmap.at("Tau2MatchingDeltaR"));
+    
+    }
+    if(passCuts) active_part->at(ePos)->push_back(i);
+    i++;
   }
 }
 
@@ -1479,7 +1526,7 @@ bool Analyzer::passedLooseJetID(int nobj) {
 
 ///sees if the event passed one of the two cuts provided
 void Analyzer::TriggerCuts(vector<int>& prevTrig, const vector<string>& trigvec, CUTS ePos) {
-  if(! need_cut[ePos]) return;
+  if(! neededCuts.isPresent(ePos)) return;
   //cout<<" trigger "<<Trigger_decision->size()<<endl;
   if(version==1){
     for(size_t i = 0; i < trigvec.size(); i++) {
@@ -1504,7 +1551,7 @@ void Analyzer::TriggerCuts(vector<int>& prevTrig, const vector<string>& trigvec,
 
 ////VBF specific cuts dealing with the leading jets.
 void Analyzer::VBFTopologyCut(const PartStats& stats, const int syst) {
-  if(! need_cut[CUTS::eSusyCom]) return;
+  if(! neededCuts.isPresent(CUTS::eSusyCom)) return;
   string systname = syst_names.at(syst);
   if(systname!=""){
     //only jet stuff is affected
@@ -1620,7 +1667,7 @@ bool Analyzer::passDiParticleApprox(const TLorentzVector& Tobj1, const TLorentzV
 /////abs for values
 ///Find the number of lepton combos that pass the dilepton cuts
 void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS ePos2, CUTS ePosFin, const PartStats& stats, const int syst) {
-  if(! need_cut[ePosFin]) return;
+  if(! neededCuts.isPresent(ePosFin)) return;
   string systname = syst_names.at(syst);
   if(systname!=""){
     //save time to not rerun stuff
@@ -1699,7 +1746,7 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
 
 /////Same as gooddilepton, just jet specific
 void Analyzer::getGoodDiJets(const PartStats& stats, const int syst) {
-  if(! need_cut[CUTS::eDiJet]) return;
+  if(! neededCuts.isPresent(CUTS::eDiJet)) return;
   string systname = syst_names.at(syst);
   if(systname!=""){
     //save time to not rerun stuff
