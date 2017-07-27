@@ -1897,7 +1897,7 @@ void Analyzer::fill_histogram() {
       //get the systematics for the last folder:
       if(crbins != 1) CRfillCuts();
       else fillCuts();
-      if(maxCut== SignalRegion){
+      if(maxCut== histo.get_cutorder()->size()){
         for(auto it: *syst_groups) {
           fill_Folder(it, maxCut, syst_histo, isyst);
         }
