@@ -1253,9 +1253,9 @@ int Analyzer::matchToGenPdg(const TLorentzVector& lvec, double minDR) {
 void Analyzer::getGoodGen(const PartStats& stats) {
   for(size_t j = 0; j < _Gen->size(); j++) {
     //we are not interested in pythia info here!
-    if(_Gen->status->at(j)>10){
-      continue;
-    }
+    //if(_Gen->status->at(j)>10){
+      //continue;
+    //}
     int id = abs(_Gen->pdg_id->at(j));
     if(genMaper[id] != nullptr && _Gen->status->at(j) == genMaper[id]->status) {
       if(id == 15 && (_Gen->pt(j) < stats.pmap.at("TauPtCut").first || _Gen->pt(j) > stats.pmap.at("TauPtCut").second || abs(_Gen->eta(j)) > stats.dmap.at("TauEtaCut"))) continue;
@@ -1860,16 +1860,30 @@ void Analyzer::fill_histogram() {
     for(auto name : syst_names) {
       //switch the systematics:
       for(Particle* ipart: allParticles){
-        if(ipart->systVec[name]->size()>0)
-          ipart->setCurrentP(name);
+        ipart->setCurrentP("orig");
       }
-      _MET->setCurrentP(name);
-      active_part =&syst_parts.at(isyst);
-
+      _MET->setCurrentP("orig");
+      active_part = &goodParts;
+      if(name.find("weight")!=string::npos){
+      }else{
+        //switch the systematics:
+        for(Particle* ipart: allParticles){
+          if(ipart->systVec[name]->size()>0)
+            ipart->setCurrentP(name);
+        }
+        _MET->setCurrentP(name);
+        active_part =&syst_parts.at(isyst);
+      }
       //get the systematics for the last folder:
-      for(auto it: *syst_groups) {
-        fill_Folder(it, maxCut, syst_histo, isyst);
+      if(crbins != 1) CRfillCuts();
+      else fillCuts();
+      if(maxCut== histo.get_cutorder()->size()){
+        for(auto it: *syst_groups) {
+          fill_Folder(it, maxCut, syst_histo, isyst);
+        }
       }
+      //restore the real weight
+      wgt=backup_wgt;
       isyst++;
     }
     for(Particle* ipart: allParticles){
@@ -1888,7 +1902,7 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, int
    * histAddVal(val, name) histo.addVal(val, group, max, name, wgt)
    * so each histogram knows the group, max and weight!
    */
-  if(group == "FillRun") {
+  if(group == "FillRun" and syst==-1) {
     if(crbins != 1) {
       for(int i = 0; i < crbins; i++) {
         ihisto.addVal(false, group, i, "Events", 1);

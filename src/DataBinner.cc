@@ -1,12 +1,29 @@
 #include "DataBinner.h"
+#include <algorithm>
 
 using namespace std;
+
+std::string random_string( size_t length )
+{
+    auto randchar = []() -> char
+    {
+        const char charset[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+        const size_t max_index = (sizeof(charset) - 1);
+        return charset[ rand() % max_index ];
+    };
+    std::string str(length,0);
+    std::generate_n( str.begin(), length, randchar );
+    return str;
+}
 
 Piece1D::Piece1D(string _name, int _bins, double _begin, double _end, int _Nfold) :
 DataPiece(_name, _Nfold), begin(_begin), end(_end), bins(_bins) {
   for(int i = 0; i < _Nfold; i++) {
     string hname = name + to_string(i);
-    TH1D tmp(hname.c_str(), name.c_str(), bins, begin, end);
+    TH1D tmp((hname+random_string(3)).c_str(), name.c_str(), bins, begin, end);
     tmp.Sumw2();
     histograms.push_back(tmp);
   }
@@ -19,7 +36,7 @@ void Piece1D::bin(int folder, double y, double weight) {
 void Piece1D::write_histogram(vector<string>& folders, TFile* outfile) {
   for(int i =0; i < (int)folders.size(); i++) {
     outfile->cd(folders.at(i).c_str());
-    histograms.at(i).Write();
+    histograms.at(i).Write(histograms.at(i).GetTitle());
   }
 }
 
@@ -33,7 +50,7 @@ DataPiece(_name, _Nfold), beginx(_beginx), endx(_endx), beginy(_beginy), endy(_e
 
   for(int i = 0; i < _Nfold; ++i) {
     string hname = name + to_string(i);
-    TH2D tmp(hname.c_str(), name.c_str(), binx, beginx, endx, biny, beginy, endy);
+    TH2D tmp((hname+random_string(3)).c_str(), name.c_str(), binx, beginx, endx, biny, beginy, endy);
     tmp.Sumw2();
     histograms.push_back(tmp);
   }
@@ -47,7 +64,7 @@ void Piece2D::bin(int folder, double x, double y, double weight) {
 void Piece2D::write_histogram(vector<string>& folders, TFile* outfile) {
   for(size_t i =0; i < folders.size(); i++) {
     outfile->cd(folders.at(i).c_str());
-    histograms.at(i).Write();
+    histograms.at(i).Write(histograms.at(i).GetTitle());
   }
 }
 
