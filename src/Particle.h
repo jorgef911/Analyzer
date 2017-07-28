@@ -16,7 +16,6 @@
 #include <TBranch.h>
 #include <TLorentzVector.h>
 
-
 #include "tokenizer.hpp"
 #include "Cut_enum.h"
 
@@ -27,7 +26,7 @@ struct PartStats {
   unordered_map<string,double> dmap;
   unordered_map<string,string> smap;
   unordered_map<string,pair<double,double> > pmap;
-  unordered_map<string,bool> bmap;
+  //  unordered_map<string,bool> bmap;
   unordered_set<string> bset;
 };
 
@@ -41,7 +40,7 @@ public:
   Particle(TTree*, string, string, vector<string>);
   virtual ~Particle() {}
 
-  virtual void findExtraCuts() {extraCuts.clear();}
+  virtual vector<CUTS> findExtraCuts() {return vector<CUTS>();}
   void init();
   void unBranch();
   double pt(uint) const;
@@ -67,20 +66,21 @@ public:
   string getName() {return GenName;};
 
   PType type;
-  vector<CUTS> extraCuts;
-  const map<PType,CUTS> cutMap = {{PType::Electron, CUTS::eGElec}, {PType::Muon, CUTS::eGMuon},
-				  {PType::Tau, CUTS::eGTau}};
   unordered_map<string, PartStats> pstats;
 
-
-
-
-  string activeSystematic;
 
 protected:
   void getPartStats(string);
   TTree* BOOM;
   string GenName;
+  const map<PType,CUTS> cutMap = {{PType::Electron, CUTS::eGElec}, {PType::Muon, CUTS::eGMuon},
+				  {PType::Tau, CUTS::eGTau}};
+  unordered_map<CUTS, string, EnumHash> jetNameMap = {
+    {CUTS::eRJet1, "Jet1"},               {CUTS::eRJet2, "Jet2"},
+    {CUTS::eRCenJet, "CentralJet"},      {CUTS::eRBJet, "BJet"},
+    {CUTS::eR1stJet, "FirstLeadingJet"},  {CUTS::eR2ndJet, "SecondLeadingJet"},
+    {CUTS::eRWjet, "WJet"}
+  };
 
  private:
   vector<double>* mpt = 0;
@@ -92,6 +92,8 @@ protected:
   vector<TLorentzVector> *cur_P;
   vector<string> syst_names;
   vector<vector<TLorentzVector>* > systVec;
+
+  string activeSystematic;
 };
 
 class Photon : public Particle {
@@ -132,16 +134,9 @@ class Jet : public Particle {
 public:
   Jet(TTree*, string, vector<string>);
 
-  unordered_map<CUTS, string, EnumHash> jetNameMap = {
-    {CUTS::eRJet1, "Jet1"},               {CUTS::eRJet2, "Jet2"},
-    {CUTS::eRCenJet, "CentralJet"},      {CUTS::eRBJet, "BJet"},
-    {CUTS::eR1stJet, "FirstLeadingJet"},  {CUTS::eR2ndJet, "SecondLeadingJet"},
-    {CUTS::eRWjet, "WJet"}
-  };
-
-  void findExtraCuts();
+  vector<CUTS> findExtraCuts();
   vector<CUTS> overlapCuts(CUTS);
-
+  
   vector<double>* neutralHadEnergyFraction = 0;
   vector<double>* neutralEmEmEnergyFraction = 0;
   vector<int>*    numberOfConstituents = 0;
@@ -156,6 +151,9 @@ public:
   vector<double>* tau3 = 0;
   vector<double>* PrunedMass = 0;
   vector<double>* SoftDropMass = 0;
+
+ protected:
+
 };
 
 class FatJet : public Particle {
@@ -163,11 +161,7 @@ class FatJet : public Particle {
 public:
   FatJet(TTree*, string, vector<string>);
 
-  unordered_map<CUTS, string, EnumHash> jetNameMap = {
-    {CUTS::eRWjet, "Wjet"}
-  };
-
-  void findExtraCuts();
+  vector<CUTS> findExtraCuts();
   vector<CUTS> overlapCuts(CUTS);
 
   vector<double>* tau1 = 0;
@@ -175,6 +169,7 @@ public:
   vector<double>* tau3 = 0;
   vector<double>* PrunedMass = 0;
   vector<double>* SoftDropMass = 0;
+
 };
 
 class Lepton : public Particle {
@@ -182,7 +177,8 @@ class Lepton : public Particle {
 public:
   Lepton(TTree*, string, string, vector<string>);
 
-  void findExtraCuts();
+  vector<CUTS> findExtraCuts();
+
   double charge(uint)const;
   vector<double>* _charge = 0;
 
@@ -230,9 +226,11 @@ class Taus : public Lepton {
 public:
   Taus(TTree*, string, vector<string>);
 
-  void findExtraCuts();
-
+  //  void findExtraCuts();
+  vector<CUTS> findExtraCuts();
   bool get_Iso(int, double, double) const;
+  bool pass_against_Elec(CUTS, int);
+  bool pass_against_Muon(CUTS, int);
 
   vector<int>     *decayModeFindingNewDMs = 0;
   vector<double>  *nProngs = 0;

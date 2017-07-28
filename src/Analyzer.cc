@@ -101,17 +101,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
 
   BOOM= new TChain("TNT/BOOM");
 
-  //gEnv->SetValue("TFile.Recover", 0);
-
-
   for( string infile: infiles){
-    //TFile* tmp;
-    //tmp = TFile::Open(infile.c_str());
-    //if(!tmp) {
-      //cout << endl << endl << "File " << infile << " did not open correctly, exiting" <<endl;
-      //exit(EXIT_FAILURE);
-    //}
-
     BOOM->AddFile(infile.c_str());
   }
 
@@ -136,29 +126,26 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
 
   reader.load(calib, BTagEntry::FLAV_B, "comb");
 
+  isData = findCut(distats["Run"].bset, "isData");
 
-  isData = distats["Run"].bmap.at("isData");
-
-  CalculatePUSystematics = distats["Run"].bmap.at("CalculatePUSystematics");
+  CalculatePUSystematics = findCut(distats["Run"].bset,"CalculatePUSystematics");
   initializePileupInfo(distats["Run"].smap.at("MCHistos"), distats["Run"].smap.at("DataHistos"),distats["Run"].smap.at("DataPUHistName"),distats["Run"].smap.at("MCPUHistName"));
   syst_names.push_back("orig");
   unordered_map<CUTS, vector<int>*, EnumHash> tmp;
   syst_parts.push_back(tmp);
-  if(!isData && distats["Systematics"].bmap.at("useSystematics")) {
-    for(auto &it : distats["Systematics"].bmap) {
-      if( it.first == "useSystematics")
-        doSystematics= it.second;
-      else if( it.second) {
-        syst_names.push_back(it.first);
+  if(!isData && findCut(distats["Systematics"].bset, "useSystematics")) {
+    for(auto systname : distats["Systematics"].bset) {
+      if( systname == "useSystematics")
+        doSystematics= true;
+      else {
+        syst_names.push_back(systname);
         syst_parts.push_back(getArray());
       }
     }
   }else {
     doSystematics=false;
   }
-  if(!isData) {
-    _Gen = new Generated(BOOM, filespace + "Gen_info.in", syst_names);
-  }
+
   _Electron = new Electron(BOOM, filespace + "Electron_info.in", syst_names);
   _Muon = new Muon(BOOM, filespace + "Muon_info.in", syst_names);
   _Tau = new Taus(BOOM, filespace + "Tau_info.in", syst_names);
@@ -167,14 +154,16 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   _MET  = new Met(BOOM,"Met_type1PF", syst_names);
 
   if(!isData) {
+    _Gen = new Generated(BOOM, filespace + "Gen_info.in", syst_names);
     allParticles= {_Gen,_Electron,_Muon,_Tau,_Jet,_FatJet};
-  }else{
+  } else {
     allParticles= {_Electron,_Muon,_Tau,_Jet,_FatJet};
   }
 
-  for(Particle* ipart: allParticles){
-    ipart->findExtraCuts();
-  }
+
+  // for(Particle* ipart: allParticles){
+  //   ipart->findExtraCuts();
+  // }
 
   vector<string> cr_variables;
   if(setCR) {
@@ -681,7 +670,7 @@ void Analyzer::updateMet(string syst) {
   double sumptForHt=0;
   for(vector<TLorentzVector>::iterator it=_Jet->begin(); it!=_Jet->end(); it++, i++) {
     if( (it->Pt() > distats["Run"].dmap.at("JetPtForMhtAndHt")) && (fabs(it->Eta()) < distats["Run"].dmap.at("JetEtaForMhtAndHt")) ) {
-      if(distats["Run"].bmap.at("ApplyJetLooseIDforMhtAndHt") && !passedLooseJetID(i) ) continue;
+      if(findCut(distats["Run"].bset, "ApplyJetLooseIDforMhtAndHt") && !passedLooseJetID(i) ) continue;
 
       sumpxForMht -= it->Px();
       sumpyForMht -= it->Py();
@@ -696,8 +685,8 @@ void Analyzer::updateMet(string syst) {
 
   /////MET CUTS
 
-  if(!passCutRange("Met", _MET->pt(), distats["Run"])) return;
-  if(distats["Run"].bmap.at("DiscrByHT") && sumptForHt < distats["Run"].dmap.at("HtCut")) return;
+  if(!passCutRange(_MET->pt(), distats["Run"].pmap.at("MetCut"))) return;
+  if(findCut(distats["Run"].bset, "DiscrByHT") && sumptForHt < distats["Run"].dmap.at("HtCut")) return;
 
   active_part->at(CUTS::eMET)->push_back(1);
 }
@@ -705,7 +694,7 @@ void Analyzer::updateMet(string syst) {
 void Analyzer::treatMuons_Met(string syst) {
 
   //syst not implemented for muon as tau or neutrino yet
-  if( syst!="orig" or !(distats["Run"].bmap.at("TreatMuonsAsNeutrinos") || distats["Run"].bmap.at("TreatMuonsAsTaus")) ){
+  if( syst!="orig" or !( findCut(distats["Run"].bset, "TreatMuonsAsNeutrinos") || findCut(distats["Run"].bset, "TreatMuonsAsTaus")) ){
     return;
   }
 
@@ -714,7 +703,7 @@ void Analyzer::treatMuons_Met(string syst) {
   _MET->systdeltaMEx["muMET"]=0;
   _MET->systdeltaMEy["muMET"]=0;
 
-  if(distats["Run"].bmap.at("TreatMuonsAsNeutrinos")) {
+  if(findCut(distats["Run"].bset, "TreatMuonsAsNeutrinos")) {
     for(auto it : *active_part->at(CUTS::eRMuon1)) {
       if(find(active_part->at(CUTS::eRMuon2)->begin(), active_part->at(CUTS::eRMuon2)->end(), it) != active_part->at(CUTS::eRMuon2)->end() ) continue;
       _MET->systdeltaMEx["muMET"] += _Muon->p4(it).Px();
@@ -775,7 +764,7 @@ void Analyzer::treatMuons_Met(string syst) {
   /////MET CUTS
   active_part->at(CUTS::eMET)->clear();
 
-  if(passCutRange("Met", _MET->pt(), distats["Run"])) {
+  if(passCutRange(_MET->pt(), distats["Run"].pmap.at("MetCut"))) {
     active_part->at(CUTS::eMET)->push_back(1);
   }
 }
@@ -892,8 +881,8 @@ void Analyzer::read_info(string filename) {
       char* p;
       strtod(stemp[1].c_str(), &p);
       if(group.compare("Control_Region") !=0 ){
-        if(stemp[1] == "1" || stemp[1] == "true") distats[group].bmap[stemp[0]]=true;
-        else if(stemp[1] == "0" || stemp[1] == "false") distats[group].bmap[stemp[0]]=false;
+        if(stemp[1] == "1" || stemp[1] == "true") distats[group].bset.insert(stemp[0]);
+	//        else if(stemp[1] == "0" || stemp[1] == "false") distats[group].bmap[stemp[0]]=false;
         else if(*p) distats[group].smap[stemp[0]] = stemp[1];
         else  distats[group].dmap[stemp[0]]=stod(stemp[1]);
       }else{
@@ -927,7 +916,7 @@ void Analyzer::setCutNeeds() {
     neededCuts.loadCuts(it->info->ePos);
   }
   
-  neededCuts.loadCuts(_Jet->extraCuts);
+  neededCuts.loadCuts(_Jet->findExtraCuts());
 
   for(auto it: jetCuts) {
     if(!neededCuts.isPresent(it)) continue;
@@ -935,7 +924,7 @@ void Analyzer::setCutNeeds() {
   }
 
   if(neededCuts.isPresent(CUTS::eRWjet)) {
-    neededCuts.loadCuts(_FatJet->extraCuts);
+    neededCuts.loadCuts(_FatJet->findExtraCuts());
     neededCuts.loadCuts(_FatJet->overlapCuts(CUTS::eRWjet));
   } else {
     cout<<"WJets not needed. They will be deactivated!"<<endl;
@@ -943,27 +932,31 @@ void Analyzer::setCutNeeds() {
   }
 
   if( neededCuts.isPresent(CUTS::eRTau1) || neededCuts.isPresent(CUTS::eRTau2) ) {
-    neededCuts.loadCuts(_Tau->extraCuts);
+    neededCuts.loadCuts(_Tau->findExtraCuts());
   } else {
     cout<<"Taus not needed. They will be deactivated!"<<endl;
     _Tau->unBranch();
   }
 
   if( neededCuts.isPresent(CUTS::eRElec1) || neededCuts.isPresent(CUTS::eRElec2) ) {
-    neededCuts.loadCuts(_Electron->extraCuts);
+    neededCuts.loadCuts(_Electron->findExtraCuts());
   } else {
     cout<<"Electrons not needed. They will be deactivated!"<<endl;
     _Electron->unBranch();
   }
 
   if( neededCuts.isPresent(CUTS::eRMuon1) || neededCuts.isPresent(CUTS::eRMuon2) ) {
-    neededCuts.loadCuts(_Muon->extraCuts);
+    neededCuts.loadCuts(_Muon->findExtraCuts());
   } else {
     cout<<"Muons not needed. They will be deactivated!"<<endl;
     _Muon->unBranch();
   }
 
-
+  if( !neededCuts.isPresent(CUTS::eGen)) {
+    cout<<"Gen not needed. They will be deactivated!"<<endl;
+    _Gen->unBranch();
+ 
+  }
 
 
 
@@ -1001,7 +994,7 @@ void Analyzer::setCutNeeds() {
     }
   }
 
-  for(auto it: _Jet->extraCuts) {
+  for(auto it: _Jet->findExtraCuts()) {
     need_cut[it] = true;
     if(adjList.find(it) == adjList.end()) continue;
     for(auto e: adjList.at(it)) {
@@ -1025,7 +1018,7 @@ void Analyzer::setCutNeeds() {
     cout<<"Taus not needed. They will be deactivated!"<<endl;
     _Tau->unBranch();
   } else {
-    for(auto it: _Tau->extraCuts) {
+    for(auto it: _Tau->findExtraCuts()) {
       need_cut[it] = true;
       if(adjList.find(it) == adjList.end()) continue;
       for(auto e: adjList.at(it)) {
@@ -1038,7 +1031,7 @@ void Analyzer::setCutNeeds() {
     cout<<"Electrons not needed. They will be deactivated!"<<endl;
     _Electron->unBranch();
   } else {
-    for(auto it: _Electron->extraCuts) {
+    for(auto it: _Electron->findExtraCuts()) {
       need_cut[it] = true;
       if(adjList.find(it) == adjList.end()) continue;
       for(auto e: adjList.at(it)) {
@@ -1051,7 +1044,7 @@ void Analyzer::setCutNeeds() {
     cout<<"Muons not needed. They will be deactivated!"<<endl;
     _Muon->unBranch();
   } else {
-    for(auto it: _Muon->extraCuts) {
+    for(auto it: _Muon->findExtraCuts()) {
       need_cut[it] = true;
       if(adjList.find(it) == adjList.end()) continue;
       for(auto e: adjList.at(it)) {
@@ -1326,7 +1319,7 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
 
     for( auto cut: stats.bset) {
       if(!passCuts) break;
-      if(cut == "DoDiscrByIsolation") {
+      else if(cut == "DoDiscrByIsolation") {
 	double firstIso = (stats.pmap.find("IsoSumPtCutValue") != stats.pmap.end()) ? stats.pmap.at("IsoSumPtCutValue").first : ival(ePos) - ival(CUTS::eRTau1) + 1;
 	double secondIso = (stats.pmap.find("IsoSumPtCutValue") != stats.pmap.end()) ? stats.pmap.at("IsoSumPtCutValue").second : 0;
 	passCuts = lep.get_Iso(i, firstIso, secondIso);
@@ -1335,18 +1328,29 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
       else if(cut == "DiscrByMetDphi") passCuts = passCutRange(absnormPhi(lvec.Phi() - _MET->phi()), stats.pmap.at("MetDphiCut"));
       else if(cut == "DiscrByMetMt") passCuts = passCutRange(calculateLeptonMetMt(lvec), stats.pmap.at("MetMtCut"));
       /////muon cuts
-      else if(cut == "DoDiscrByTightID") passCuts = _Muon->tight->at(i);
+      else if(cut == "DoDiscrByTightID" && lep.type == PType::Muon) passCuts = _Muon->tight->at(i);
       else if(cut == "DoDiscrBySoftID") passCuts = _Muon->soft->at(i);
       ////electron cuts
       else if(cut == "DoDiscrByVetoID") passCuts = _Electron->isPassVeto->at(i);
       else if(cut == "DoDiscrByLooseID") passCuts = _Electron->isPassLoose->at(i);
       else if(cut == "DoDiscrByMediumID") passCuts = _Electron->isPassMedium->at(i);
-      else if(cut == "DoDiscrByTightID") passCuts = _Electron->isPassTight->at(i);
+      else if(cut == "DoDiscrByTightID" && lep.type == PType::Electron) passCuts = _Electron->isPassTight->at(i);
       else if(cut == "DoDiscrByHEEPID") passCuts = _Electron->isPassHEEPId->at(i);
       else if(cut == "DoDiscrByCrackCut") passCuts = !isInTheCracks(lvec.Eta());
       /////tau cuts
       else if(cut == "DoDiscrByLeadTrack") passCuts = (_Tau->leadChargedCandPt->at(i) >= stats.dmap.at("LeadTrackThreshold"));
-      // ----anti-overlap requirements
+           // ----Electron and Muon vetos
+      else if (cut == "DoDiscrAgainstElectron") passCuts = _Tau->pass_against_Elec(ePos, i);
+      else if (cut == "SelectTausThatAreElectrons") passCuts = !_Tau->pass_against_Elec(ePos, i);
+
+      else if (cut == "DoDiscrAgainstMuon") passCuts = _Tau->pass_against_Muon(ePos, i);
+      else if (cut == "SelectTausThatAreMuons") passCuts =  !_Tau->pass_against_Muon(ePos, i);
+
+      else if(cut == "DiscrByProngType") {
+	passCuts &= stats.smap.at("ProngType").find("hps") == string::npos || _Tau->decayModeFindingNewDMs->at(i) != 0;
+	passCuts &= passProng(stats.smap.at("ProngType"), _Tau->nProngs->at(i));
+      }
+            // ----anti-overlap requirements
       else if(cut == "RemoveOverlapWithMuon1s") passCuts = !isOverlaping(lvec, *_Muon, CUTS::eRMuon1, stats.dmap.at("Muon1MatchingDeltaR"));
       else if(cut == "RemoveOverlapWithMuon2s") passCuts = !isOverlaping(lvec, *_Muon, CUTS::eRMuon2, stats.dmap.at("Muon2MatchingDeltaR"));
       else if(cut == "RemoveOverlapWithElectron1s") passCuts = !isOverlaping(lvec, *_Electron, CUTS::eRElec1, stats.dmap.at("Electron1MatchingDeltaR"));
@@ -1356,21 +1360,6 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
     }
     if(passCuts) active_part->at(ePos)->push_back(i);
     i++;
-
-    // } else if(lep.type == PType::Tau) {   /////////////TAU CUT/////////////////
-    //   // ----Require 1 or 3 prongs
-    //   if(stats.smap.at("DiscrByProngType").find("hps") != string::npos && _Tau->decayModeFindingNewDMs->at(i) == 0) continue;
-    //   if(!passProng(stats.smap.at("DiscrByProngType"), _Tau->nProngs->at(i))) continue;
-
-    //   // ----Electron and Muon vetos
-    //   vector<int>* against = (ePos == CUTS::eRTau1) ? _Tau->againstElectron.first : _Tau->againstElectron.second;
-    //   if (stats.bmap.at("DoDiscrAgainstElectron") && against->at(i) == 0) continue;
-    //   else if (stats.bmap.at("SelectTausThatAreElectrons") && against->at(i) > 0) continue;
-
-    //   against = (ePos == CUTS::eRTau1) ? _Tau->againstMuon.first : _Tau->againstMuon.second;
-    //   if (stats.bmap.at("DoDiscrAgainstMuon") && against->at(i) == 0) continue;
-    //   else if (stats.bmap.at("SelectTausThatAreMuons") && against->at(i) > 0) continue;
-
   }
   return;
 }
@@ -1566,49 +1555,41 @@ void Analyzer::VBFTopologyCut(const PartStats& stats, const int syst) {
 
   TLorentzVector ljet1 = _Jet->p4(active_part->at(CUTS::eR1stJet)->at(0));
   TLorentzVector ljet2 = _Jet->p4(active_part->at(CUTS::eR2ndJet)->at(0));
-
-  if(!passCutRange("Mass", (ljet1 + ljet2).M(), stats)) return;
-  if(!passCutRange("Pt", (ljet1 + ljet2).Pt(), stats)) return;
-  if(!passCutRange("DeltaEta", abs(ljet1.Eta() - ljet2.Eta()), stats)) return;
-  if(!passCutRange("DeltaEta", absnormPhi(ljet1.Phi() - ljet2.Phi()), stats)) return;
-
-  if(stats.bmap.at("DiscrByOSEta")) {
-    if((ljet1.Eta() * ljet2.Eta()) >= 0) return;
-  }
-
+  TLorentzVector dijet = ljet1 + ljet2;
   double dphi1 = normPhi(ljet1.Phi() - _MET->phi());
   double dphi2 = normPhi(ljet2.Phi() - _MET->phi());
-  double r1, r2, alpha;
+  
+  bool passCuts = true;
+  for(auto cut: stats.bset) {
+    if(!passCuts) break;
+    else if(cut == "DiscrByMass") passCuts = passCutRange(dijet.M(), stats.pmap.at("MassCut"));
+    else if(cut == "DiscrByPt") passCuts = passCutRange(dijet.Pt(), stats.pmap.at("PtCut"));
+    else if(cut == "DiscrByDeltaEta") passCuts = passCutRange(abs(ljet1.Eta() - ljet2.Eta()), stats.pmap.at("DeltaEtaCut"));
+    else if(cut == "DiscrByDeltaPhi") passCuts = passCutRange(absnormPhi(ljet1.Phi() - ljet2.Phi()), stats.pmap.at("DeltaPhiCut"));  
+    else if(cut == "DiscrByOSEta") passCuts = (ljet1.Eta() * ljet2.Eta() < 0);
+    else if(cut == "DiscrByR1") passCuts = passCutRange(sqrt( pow(dphi1,2.0) + pow((TMath::Pi() - dphi2),2.0)), stats.pmap.at("R1Cut"));
+    else if(cut == "DiscrByR2") passCuts = passCutRange(sqrt( pow(dphi2,2.0) + pow((TMath::Pi() - dphi1),2.0)), stats.pmap.at("R2Cut"));
+    else if(cut == "DiscrByAlpha") {
+      double alpha = (dijet.M() > 0) ? ljet2.Pt() / dijet.M() : -1;
+      passCuts = passCutRange(alpha, stats.pmap.at("AlphaCut"));
+    }
+    else if(cut == "DiscrByDphi1") passCuts = passCutRange(abs(dphi1), stats.pmap.at("DPhi1Cut"));
+    else if(cut == "DiscrByDphi2") passCuts = passCutRange(abs(dphi2), stats.pmap.at("DPhi2Cut"));
 
-  if(stats.bmap.at("DiscrByR1")) {
-    r1 = sqrt( pow(dphi1,2.0) + pow((TMath::Pi() - dphi2),2.0) );
-    if(r1 < stats.pmap.at("R1Cut").first || r1 > stats.pmap.at("R1Cut").second) return;
-
+    else cout << "cut: " << cut << " not listed" << endl;
   }
-  if(stats.bmap.at("DiscrByR2")) {
-    r2 = sqrt( pow(dphi2,2.0) + pow((TMath::Pi() - dphi1),2.0) );
-    if(r2 < stats.pmap.at("R2Cut").first || r2 > stats.pmap.at("R2Cut").second) return;
-  }
-  if(stats.bmap.at("DiscrByAlpha")) {
-    TLorentzVector addVec = ljet1 + ljet2;
-    alpha = (addVec.M() > 0) ? ljet2.Pt() / addVec.M() : -1;
-    if(alpha < stats.pmap.at("AlphaCut").first || alpha > stats.pmap.at("AlphaCut").second) return;
-  }
-  if( !passCutRange("Dphi1", abs(dphi1), stats)) return;
-  if( !passCutRange("Dphi2", abs(dphi2), stats)) return;
 
-  active_part->at(CUTS::eSusyCom)->push_back(0);
-}
-
-inline bool Analyzer::passCutRange(string CutName, double value, const PartStats& stats) {
-  return ( !(stats.bmap.at("DiscrBy" + CutName)) || (value > stats.pmap.at(CutName + "Cut").first && value < stats.pmap.at(CutName + "Cut").second) );
-
+  if(passCuts)  active_part->at(CUTS::eSusyCom)->push_back(0);
+  return;
 }
 
 bool Analyzer::passCutRange(double value, const pair<double, double>& cuts) {
   return (value > cuts.first && value < cuts.second);
 }
 
+bool Analyzer::findCut(unordered_set<string>& set, string cut) {
+  return (set.find(cut) != set.end());
+}
 
 //-----Calculate lepton+met transverse mass
 double Analyzer::calculateLeptonMetMt(const TLorentzVector& Tobj) {
@@ -1687,50 +1668,44 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
   TLorentzVector part1, part2;
 
   for(auto i1 : *active_part->at(ePos1)) {
+    part1 = lep1.p4(i1);
     for(auto i2 : *active_part->at(ePos2)) {
       if(sameParticle && i2 <= i1) continue;
-      part1 = lep1.p4(i1);
       part2 = lep2.p4(i2);
 
-      if(stats.bmap.at("DiscrByDeltaR") && (part1.DeltaR(part2)) < stats.dmap.at("DeltaRCut")) continue;
-
-
-
-      if (stats.bmap.find("DiscrByOSLSType") != stats.bmap.end() ){
-        //if it is 1 or 0 it will end up in the bool map!!
-        if(stats.bmap.at("DiscrByOSLSType") && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
-      }else if (stats.dmap.find("DiscrByOSLSType") != stats.dmap.end() ){
-        if(lep1.charge(i1) * lep2.charge(i2) > 0) continue;
-      }else if (stats.smap.find("DiscrByOSLSType") != stats.smap.end() ){
-        if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
-        else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge(i1) * lep2.charge(i2) >= 0)) continue;
+      bool passCuts = true;
+      for(auto cut : stats.bset) {
+	if(!passCuts) break;
+	else if (cut == "DiscrByDeltaR") passCuts = (part1.DeltaR(part2) >= stats.dmap.at("DeltaRCut"));
+	else if(cut == "DiscrByCosDphi") passCuts = passCutRange(cos(absnormPhi(part1.Phi() - part2.Phi())), stats.pmap.at("CosDphiCut"));
+	else if(cut == "DiscrByDeltaPt") passCuts = passCutRange(part1.Pt() - part2.Pt(), stats.pmap.at("DeltaPtCutValue"));
+	else if(cut == "DiscrByCDFzeta2D") {
+	  double CDFzeta = stats.dmap.at("PZetaCutCoefficient") * getPZeta(part1, part2).first
+	    + stats.dmap.at("PZetaVisCutCoefficient") * getPZeta(part1, part2).second;
+	  passCuts = passCutRange(CDFzeta, stats.pmap.at("CDFzeta2DCutValue"));
+	}
+	else if(cut == "DiscrByDeltaPtDivSumPt") {
+	  double ptDiv = (part1.Pt() - part2.Pt()) / (part1.Pt() + part2.Pt());
+	  passCuts = passCutRange(ptDiv, stats.pmap.at("DeltaPtDivSumPtCutValue"));
+	}
+	else if (cut == "DiscrByMassReco") {
+	  double diMass = diParticleMass(part1,part2, stats.smap.at("HowCalculateMassReco"));
+	  passCuts = passCutRange(diMass, stats.pmap.at("MassCut"));
+	}
+	else cout << "cut: " << cut << " not listed" << endl;
       }
+      
 
-      if( !passCutRange("CosDphi", cos(absnormPhi( part1.Phi() - part2.Phi())), stats)) continue;
+      // if (stats.bmap.find("DiscrByOSLSType") != stats.bmap.end() ){
+      //   //if it is 1 or 0 it will end up in the bool map!!
+      //   if(stats.bmap.at("DiscrByOSLSType") && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
+      // }else if (stats.dmap.find("DiscrByOSLSType") != stats.dmap.end() ){
+      //   if(lep1.charge(i1) * lep2.charge(i2) > 0) continue;
+      // }else if (stats.smap.find("DiscrByOSLSType") != stats.smap.end() ){
+      //   if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
+      //   else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge(i1) * lep2.charge(i2) >= 0)) continue;
+      // }
 
-      // ----Mass window requirement
-
-      if (stats.bmap.at("DiscrByMassReco")) {
-        double diMass = diParticleMass(part1,part2, stats.smap.at("HowCalculateMassReco"));
-        if( diMass < stats.pmap.at("MassCut").first || diMass > stats.pmap.at("MassCut").second) continue;
-      }
-
-      if (stats.bmap.at("DiscrByCDFzeta2D")) {
-        double CDFzeta = stats.dmap.at("PZetaCutCoefficient") * getPZeta(part1, part2).first
-                + stats.dmap.at("PZetaVisCutCoefficient") * getPZeta(part1, part2).second;
-        if( CDFzeta < stats.pmap.at("CDFzeta2DCutValue").first || CDFzeta > stats.pmap.at("CDFzeta2DCutValue").second ) continue;
-      }
-
-
-      if (stats.bmap.at("DiscrByDeltaPtDivSumPt")) {
-        double ptDiv = (part1.Pt() - part2.Pt()) / (part1.Pt() + part2.Pt());
-        if( ptDiv < stats.pmap.at("DeltaPtDivSumPtCutValue").first || ptDiv > stats.pmap.at("DeltaPtDivSumPtCutValue").second) continue;
-      }
-
-      if (stats.bmap.at("DiscrByDeltaPt")) {
-        double deltaPt = part1.Pt() - part2.Pt();
-        if(deltaPt < stats.pmap.at("DeltaPtCutValue").first || deltaPt > stats.pmap.at("DeltaPtCutValue").second) continue;
-      }
 
       ///Particlesp that lead to good combo are nGen * part1 + part2
       /// final / nGen = part1 (make sure is integer)
@@ -1760,29 +1735,24 @@ void Analyzer::getGoodDiJets(const PartStats& stats, const int syst) {
   for(auto ij2 : *active_part->at(CUTS::eRJet2)) {
     jet2 = _Jet->p4(ij2);
     for(auto ij1 : *active_part->at(CUTS::eRJet1)) {
+      if(ij1 == ij2) continue;
       jet1 = _Jet->p4(ij1);
-
-      if (stats.bmap.at("DiscrByDeltaR")) {
-        if(jet1.DeltaR(jet2) < stats.dmap.at("DeltaRCut")) continue;
-      }
-
-      if( !passCutRange("DeltaEta", abs(jet1.Eta() - jet2.Eta()), stats) ) continue;
-      if( !passCutRange("DeltaPhi", abs(jet1.Phi() - jet2.Phi()), stats) ) continue;
-
-      if (stats.bmap.at("DiscrByOSEta")) {
-        if((jet1.Eta() * jet2.Eta()) >= 0) continue;
-      }
-      // ----Require both legs to be almost back-to-back in phi
-      if( !passCutRange("CosDphi", cos(absnormPhi(jet1.Phi() - jet2.Phi())), stats) ) continue;
-
-      // ----Mass window requirement
-      if (stats.bmap.at("DiscrByMassReco")) {
-        if( ((jet1 + jet2).M() < stats.pmap.at("MassCut").first) || ((jet1 + jet2).M() > stats.pmap.at("MassCut").second) ) continue;
+      
+      bool passCuts = true;
+      for(auto cut : stats.bset) {
+	if(!passCuts) break;
+	else if (cut == "DiscrByDeltaR") passCuts = (jet1.DeltaR(jet2) >= stats.dmap.at("DeltaRCut"));
+	else if(cut == "DiscrByDeltaEta") passCuts = passCutRange(abs(jet1.Eta() - jet2.Eta()), stats.pmap.at("DeltaEtaCut"));
+	else if(cut == "DiscrByDeltaPhi") passCuts = passCutRange(absnormPhi(jet1.Phi() - jet2.Phi()), stats.pmap.at("DeltaPhiCut"));  
+	else if(cut == "DiscrByOSEta") passCuts = (jet1.Eta() * jet2.Eta() < 0);
+	else if(cut == "DiscrByMassReco") passCuts = passCutRange((jet1+jet2).M(), stats.pmap.at("MassCut"));
+	else if(cut == "DiscrByCosDphi") passCuts = passCutRange(cos(absnormPhi(jet1.Phi() - jet2.Phi())), stats.pmap.at("CosDphiCut"));
+	else cout << "cut: " << cut << " not listed" << endl;
       }
       ///Particlesp that lead to good combo are totjet * part1 + part2
       /// final / totjet = part1 (make sure is integer)
       /// final % totjet = part2
-      active_part->at(CUTS::eDiJet)->push_back(ij1*_Jet->size() + ij2);
+      if(passCuts) active_part->at(CUTS::eDiJet)->push_back(ij1*_Jet->size() + ij2);
     }
   }
 }
@@ -1830,7 +1800,7 @@ pair<double, double> Analyzer::getPZeta(const TLorentzVector& Tobj1, const TLore
 
 ////Grabs a list of the groups of histograms to be filled and asked Fill_folder to fill up the histograms
 void Analyzer::fill_histogram() {
-  if(distats["Run"].bmap["ApplyGenWeight"] && gen_weight == 0.0) return;
+  if(findCut(distats["Run"].bset, "ApplyGenWeight") && gen_weight == 0.0) return;
 
   if(crbins != 1) CRfillCuts();
   else fillCuts();
@@ -1839,7 +1809,7 @@ void Analyzer::fill_histogram() {
   const vector<string>* groups = histo.get_groups();
   if(!isData){
     wgt = pu_weight;
-    if(distats["Run"].bmap["ApplyGenWeight"]) wgt *= (gen_weight > 0) ? 1.0 : -1.0;
+    if(findCut(distats["Run"].bset ,"ApplyGenWeight")) wgt *= (gen_weight > 0) ? 1.0 : -1.0;
     //backup current weight
     backup_wgt=wgt;
   }else{
@@ -1887,7 +1857,7 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, int
     if(crbins != 1) {
       for(int i = 0; i < crbins; i++) {
         ihisto.addVal(false, group, i, "Events", 1);
-        if(distats["Run"].bmap["ApplyGenWeight"]) {
+        if(findCut(distats["Run"].bset, "ApplyGenWeight")) {
           //put the weighted events in bin 3
           ihisto.addVal(2, group,i, "Events", (gen_weight > 0) ? 1.0 : -1.0);
         }
@@ -1895,7 +1865,7 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, int
     }
     else{
       ihisto.addVal(false, group,ihisto.get_maxfolder(), "Events", 1);
-      if(distats["Run"].bmap["ApplyGenWeight"]) {
+      if(findCut(distats["Run"].bset, "ApplyGenWeight")) {
         //put the weighted events in bin 3
         ihisto.addVal(2, group,ihisto.get_maxfolder(), "Events", (gen_weight > 0) ? 1.0 : -1.0);
       }

@@ -5,11 +5,12 @@
 CalculatePUSystematics true
 DataHistos PU2016data_6p2ifb.root
 MCHistos PU2016MC.root
-DataPUHistName NVertices_0
 MCPUHistName NVertices_0
+DataPUHistName NVertices_0
+
 
 isData false
-ApplyGenWeight  true
+ApplyGenWeight  false
 
 ///------Triggers-----///
 
@@ -30,7 +31,7 @@ DiscrByMet true
 MetCut 30.0 10000.0
 
 DiscrByMHT false
-MhtCut 50.0
+MhtCut 30.0
 DiscrByHT false
 HtCut 30.0
 

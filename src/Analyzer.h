@@ -126,7 +126,8 @@ private:
 
   inline bool passCutRange(string, double, const PartStats&);
   bool passCutRange(double, const pair<double, double>&);
-
+  bool findCut(unordered_set<string>&, string);
+  
   void updateMet(string syst="orig");
   void treatMuons_Met(string syst="orig");
   double getPileupWeight(float);

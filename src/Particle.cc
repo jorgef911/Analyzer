@@ -3,6 +3,14 @@
 
 #define SetBranch(name, variable) BOOM->SetBranchStatus(name, 1);  BOOM->SetBranchAddress(name, &variable);
 
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////    PARTICLE   ////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+
+
 //particle is a objet that stores multiple versions of the particle candidates
 Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string> _syst_names) : BOOM(_BOOM), GenName(_GenName), syst_names(_syst_names) {
   type = PType::None;
@@ -27,8 +35,27 @@ Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string
   //  activeSystematic="orig";
 }
 
-void Particle::addPtEtaPhiESyst(double ipt,double ieta, double iphi, double ienergy, int syst){
+double Particle::pt(uint index)const         {return cur_P->at(index).Pt();}
+double Particle::eta(uint index)const        {return cur_P->at(index).Eta();}
+double Particle::phi(uint index)const        {return cur_P->at(index).Phi();}
+double Particle::energy(uint index)const     {return cur_P->at(index).E();}
+double Particle::charge(uint index)const     {return 0;}
 
+uint Particle::size()const                   {return Reco.size();}
+vector<TLorentzVector>::iterator Particle::begin(){ return cur_P->begin();}
+vector<TLorentzVector>::iterator Particle::end(){ return cur_P->end();}
+vector<TLorentzVector>::const_iterator Particle::begin()const { return cur_P->begin();}
+vector<TLorentzVector>::const_iterator Particle::end()const { return cur_P->end();}
+
+TLorentzVector Particle::p4(uint index)const {return (cur_P->at(index));}
+TLorentzVector& Particle::p4(uint index) {return cur_P->at(index);}
+TLorentzVector Particle::RecoP4(uint index)const {return Reco.at(index);}
+TLorentzVector& Particle::RecoP4(uint index) {return Reco.at(index);}
+
+
+
+
+void Particle::addPtEtaPhiESyst(double ipt,double ieta, double iphi, double ienergy, int syst){
   TLorentzVector mp4;
   mp4.SetPtEtaPhiE(ipt,ieta,iphi,ienergy);
   systVec.at(syst)->push_back(mp4);
@@ -53,31 +80,12 @@ void Particle::init(){
 
   }
   setCurrentP(-1);
-  //  cout << "size: " << size() <<endl;
 
 }
 
-double Particle::pt(uint index)const         {return cur_P->at(index).Pt();}
-double Particle::eta(uint index)const        {return cur_P->at(index).Eta();}
-double Particle::phi(uint index)const        {return cur_P->at(index).Phi();}
-double Particle::energy(uint index)const     {return cur_P->at(index).E();}
-double Particle::charge(uint index)const     {return 0;}
-double Lepton::charge(uint index)const     {return _charge->at(index);}
-uint Particle::size()const                   {return Reco.size();}
-vector<TLorentzVector>::iterator Particle::begin(){ return cur_P->begin();}
-vector<TLorentzVector>::iterator Particle::end(){ return cur_P->end();}
-vector<TLorentzVector>::const_iterator Particle::begin()const { return cur_P->begin();}
-vector<TLorentzVector>::const_iterator Particle::end()const { return cur_P->end();}
-
-
-TLorentzVector Particle::p4(uint index)const {return (cur_P->at(index));}
-TLorentzVector& Particle::p4(uint index) {return cur_P->at(index);}
-TLorentzVector Particle::RecoP4(uint index)const {return Reco.at(index);}
-TLorentzVector& Particle::RecoP4(uint index) {return Reco.at(index);}
 
 void Particle::setOrigReco() {
   /////memory loss here if no smear and new vector. Only once, so ignore for now...
-  
   systVec.at(0) = &Reco;
 }
 
@@ -137,6 +145,13 @@ void Particle::getPartStats(string filename) {
   info_file.close();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////    PHOTON  //////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+
 Photon::Photon(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Photon", filename, syst_names) {
   SetBranch("Photon_et", et);
   SetBranch("Photon_HoverE", hoverE);
@@ -150,6 +165,13 @@ Photon::Photon(TTree* _BOOM, string filename, vector<string> syst_names) : Parti
   SetBranch("Photon_hasPixelSeed", hasPixelSeed);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////    GENERATED   ///////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+
 Generated::Generated(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Gen", filename, syst_names) {
 
   SetBranch("Gen_pdg_id", pdg_id);
@@ -157,6 +179,13 @@ Generated::Generated(TTree* _BOOM, string filename, vector<string> syst_names) :
   SetBranch("Gen_status", status);
   SetBranch("Gen_BmotherIndex", BmotherIndex);
 }
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////    JET  ////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
 
 
 Jet::Jet(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Jet", filename, syst_names) {
@@ -172,15 +201,12 @@ Jet::Jet(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_B
   SetBranch("Jet_bDiscriminator_pfCISVV2", bDiscriminator);
 }
 
-void Jet::findExtraCuts() {
-  Particle::findExtraCuts();
+vector<CUTS> Jet::findExtraCuts() {
+  vector<CUTS> return_vec;
   if(pstats["Smear"].bset.find("SmearTheJet") != pstats["Smear"].bset.end()) {
-    extraCuts.push_back(CUTS::eGMuon);
-    extraCuts.push_back(CUTS::eGElec);
-    extraCuts.push_back(CUTS::eGTau);
-    extraCuts.push_back(CUTS::eGJet);
+    return_vec.push_back(CUTS::eGen);
   }
-
+  return return_vec;
 }
 
 vector<CUTS> Jet::overlapCuts(CUTS ePos) {
@@ -197,6 +223,13 @@ vector<CUTS> Jet::overlapCuts(CUTS ePos) {
 }
 
 
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////    FATJET   ////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+
 FatJet::FatJet(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_BOOM, "Jet_toptag", filename, syst_names) {
   type = PType::FatJet;
   SetBranch("Jet_toptag_tau1", tau1);
@@ -206,12 +239,12 @@ FatJet::FatJet(TTree* _BOOM, string filename, vector<string> syst_names) : Parti
   SetBranch("Jet_toptag_SoftDropMass", SoftDropMass);
 }
 
-void FatJet::findExtraCuts() {
+vector<CUTS> FatJet::findExtraCuts() {
+  vector<CUTS> return_vec;
   if(pstats["Smear"].bset.find("SmearTheJet") != pstats["Smear"].bset.end()) {
-    extraCuts.push_back(CUTS::eGMuon);
-    extraCuts.push_back(CUTS::eGElec);
-    extraCuts.push_back(CUTS::eGTau);
+    return_vec.push_back(CUTS::eGen);
   }
+  return return_vec;
 }
 
 vector<CUTS> FatJet::overlapCuts(CUTS ePos) {
@@ -228,17 +261,34 @@ vector<CUTS> FatJet::overlapCuts(CUTS ePos) {
 }
 
 
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////    LEPTON   ////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+
 Lepton::Lepton(TTree* _BOOM, string GenName, string EndName, vector<string> syst_names) : Particle(_BOOM, GenName, EndName, syst_names) {
   SetBranch((GenName+"_charge").c_str(), _charge);
 }
 
-void Lepton::findExtraCuts() {
-  Particle::findExtraCuts();
+vector<CUTS> Lepton::findExtraCuts() {
+  vector<CUTS> return_vec;
   unordered_set<string>& tmpset = pstats["Smear"].bset;
   if(tmpset.find("SmearTheParticle") != tmpset.end() || tmpset.find("MatchToGen") != tmpset.end()) {
-    extraCuts.push_back(cutMap.at(type));
+    return_vec.push_back(cutMap.at(type));
   }
+  return return_vec;
 }
+
+double Lepton::charge(uint index)const     {return _charge->at(index);}
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////    ELECTRON   ////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
 
 Electron::Electron(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "patElectron", filename, syst_names) {
   type = PType::Electron;
@@ -267,6 +317,20 @@ Electron::Electron(TTree* _BOOM, string filename, vector<string> syst_names) : L
   }
 }
 
+
+bool Electron::get_Iso(int index, double min, double max) const {
+  double maxIsoval = std::max(0.0, isoNeutralHadrons->at(index) + isoPhotons->at(index) - 0.5 * isoPU->at(index));
+  double isoSum = (isoChargedHadrons->at(index) + maxIsoval) / pt(index);
+  return (isoSum >= min && isoSum < max);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////   MUON  // ////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+
 Muon::Muon(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "Muon", filename, syst_names) {
   type = PType::Muon;
   unordered_set<string>& mu1 = pstats["Muon1"].bset;
@@ -287,7 +351,19 @@ Muon::Muon(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_B
   }
 }
 
-///////fix against stuff
+bool Muon::get_Iso(int index, double min, double max) const {
+  double maxIsoval = std::max(0.0, isoNeutralHadron->at(index) + isoPhoton->at(index) - 0.5 * isoPU->at(index));
+  double isoSum = (isoCharged->at(index) + maxIsoval) / pt(index);
+  return (isoSum >= min && isoSum < max);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////    TAUS    ///////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+
+
 Taus::Taus(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "Tau", filename, syst_names) {
   type = PType::Tau;
 
@@ -342,33 +418,21 @@ Taus::Taus(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_B
 
 }
 
-void Taus::findExtraCuts() {
-  Lepton::findExtraCuts();
+vector<CUTS> Taus::findExtraCuts() {
+  vector<CUTS> return_vec = Lepton::findExtraCuts();
 
   unordered_set<string>& tau1 = pstats["Tau1"].bset;
   unordered_set<string>& tau2 = pstats["Tau2"].bset;
   if(tau1.find("RemoveOverlapWithMuon1s") != tau1.end() || tau2.find("RemoveOverlapWithMuon1s") != tau2.end())
-    extraCuts.push_back(CUTS::eRMuon1);
+    return_vec.push_back(CUTS::eRMuon1);
   if(tau1.find("RemoveOverlapWithMuon2s") != tau1.end() || tau2.find("RemoveOverlapWithMuon2s") != tau2.end())
-    extraCuts.push_back(CUTS::eRMuon2);
+    return_vec.push_back(CUTS::eRMuon2);
   if(tau1.find("RemoveOverlapWithElectron1s") != tau1.end() || tau2.find("RemoveOverlapWithElectron1s") != tau2.end())
-    extraCuts.push_back(CUTS::eRElec1);
+    return_vec.push_back(CUTS::eRElec1);
   if(tau1.find("RemoveOverlapWithElectron2s") != tau1.end() || tau2.find("RemoveOverlapWithElectron2s") != tau2.end())
-    extraCuts.push_back(CUTS::eRElec2);
-}
+    return_vec.push_back(CUTS::eRElec2);
 
-
-
-bool Electron::get_Iso(int index, double min, double max) const {
-  double maxIsoval = std::max(0.0, isoNeutralHadrons->at(index) + isoPhotons->at(index) - 0.5 * isoPU->at(index));
-  double isoSum = (isoChargedHadrons->at(index) + maxIsoval) / pt(index);
-  return (isoSum >= min && isoSum < max);
-}
-
-bool Muon::get_Iso(int index, double min, double max) const {
-  double maxIsoval = std::max(0.0, isoNeutralHadron->at(index) + isoPhoton->at(index) - 0.5 * isoPU->at(index));
-  double isoSum = (isoCharged->at(index) + maxIsoval) / pt(index);
-  return (isoSum >= min && isoSum < max);
+  return return_vec;
 }
 
 bool Taus::get_Iso(int index, double onetwo, double max) const {
@@ -378,4 +442,10 @@ bool Taus::get_Iso(int index, double onetwo, double max) const {
   return (maxIsoval > 0.5 && minIsoval > 0.5);
 }
 
+bool Taus::pass_against_Elec(CUTS ePos, int index) {
+  return (ePos == CUTS::eRTau1) ? againstElectron.first->at(index) : againstElectron.second->at(index);
+}
 
+bool Taus::pass_against_Muon(CUTS ePos, int index) {
+  return (ePos == CUTS::eRTau1) ? againstMuon.first->at(index) : againstMuon.second->at(index);
+}
