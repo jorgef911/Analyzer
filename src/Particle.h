@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <iostream>
+#include <regex>
 
 #include <TTree.h>
 #include <TBranch.h>
@@ -27,7 +28,12 @@ struct PartStats {
   unordered_map<string,string> smap;
   unordered_map<string,pair<double,double> > pmap;
   //  unordered_map<string,bool> bmap;
-  unordered_set<string> bset;
+  vector<string> bset;
+
+  bool bfind(string cut) const {
+    return find(bset.begin(), bset.end(), cut) != bset.end();
+  }
+  
 };
 
 
@@ -59,12 +65,16 @@ public:
   vector<TLorentzVector>::const_iterator begin() const;
   vector<TLorentzVector>::const_iterator end() const;
 
+  bool needSyst(int) const;
+
   void addPtEtaPhiESyst(double, double, double, double, int);
   void addP4Syst(TLorentzVector, int);
   void setOrigReco();
   void setCurrentP(int);
   string getName() {return GenName;};
 
+  bool findCut(const vector<string>&, string);
+  
   PType type;
   unordered_map<string, PartStats> pstats;
 
@@ -136,6 +146,7 @@ public:
 
   vector<CUTS> findExtraCuts();
   vector<CUTS> overlapCuts(CUTS);
+  bool passedLooseJetID(int);
   
   vector<double>* neutralHadEnergyFraction = 0;
   vector<double>* neutralEmEmEnergyFraction = 0;

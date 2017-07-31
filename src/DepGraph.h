@@ -18,7 +18,7 @@ public:
   void loadCuts(vector<CUTS>);
   void loadCuts(CUTS);
   bool isPresent(CUTS);
-
+  unordered_set<int> getCuts();
   
 private:
   void dfs(int vertex);

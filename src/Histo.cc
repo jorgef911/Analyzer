@@ -9,20 +9,16 @@ outfile(nullptr), outname(outfilename), Npdf(_Npdf), isData(_isData) {
   //no syst uncertainty hist object
   if (syst_unvertainties.size()==0){
     read_cuts(cutname, folderCuts);
-    NFolders = folders.size();
-    read_hist(histname);
   }else{
     read_syst(syst_unvertainties);
-    NFolders = folders.size();
-    read_hist(histname);
-    CR = true;
-    for(auto it: data){
-      it.second->setControlRegions();
-    }
   }
-  if(folderCuts.size() != 0) {
-    CR = true;
-    for(auto it: data) it.second->setControlRegions();
+
+  NFolders = folders.size();
+  read_hist(histname);
+
+  if(folderCuts.size() != 0 || syst_unvertainties.size() != 0) {
+    fillSingle = true;
+    for(auto it: data) it.second->setSingleFill();
   }
 }
 
@@ -40,7 +36,7 @@ Histogramer& Histogramer::operator=(const Histogramer& rhs) {
   folderToCutNum = rhs.folderToCutNum;
   data_order.reserve(rhs.data_order.size());
   data_order = rhs.data_order;
-  CR = rhs.CR;
+  fillSingle = rhs.fillSingle;
 
   for(auto mit: rhs.data) {
     data[mit.first] = new DataBinner(*(mit.second));
@@ -66,7 +62,7 @@ Histogramer& Histogramer::operator=(Histogramer&& rhs) {
   folderToCutNum = rhs.folderToCutNum;
 
   data_order = rhs.data_order;
-  CR = rhs.CR;
+  fillSingle = rhs.fillSingle;
   data.swap(rhs.data);
 
   rhs.data.clear();
@@ -77,7 +73,7 @@ Histogramer& Histogramer::operator=(Histogramer&& rhs) {
 
 
 Histogramer::Histogramer(const Histogramer& rhs) :
-outname(rhs.outname), NFolders(rhs.NFolders), isData(rhs.isData), CR(rhs.CR)
+outname(rhs.outname), NFolders(rhs.NFolders), isData(rhs.isData), fillSingle(rhs.fillSingle)
 {
   cuts = rhs.cuts;
   cut_order = rhs.cut_order;
@@ -95,7 +91,7 @@ outname(rhs.outname), NFolders(rhs.NFolders), isData(rhs.isData), CR(rhs.CR)
 }
 
 Histogramer::Histogramer(Histogramer&& rhs) :
-outname(rhs.outname), NFolders(rhs.NFolders), isData(rhs.isData), CR(rhs.CR)
+outname(rhs.outname), NFolders(rhs.NFolders), isData(rhs.isData), fillSingle(rhs.fillSingle)
 {
   cuts = rhs.cuts;
   cut_order = rhs.cut_order;
@@ -282,37 +278,32 @@ void Histogramer::fill_histogram() {
   outfile->Close();
 }
 
-void Histogramer::addVal(double value, string group, int maxcut, string histn, double weight, int syst) {
+void Histogramer::addVal(double value, string group, int maxcut, string histn, double weight) {
   int maxFolder=0;
 
 
-  if(CR) maxFolder = maxcut;
+  if(fillSingle) maxFolder = maxcut;
   else {
     for(int i = 0; i < NFolders; i++) {
       if(maxcut > folderToCutNum[i]) maxFolder++;
       else break;
     }
-  }
-  if(syst!=-1){
-    maxFolder=syst;
   }
 
   data[group]->AddPoint(histn, maxFolder, value, weight);
 
 }
 
-void Histogramer::addVal(double valuex, double valuey, string group, int maxcut, string histn, double weight, int syst) {
+void Histogramer::addVal(double valuex, double valuey, string group, int maxcut, string histn, double weight) {
   int maxFolder=0;
 
-  if(CR) maxFolder = maxcut;
+  if(fillSingle) maxFolder = maxcut;
   else {
     for(int i = 0; i < NFolders; i++) {
       if(maxcut > folderToCutNum[i]) maxFolder++;
       else break;
     }
   }
-  if(syst!=-1){
-    maxFolder=syst;
-  }
+
   data[group]->AddPoint(histn, maxFolder, valuex, valuey, weight);
 }

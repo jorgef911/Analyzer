@@ -90,3 +90,7 @@ void DepGraph::loadCuts(CUTS cut) {
 bool DepGraph::isPresent(CUTS cut) {
   return (neededCuts.find(cutint(cut)) != neededCuts.end());
 }
+
+unordered_set<int> DepGraph::getCuts() {
+  return neededCuts;
+}

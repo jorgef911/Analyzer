@@ -41,8 +41,8 @@ public:
   const vector<string>* get_folders() const {return &folders;}
   int get_maxfolder() const {return (folderToCutNum.back()+1);}
 
-  void addVal(double, string, int, string, double, int syst=-1);
-  void addVal(double, double, string, int, string, double, int syst=-1);
+  void addVal(double, string, int, string, double);
+  void addVal(double, double, string, int, string, double);
   void fill_histogram();
   void setControlRegions();
 
@@ -51,7 +51,7 @@ private:
   string outname;
   int NFolders;
   int Npdf;
-  bool isData, CR=false;
+  bool isData, fillSingle=false;
 
   unordered_map<string, pair<int,int>> cuts;
   vector<string> cut_order;

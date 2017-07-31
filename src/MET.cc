@@ -72,12 +72,33 @@ void Met::init(){
 }
 
 
-void Met::update(string syst="orig"){
+void Met::update(PartStats& stats, Jet& jet, string syst="orig"){
   ///Calculates met from values from each file plus smearing and treating muons as neutrinos
+  double sumpxForMht=0;
+  double sumpyForMht=0;
+  double sumptForHt=0;
 
-  systVec[syst]->SetPxPyPzE(cur_P->Px()+systdeltaMEx[syst], cur_P->Py()+systdeltaMEy[syst], cur_P->Pz(),
+  int i=0;
+  for(auto jetVec: jet) {
+    bool add = true;
+    if( (jetVec.Pt() < stats.dmap.at("JetPtForMhtAndHt")) ||
+	(abs(jetVec.Eta()) > stats.dmap.at("JetEtaForMhtAndHt")) ||
+	( stats.bfind("ApplyJetLooseIDforMhtAndHt") &&
+	  !jet.passedLooseJetID(i) ) ) add = false;
+    if(add) {
+      sumpxForMht -= jetVec.Px();
+      sumpyForMht -= jetVec.Py();
+      sumptForHt  += jetVec.Pt();
+    }
+    i++;
+  }
+ syst_HT[syst]=sumptForHt;
+ syst_MHT[syst]=sumpyForMht;
+ syst_MHTphi[syst]=atan2(sumpyForMht,sumpxForMht);
+
+ systVec[syst]->SetPxPyPzE(cur_P->Px()+systdeltaMEx[syst], cur_P->Py()+systdeltaMEy[syst], cur_P->Pz(),
   TMath::Sqrt(pow(cur_P->Px()+systdeltaMEx[syst],2) + pow(cur_P->Py()+systdeltaMEy[syst],2)));
-  setCurrentP(syst);
+
 }
 
 double Met::pt()const         {return cur_P->Pt();}

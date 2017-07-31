@@ -43,7 +43,7 @@ void Systematics::shiftLepton(Lepton& lepton, TLorentzVector recoLep, TLorentzVe
 void Systematics::loadScaleRes(const PartStats& smear, const PartStats& syst, string syst_name) {
   scale = 1;
   resolution = 1;
-  if(smear.bset.count("SmearTheParticle") != 0) {
+  if(smear.bfind("SmearTheParticle")) {
     scale = smear.dmap.at("PtScaleOffset");
     resolution = smear.dmap.at("PtScaleOffset");
   } 

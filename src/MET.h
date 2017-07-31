@@ -51,7 +51,7 @@ public:
   void addP4Syst(TLorentzVector, string);
   void setCurrentP(string);
   string getName() {return GenName;};
-  void update(string);
+  void update(PartStats&, Jet&, string);
 
   TLorentzVector Reco;
   TLorentzVector *cur_P;

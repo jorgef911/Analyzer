@@ -79,7 +79,7 @@ void Piece2D::write_histogram(vector<string>& folders, TFile* outfile) {
 
 DataBinner::DataBinner(){}
 
-DataBinner::DataBinner(const DataBinner& rhs) : CR(rhs.CR) {
+DataBinner::DataBinner(const DataBinner& rhs) : fillSingle(rhs.fillSingle) {
   cout << "copied" << endl;
   order = rhs.order;
 
@@ -93,7 +93,7 @@ DataBinner::DataBinner(const DataBinner& rhs) : CR(rhs.CR) {
 
 }
 
-DataBinner::DataBinner(DataBinner&& rhs) : CR(rhs.CR) {
+DataBinner::DataBinner(DataBinner&& rhs) : fillSingle(rhs.fillSingle) {
   cout << "moved" << endl;
   for(auto it: datamap) {
     if(it.second != nullptr) {
@@ -132,7 +132,7 @@ void DataBinner::Add_Hist(string shortname, string fullname, int binx, double le
 void DataBinner::AddPoint(string name, int maxfolder, double value, double weight) {
   if(datamap.count(name) == 0)  return;
 
-  if(CR) {
+  if(fillSingle) {
     if(maxfolder < 0) return;
     datamap.at(name)->bin(maxfolder,value, weight);
   } else {
@@ -146,7 +146,7 @@ void DataBinner::AddPoint(string name, int maxfolder, double value, double weigh
 void DataBinner::AddPoint(string name, int maxfolder, double valuex, double valuey, double weight) {
   if(datamap.count(name) == 0) return;
 
-  if(CR) {
+  if(fillSingle) {
     if(maxfolder < 0) return;
     datamap.at(name)->bin(maxfolder,valuex, valuey, weight);
   } else {

@@ -16,8 +16,23 @@ Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string
   type = PType::None;
   getPartStats(filename);
 
+  regex genName_regex(".*([A-Z][^[:space:]]+)");
+  regex syst_regex("([A-Za-z]+).+");
+  smatch mGen, mSyst;
+  regex_match(GenName, mGen, genName_regex);
+
   for( auto item : syst_names) {
-    systVec.push_back(new vector<TLorentzVector>());
+    if(item == "orig") {
+      systVec.push_back(new vector<TLorentzVector>());
+      continue;
+    }
+    if(!regex_match(item, mSyst, syst_regex)) continue;
+    if(mGen[1] == mSyst[1]) {
+      systVec.push_back(new vector<TLorentzVector>());
+      cout << GenName << ": " << item << endl;
+    } else {
+      systVec.push_back(nullptr);
+    }
   }
 
   //set the pt to an empty vector if the branch does not exist
@@ -71,7 +86,7 @@ void Particle::init(){
     //cleanup of the particles
   Reco.clear();
   for(auto it: systVec){
-    it->clear();
+    if(it != nullptr) it->clear();
   }
   TLorentzVector tmp;
   for(uint i=0; i < mpt->size(); i++) {
@@ -89,11 +104,15 @@ void Particle::setOrigReco() {
   systVec.at(0) = &Reco;
 }
 
+bool Particle::needSyst(int syst) const {
+  return systVec.at(syst) != nullptr;
+}
+
 
 void Particle::setCurrentP(int syst){
   if(syst == -1) {
     cur_P = &Reco;
-  } else if( systVec.at(syst)->size() == 0) {
+  } else if(systVec.at(syst) == nullptr || systVec.at(syst)->size() == 0) {
     cur_P = systVec.at(0);  //orig
   } else {
     cur_P = systVec.at(syst);
@@ -135,7 +154,7 @@ void Particle::getPartStats(string filename) {
       exit(1);
     } else if(stemp.size() == 2) {
 
-      if(stemp[1] == "1" || stemp[1] == "true" ) pstats[group].bset.insert(stemp[0]);
+      if(stemp[1] == "1" || stemp[1] == "true" ) pstats[group].bset.push_back(stemp[0]);
       //      else if(stemp[1] == "0"  || stemp[1] == "false" ) pstats[group]bmap[stemp[0]]=false;
 
       else if(stemp[1].find_first_not_of("0123456789+-.") == string::npos) pstats[group].dmap[stemp[0]]=stod(stemp[1]);
@@ -144,6 +163,7 @@ void Particle::getPartStats(string filename) {
   }
   info_file.close();
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -203,7 +223,7 @@ Jet::Jet(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_B
 
 vector<CUTS> Jet::findExtraCuts() {
   vector<CUTS> return_vec;
-  if(pstats["Smear"].bset.find("SmearTheJet") != pstats["Smear"].bset.end()) {
+  if(pstats["Smear"].bfind("SmearTheJet")) {
     return_vec.push_back(CUTS::eGen);
   }
   return return_vec;
@@ -211,16 +231,29 @@ vector<CUTS> Jet::findExtraCuts() {
 
 vector<CUTS> Jet::overlapCuts(CUTS ePos) {
   vector<CUTS> returnCuts;
-  unordered_set<string>& tmpset = pstats[jetNameMap.at(ePos)].bset;
-  if(tmpset.find("RemoveOverlapWithMuon1s") != tmpset.end()) returnCuts.push_back(CUTS::eRMuon1);
-  if(tmpset.find("RemoveOverlapWithMuon2s") != tmpset.end()) returnCuts.push_back(CUTS::eRMuon2);
-  if(tmpset.find("RemoveOverlapWithElectron1s") != tmpset.end()) returnCuts.push_back(CUTS::eRElec1);
-  if(tmpset.find("RemoveOverlapWithElectron2s") != tmpset.end()) returnCuts.push_back(CUTS::eRElec2);
-  if(tmpset.find("RemoveOverlapWithTau1s") != tmpset.end()) returnCuts.push_back(CUTS::eRTau1);
-  if(tmpset.find("RemoveOverlapWithTau2s") != tmpset.end()) returnCuts.push_back(CUTS::eRTau2);
+  auto& tmpset = pstats[jetNameMap.at(ePos)];
+  if(tmpset.bfind("RemoveOverlapWithMuon1s")) returnCuts.push_back(CUTS::eRMuon1);
+  if(tmpset.bfind("RemoveOverlapWithMuon2s")) returnCuts.push_back(CUTS::eRMuon2);
+  if(tmpset.bfind("RemoveOverlapWithElectron1s")) returnCuts.push_back(CUTS::eRElec1);
+  if(tmpset.bfind("RemoveOverlapWithElectron2s")) returnCuts.push_back(CUTS::eRElec2);
+  if(tmpset.bfind("RemoveOverlapWithTau1s")) returnCuts.push_back(CUTS::eRTau1);
+  if(tmpset.bfind("RemoveOverlapWithTau2s")) returnCuts.push_back(CUTS::eRTau2);
 
   return returnCuts;
 }
+
+bool Jet::passedLooseJetID(int nobj) {
+  if (neutralHadEnergyFraction->at(nobj) >= 0.99) return false;
+  if (neutralEmEmEnergyFraction->at(nobj) >= 0.99) return false;
+  if (numberOfConstituents->at(nobj) <= 1) return false;
+  if (muonEnergyFraction->at(nobj) >= 0.80) return false;
+  if ( (fabs(p4(nobj).Eta()) < 2.4) &&
+       ((chargedHadronEnergyFraction->at(nobj) <= 0.0) ||
+	(chargedMultiplicity->at(nobj) <= 0.0) ||
+	(chargedEmEnergyFraction->at(nobj) >= 0.99) )) return false;
+  return true;
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -241,7 +274,7 @@ FatJet::FatJet(TTree* _BOOM, string filename, vector<string> syst_names) : Parti
 
 vector<CUTS> FatJet::findExtraCuts() {
   vector<CUTS> return_vec;
-  if(pstats["Smear"].bset.find("SmearTheJet") != pstats["Smear"].bset.end()) {
+  if(pstats["Smear"].bfind("SmearTheJet")) {
     return_vec.push_back(CUTS::eGen);
   }
   return return_vec;
@@ -249,13 +282,13 @@ vector<CUTS> FatJet::findExtraCuts() {
 
 vector<CUTS> FatJet::overlapCuts(CUTS ePos) {
   vector<CUTS> returnCuts;
-  unordered_set<string>& tmpset = pstats[jetNameMap.at(ePos)].bset;
-  if(tmpset.find("RemoveOverlapWithMuon1s") != tmpset.end()) returnCuts.push_back(CUTS::eRMuon1);
-  if(tmpset.find("RemoveOverlapWithMuon2s") != tmpset.end()) returnCuts.push_back(CUTS::eRMuon2);
-  if(tmpset.find("RemoveOverlapWithElectron1s") != tmpset.end()) returnCuts.push_back(CUTS::eRElec1);
-  if(tmpset.find("RemoveOverlapWithElectron2s") != tmpset.end()) returnCuts.push_back(CUTS::eRElec2);
-  if(tmpset.find("RemoveOverlapWithTau1s") != tmpset.end()) returnCuts.push_back(CUTS::eRTau1);
-  if(tmpset.find("RemoveOverlapWithTau2s") != tmpset.end()) returnCuts.push_back(CUTS::eRTau2);
+  auto& tmpset = pstats[jetNameMap.at(ePos)];
+  if(tmpset.bfind("RemoveOverlapWithMuon1s")) returnCuts.push_back(CUTS::eRMuon1);
+  if(tmpset.bfind("RemoveOverlapWithMuon2s")) returnCuts.push_back(CUTS::eRMuon2);
+  if(tmpset.bfind("RemoveOverlapWithElectron1s")) returnCuts.push_back(CUTS::eRElec1);
+  if(tmpset.bfind("RemoveOverlapWithElectron2s")) returnCuts.push_back(CUTS::eRElec2);
+  if(tmpset.bfind("RemoveOverlapWithTau1s")) returnCuts.push_back(CUTS::eRTau1);
+  if(tmpset.bfind("RemoveOverlapWithTau2s")) returnCuts.push_back(CUTS::eRTau2);
 
   return returnCuts;
 }
@@ -274,8 +307,8 @@ Lepton::Lepton(TTree* _BOOM, string GenName, string EndName, vector<string> syst
 
 vector<CUTS> Lepton::findExtraCuts() {
   vector<CUTS> return_vec;
-  unordered_set<string>& tmpset = pstats["Smear"].bset;
-  if(tmpset.find("SmearTheParticle") != tmpset.end() || tmpset.find("MatchToGen") != tmpset.end()) {
+  auto& tmpset = pstats["Smear"];
+  if(tmpset.bfind("SmearTheParticle") || tmpset.bfind("MatchToGen")) {
     return_vec.push_back(cutMap.at(type));
   }
   return return_vec;
@@ -292,27 +325,27 @@ double Lepton::charge(uint index)const     {return _charge->at(index);}
 
 Electron::Electron(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "patElectron", filename, syst_names) {
   type = PType::Electron;
-  unordered_set<string>& elec1 = pstats["Elec1"].bset;
-  unordered_set<string>& elec2 = pstats["Elec2"].bset;
-  if(elec1.find("DoDiscrByIsolation") != elec1.end() || elec2.find("DoDiscrByIsolation") != elec2.end()) {
+  auto& elec1 = pstats["Elec1"];
+  auto& elec2 = pstats["Elec2"];
+  if(elec1.bfind("DoDiscrByIsolation") || elec2.bfind("DoDiscrByIsolation")) {
     SetBranch("patElectron_isoChargedHadrons", isoChargedHadrons);
     SetBranch("patElectron_isoNeutralHadrons", isoNeutralHadrons);
     SetBranch("patElectron_isoPhotons", isoPhotons);
     SetBranch("patElectron_isoPU", isoPU);
   }
-  if(elec1.find("DoDiscrByVetoID") != elec1.end() || elec2.find("DoDiscrByVetoID") != elec2.end()) {
+  if(elec1.bfind("DoDiscrByVetoID") || elec2.bfind("DoDiscrByVetoID")) {
     SetBranch("patElectron_isPassVeto", isPassVeto);
   }
-  if(elec1.find("DoDiscrByLooseID") != elec1.end() || elec2.find("DoDiscrByLooseID") != elec2.end()) {
+  if(elec1.bfind("DoDiscrByLooseID") || elec2.bfind("DoDiscrByLooseID")) {
     SetBranch("patElectron_isPassLoose", isPassLoose);
   }
-  if(elec1.find("DoDiscrByMediumID") != elec1.end() || elec2.find("DoDiscrByMediumID") != elec2.end()) {
+  if(elec1.bfind("DoDiscrByMediumID") || elec2.bfind("DoDiscrByMediumID")) {
     SetBranch("patElectron_isPassMedium", isPassMedium);
   }
-  if(elec1.find("DoDiscrByTightID") != elec1.end() || elec2.find("DoDiscrByTightID") != elec2.end()) {
+  if(elec1.bfind("DoDiscrByTightID") || elec2.bfind("DoDiscrByTightID")) {
     SetBranch("patElectron_isPassTight", isPassTight);
   }
-  if(elec1.find("DoDiscrByHEEPID") != elec1.end() || elec2.find("DoDiscrByHEEPID") != elec2.end()) {
+  if(elec1.bfind("DoDiscrByHEEPID") || elec2.bfind("DoDiscrByHEEPID")) {
     SetBranch("patElectron_isPassHEEPId", isPassHEEPId);
   }
 }
@@ -333,16 +366,16 @@ bool Electron::get_Iso(int index, double min, double max) const {
 
 Muon::Muon(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_BOOM, "Muon", filename, syst_names) {
   type = PType::Muon;
-  unordered_set<string>& mu1 = pstats["Muon1"].bset;
-  unordered_set<string>& mu2 = pstats["Muon2"].bset;
+  auto& mu1 = pstats["Muon1"];
+  auto& mu2 = pstats["Muon2"];
 
-  if(mu1.find("DoDiscrByTightID") != mu1.end() || mu2.find("DoDiscrByTightID") != mu2.end()) {
+  if(mu1.bfind("DoDiscrByTightID") || mu2.bfind("DoDiscrByTightID")) {
     SetBranch("Muon_tight", tight);
      }
-  if(mu1.find("DoDiscrBySoftID") != mu1.end() || mu2.find("DoDiscrBySoftID") != mu2.end()) {
+  if(mu1.bfind("DoDiscrBySoftID") || mu2.bfind("DoDiscrBySoftID")) {
     SetBranch("Muon_soft", soft);
   }
-  if(mu1.find("DoDiscrByIsolation") != mu1.end() || mu2.find("DoDiscrByIsolation") != mu2.end()) {
+  if(mu1.bfind("DoDiscrByIsolation") || mu2.bfind("DoDiscrByIsolation")) {
 
     SetBranch("Muon_isoCharged", isoCharged);
     SetBranch("Muon_isoNeutralHadron", isoNeutralHadron);
@@ -421,15 +454,15 @@ Taus::Taus(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_B
 vector<CUTS> Taus::findExtraCuts() {
   vector<CUTS> return_vec = Lepton::findExtraCuts();
 
-  unordered_set<string>& tau1 = pstats["Tau1"].bset;
-  unordered_set<string>& tau2 = pstats["Tau2"].bset;
-  if(tau1.find("RemoveOverlapWithMuon1s") != tau1.end() || tau2.find("RemoveOverlapWithMuon1s") != tau2.end())
+  auto& tau1 = pstats["Tau1"];
+  auto& tau2 = pstats["Tau2"];
+  if(tau1.bfind("RemoveOverlapWithMuon1s") || tau2.bfind("RemoveOverlapWithMuon1s"))
     return_vec.push_back(CUTS::eRMuon1);
-  if(tau1.find("RemoveOverlapWithMuon2s") != tau1.end() || tau2.find("RemoveOverlapWithMuon2s") != tau2.end())
+  if(tau1.bfind("RemoveOverlapWithMuon2s") || tau2.bfind("RemoveOverlapWithMuon2s"))
     return_vec.push_back(CUTS::eRMuon2);
-  if(tau1.find("RemoveOverlapWithElectron1s") != tau1.end() || tau2.find("RemoveOverlapWithElectron1s") != tau2.end())
+  if(tau1.bfind("RemoveOverlapWithElectron1s") || tau2.bfind("RemoveOverlapWithElectron1s"))
     return_vec.push_back(CUTS::eRElec1);
-  if(tau1.find("RemoveOverlapWithElectron2s") != tau1.end() || tau2.find("RemoveOverlapWithElectron2s") != tau2.end())
+  if(tau1.bfind("RemoveOverlapWithElectron2s") || tau2.bfind("RemoveOverlapWithElectron2s"))
     return_vec.push_back(CUTS::eRElec2);
 
   return return_vec;

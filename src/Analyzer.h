@@ -52,7 +52,7 @@ public:
   ~Analyzer();
   void clear_values();
   void preprocess(int);
-  void fillCuts();
+  bool fillCuts(bool);
   void printCuts();
   void writeout();
   int nentries;
@@ -75,7 +75,7 @@ private:
   void CRfillCuts();
   ///// Functions /////
   //void fill_Folder(string, const int, string syst="");
-  void fill_Folder(string, const int, Histogramer& ihisto, int syst=-1 );
+  void fill_Folder(string, const int, Histogramer& ihisto);
 
   void getInputs();
   void setupJob(string);
@@ -126,7 +126,7 @@ private:
 
   inline bool passCutRange(string, double, const PartStats&);
   bool passCutRange(double, const pair<double, double>&);
-  bool findCut(unordered_set<string>&, string);
+  bool findCut(const vector<string>&, string);
   
   void updateMet(string syst="orig");
   void treatMuons_Met(string syst="orig");
