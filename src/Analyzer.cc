@@ -129,7 +129,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   _Tau = new Taus(BOOM, filespace + "Tau_info.in", syst_names);
   _Jet = new Jet(BOOM, filespace + "Jet_info.in", syst_names);
   _FatJet = new FatJet(BOOM, filespace + "FatJet_info.in", syst_names);
-  _MET  = new Met(BOOM,"Met_type1PF", syst_names);
+  _MET  = new Met(BOOM, "Met_type1PF" , syst_names);
 
   if(!isData) {
     _Gen = new Generated(BOOM, filespace + "Gen_info.in", syst_names);
@@ -352,9 +352,8 @@ void Analyzer::preprocess(int event) {
   for(Particle* ipart: allParticles){
     ipart->init();
   }
-
-  //call this extra because it is not in the list
   _MET->init();
+
   active_part = &goodParts;
   if(!select_mc_background()){
     //we will put nothing in good particles
@@ -388,17 +387,9 @@ void Analyzer::preprocess(int event) {
 
     smearJet(*_Jet,CUTS::eGJet,_Jet->pstats["Smear"], i);
     smearJet(*_FatJet,CUTS::eGJet,_FatJet->pstats["Smear"], i);
-    updateMet(syst_names.at(i));
+    updateMet(i);
   }
   
-
-  //reset all particles to normal:
-  // for(Particle* ipart: allParticles){
-  //   ipart->setCurrentP(0);
-  // }
-  //for MET this will be done here:
-  updateMet();
-
   for(size_t i=0; i < syst_names.size(); i++) {
     string systname = syst_names.at(i);
     if(systname.find("Met")!=string::npos){
@@ -414,6 +405,7 @@ void Analyzer::preprocess(int event) {
     }
 
     for( auto part: allParticles) part->setCurrentP(i);
+    _MET->setCurrentP(i);
     getGoodParticles(i);
   }
   active_part = &goodParts;
@@ -491,15 +483,16 @@ bool Analyzer::fillCuts(bool fillCounter) {
   bool prevTrue = true;
   
   maxCut=0;
-
+  //  cout << active_part << endl;;
 
   for(size_t i = 0; i < cut_order->size(); i++) {
     string cut = cut_order->at(i);
     if(isData && cut.find("Gen") != string::npos) continue;
-
+    
     int min= cut_info->at(cut).first;
     int max= cut_info->at(cut).second;
     int nparticles = active_part->at(cut_num.at(cut))->size();
+    //    if(!fillCounter) cout << cut << ": " << nparticles << " (" << min << ", " << max << ")" <<endl;
     if( (nparticles >= min) && (nparticles <= max || max == -1)) {
       if((cut_num.at(cut) == CUTS::eR1stJet || cut_num.at(cut) == CUTS::eR2ndJet) && active_part->at(cut_num.at(cut))->at(0) == -1 ) {
         prevTrue = false;
@@ -510,7 +503,10 @@ bool Analyzer::fillCuts(bool fillCounter) {
 	cuts_cumul[i] += (prevTrue) ? 1 : 0;
 	maxCut += (prevTrue) ? 1 : 0;
       }
-    } else prevTrue = false;
+    } else {
+      prevTrue = false;
+      if(!fillCounter) return false;
+    }
   }
 
   if(crbins != 1) {
@@ -620,7 +616,7 @@ bool Analyzer::select_mc_background(){
 }
 
 ///Calculates met from values from each file plus smearing and treating muons as neutrinos
-void Analyzer::updateMet(string syst) {
+void Analyzer::updateMet(int syst) {
   _MET->update(distats["Run"], *_Jet,  syst);
 
   /////MET CUTS
@@ -631,83 +627,87 @@ void Analyzer::updateMet(string syst) {
   active_part->at(CUTS::eMET)->push_back(1);
 }
 
-void Analyzer::treatMuons_Met(string syst) {
+///////////////////////////////////////////////
+////////removed for teh time being/////////////
+///////////////////////////////////////////////
 
-  //syst not implemented for muon as tau or neutrino yet
-  if( syst!="orig" or !( distats["Run"].bfind("TreatMuonsAsNeutrinos") || distats["Run"].bfind("TreatMuonsAsTaus")) ){
-    return;
-  }
+// void Analyzer::treatMuons_Met(string syst) {
 
-  //  Neutrino update before calculation
-  _MET->addP4Syst(_MET->p4(),"muMET");
-  _MET->systdeltaMEx["muMET"]=0;
-  _MET->systdeltaMEy["muMET"]=0;
+//   //syst not implemented for muon as tau or neutrino yet
+//   if( syst!="orig" or !( distats["Run"].bfind("TreatMuonsAsNeutrinos") || distats["Run"].bfind("TreatMuonsAsTaus")) ){
+//     return;
+//   }
 
-  if(distats["Run"].bfind("TreatMuonsAsNeutrinos")) {
-    for(auto it : *active_part->at(CUTS::eRMuon1)) {
-      if(find(active_part->at(CUTS::eRMuon2)->begin(), active_part->at(CUTS::eRMuon2)->end(), it) != active_part->at(CUTS::eRMuon2)->end() ) continue;
-      _MET->systdeltaMEx["muMET"] += _Muon->p4(it).Px();
-      _MET->systdeltaMEy["muMET"] += _Muon->p4(it).Py();
-    }
-    for(auto it : *active_part->at(CUTS::eRMuon2)) {
-      _MET->systdeltaMEx["muMET"] += _Muon->p4(it).Px();
-      _MET->systdeltaMEy["muMET"] += _Muon->p4(it).Py();
-    }
-  }
-  // else if(distats["Run"].bmap.at("TreatMuonsAsTaus")) {
+//   //  Neutrino update before calculation
+//   _MET->addP4Syst(_MET->p4(),"muMET");
+//   _MET->systdeltaMEx["muMET"]=0;
+//   _MET->systdeltaMEy["muMET"]=0;
 
-  //   if(active_part->at(CUTS::eRMuon1)->size() == 1) {
+//   if(distats["Run"].bfind("TreatMuonsAsNeutrinos")) {
+//     for(auto it : *active_part->at(CUTS::eRMuon1)) {
+//       if(find(active_part->at(CUTS::eRMuon2)->begin(), active_part->at(CUTS::eRMuon2)->end(), it) != active_part->at(CUTS::eRMuon2)->end() ) continue;
+//       _MET->systdeltaMEx["muMET"] += _Muon->p4(it).Px();
+//       _MET->systdeltaMEy["muMET"] += _Muon->p4(it).Py();
+//     }
+//     for(auto it : *active_part->at(CUTS::eRMuon2)) {
+//       _MET->systdeltaMEx["muMET"] += _Muon->p4(it).Px();
+//       _MET->systdeltaMEy["muMET"] += _Muon->p4(it).Py();
+//     }
+//   }
+//   // else if(distats["Run"].bmap.at("TreatMuonsAsTaus")) {
 
-  //     int muon = (int)active_part->at(CUTS::eRMuon1)->at(0);
+//   //   if(active_part->at(CUTS::eRMuon1)->size() == 1) {
 
-  //     double rand1 = 1;//Tau_HFrac->GetRandom();
-  //     double rand2 = 0;//Tau_Resol->GetRandom();
+//   //     int muon = (int)active_part->at(CUTS::eRMuon1)->at(0);
 
-  //     double ETau_Pt = _Muon->p4(muon).Pt()*rand1*(rand2+1.0);
-  //     double ETau_Eta = _Muon->p4(muon).Eta();
-  //     double ETau_Phi=normPhi(_Muon->p4(muon).Phi());//+DeltaNu_Phi->GetRandom());
-  //     double ETau_Energy = 0.;
+//   //     double rand1 = 1;//Tau_HFrac->GetRandom();
+//   //     double rand2 = 0;//Tau_Resol->GetRandom();
+
+//   //     double ETau_Pt = _Muon->p4(muon).Pt()*rand1*(rand2+1.0);
+//   //     double ETau_Eta = _Muon->p4(muon).Eta();
+//   //     double ETau_Phi=normPhi(_Muon->p4(muon).Phi());//+DeltaNu_Phi->GetRandom());
+//   //     double ETau_Energy = 0.;
 
 
-  //     // double theta = 2.0*TMath::ATan2(1.0,TMath::Exp(_Muon->p4(muon).Eta()));
-  //     // double sin_theta = TMath::Sin(theta);
-  //     // double P_tau = ETau_Pt/sin_theta;
+//   //     // double theta = 2.0*TMath::ATan2(1.0,TMath::Exp(_Muon->p4(muon).Eta()));
+//   //     // double sin_theta = TMath::Sin(theta);
+//   //     // double P_tau = ETau_Pt/sin_theta;
 
-  //     // //ETau_Energy = sqrt(pow(P_tau, 2) + pow(1.77699, 2));
-  //     // ETau_Energy = sqrt( pow(1.77699, 2) + pow(ETau_Pt, 2) + pow(_Muon->p4(muon).Pz(), 2));
+//   //     // //ETau_Energy = sqrt(pow(P_tau, 2) + pow(1.77699, 2));
+//   //     // ETau_Energy = sqrt( pow(1.77699, 2) + pow(ETau_Pt, 2) + pow(_Muon->p4(muon).Pz(), 2));
 
-  //     /*if(ETau_Pt <= 15.0){
-  //       while(ETau_Pt<=15.0){
-  //       rand1 = Tau_HFrac->GetRandom();
-  //       rand2 = Tau_Resol->GetRandom();
-  //       ETau_Pt = _Muon->p4(muon).Pt()*rand1*(rand2+1.0);
-  //       ENu_Pt = _Muon->p4(muon).Pt()-ETau_Pt;
-  //       }
-  //     }
-  //     */
+//   //     /*if(ETau_Pt <= 15.0){
+//   //       while(ETau_Pt<=15.0){
+//   //       rand1 = Tau_HFrac->GetRandom();
+//   //       rand2 = Tau_Resol->GetRandom();
+//   //       ETau_Pt = _Muon->p4(muon).Pt()*rand1*(rand2+1.0);
+//   //       ENu_Pt = _Muon->p4(muon).Pt()-ETau_Pt;
+//   //       }
+//   //     }
+//   //     */
 
-  //     TLorentzVector Emu_Tau;
-  //     Emu_Tau.SetPtEtaPhiE(ETau_Pt, ETau_Eta, ETau_Phi, ETau_Energy);
-  //     _Muon->cur_P->clear();
+//   //     TLorentzVector Emu_Tau;
+//   //     Emu_Tau.SetPtEtaPhiE(ETau_Pt, ETau_Eta, ETau_Phi, ETau_Energy);
+//   //     _Muon->cur_P->clear();
 
-  //     if (ETau_Pt >= _Muon->pstats["Muon1"].pmap.at("PtCut").first ){
-  //       _Muon->cur_P->push_back(Emu_Tau);
-  //       _MET->systdeltaMEy["muMET"] += (_Muon->p4(muon).Px()-Emu_Tau.Px());
-  //       _MET->systdeltaMEy["muMET"] += (_Muon->p4(muon).Py()-Emu_Tau.Py());
+//   //     if (ETau_Pt >= _Muon->pstats["Muon1"].pmap.at("PtCut").first ){
+//   //       _Muon->cur_P->push_back(Emu_Tau);
+//   //       _MET->systdeltaMEy["muMET"] += (_Muon->p4(muon).Px()-Emu_Tau.Px());
+//   //       _MET->systdeltaMEy["muMET"] += (_Muon->p4(muon).Py()-Emu_Tau.Py());
 
-  //     }
-  //   }
-  //}
-  // recalculate MET
-  //  _MET->update("muMET");
+//   //     }
+//   //   }
+//   //}
+//   // recalculate MET
+//   //  _MET->update("muMET");
 
-  /////MET CUTS
-  active_part->at(CUTS::eMET)->clear();
+//   /////MET CUTS
+//   active_part->at(CUTS::eMET)->clear();
 
-  if(passCutRange(_MET->pt(), distats["Run"].pmap.at("MetCut"))) {
-    active_part->at(CUTS::eMET)->push_back(1);
-  }
-}
+//   if(passCutRange(_MET->pt(), distats["Run"].pmap.at("MetCut"))) {
+//     active_part->at(CUTS::eMET)->push_back(1);
+//   }
+// }
 
 
 /////sets up other values needed for analysis that aren't particle specific
@@ -910,19 +910,6 @@ void Analyzer::smearLepton(Lepton& lep, CUTS eGenPos, const PartStats& stats, co
 
   string systname = syst_names.at(syst);
   if(!lep.needSyst(syst)) return;
-  // if(systname!="orig"){
-  //   //save time to not rerun stuff
-  //   if( systname.find("Muon")==string::npos && lep.type == PType::Muon){
-  //     return;
-  //   }else if( systname.find("Ele")==string::npos && lep.type == PType::Electron){
-  //     return;
-  //   }else if( systname.find("Tau")==string::npos && lep.type == PType::Tau){
-  //     return;
-  //   }
-  // }
-  //if the orig particle should be smeared this vector needs to be cleared
-
-
 
   if(systname=="orig" && !stats.bfind("SmearTheParticle")){
     lep.setOrigReco();
@@ -931,7 +918,7 @@ void Analyzer::smearLepton(Lepton& lep, CUTS eGenPos, const PartStats& stats, co
     for(size_t i = 0; i < lep.size(); i++) {
       TLorentzVector lepReco = lep.RecoP4(i);
       TLorentzVector genVec =  matchLeptonToGen(lepReco, lep.pstats["Smear"],eGenPos);
-      systematics.shiftLepton(lep, lepReco, genVec, _MET->systdeltaMEx[systname], _MET->systdeltaMEy[systname], syst);
+      systematics.shiftLepton(lep, lepReco, genVec, _MET->systdeltaMEx[syst], _MET->systdeltaMEy[syst], syst);
     }
   }
 }
@@ -972,7 +959,7 @@ void Analyzer::smearJet(Particle& jet, const CUTS eGenPos, const PartStats& stat
     }else if(systname=="Jet_Scale_Down"){
       sf = 1.- jetScaleRes.GetScale(jetReco, false, -1) ;
     }
-    systematics.shiftParticle(jet, jetReco, sf, _MET->systdeltaMEx[systname], _MET->systdeltaMEy[systname], syst);
+    systematics.shiftParticle(jet, jetReco, sf, _MET->systdeltaMEx[syst], _MET->systdeltaMEy[syst], syst);
   }
 }
 
@@ -1160,6 +1147,7 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
     if(passCuts) active_part->at(ePos)->push_back(i);
     i++;
   }
+
   return;
 }
 
@@ -1570,8 +1558,6 @@ pair<double, double> Analyzer::getPZeta(const TLorentzVector& Tobj1, const TLore
 void Analyzer::fill_histogram() {
   if(distats["Run"].bfind("ApplyGenWeight") && gen_weight == 0.0) return;
 
-  fillCuts(true);
-
   if(isData && blinded && maxCut == SignalRegion) return;
 
   const vector<string>* groups = histo.get_groups();
@@ -1585,13 +1571,15 @@ void Analyzer::fill_histogram() {
 
   for(int i = 0; i < syst_names.size(); i++) {
     for(Particle* ipart: allParticles) ipart->setCurrentP(i);
-    _MET->setCurrentP(syst_names.at(i));
+    _MET->setCurrentP(i);
     active_part =&syst_parts.at(i);
 
     //////i == 0 is orig or no syst case
     if(i == 0) {
       active_part = &goodParts;
+      fillCuts(true);
       for(auto it: *groups) {
+
 	fill_Folder(it, maxCut, histo);
       }
     } else { // other systematics
@@ -1601,29 +1589,6 @@ void Analyzer::fill_histogram() {
       }
     }
   }
-  // if(doSystematics){
-  //   const vector<string>* syst_groups = syst_histo.get_groups();
-
-  //   for(int i = 1; i < syst_names.size(); i++) {
-  //     //switch the systematics:
-  //     for(Particle* ipart: allParticles){
-  // 	ipart->setCurrentP(i);
-  //     }
-  //     _MET->setCurrentP(syst_names.at(i));
-  //     active_part =&syst_parts.at(i);
-
-  //     //get the systematics for the last folder:
-  //     for(auto it: *syst_groups) {
-  //       fill_Folder(it, maxCut, syst_histo, i);
-  //     }
-  //   }
-  //   for(Particle* ipart: allParticles){
-  //     ipart->setCurrentP(0);
-  //   }
-  //   _MET->setCurrentP("orig");
-  //   active_part = &goodParts;
-  // }
-
 }
 
 ///Function that fills up the histograms

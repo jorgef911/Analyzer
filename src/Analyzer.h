@@ -128,8 +128,8 @@ private:
   bool passCutRange(double, const pair<double, double>&);
   bool findCut(const vector<string>&, string);
   
-  void updateMet(string syst="orig");
-  void treatMuons_Met(string syst="orig");
+  void updateMet(int syst=0);
+  //  void treatMuons_Met(string syst="orig");
   double getPileupWeight(float);
   unordered_map<CUTS, vector<int>*, EnumHash> getArray();
 
