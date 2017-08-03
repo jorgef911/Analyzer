@@ -53,7 +53,7 @@ void Met::init(){
   //cleanup of the particles
   //keep this if there is any ever some need for a unchanged met
   Reco.SetPxPyPzE(mMet[0],mMet[1],mMet[2],sqrt(pow(mMet[0],2) + pow(mMet[1],2)));
-  for(int i=0; i < syst_names.size(); i++) {
+  for(int i=0; i < (int) syst_names.size(); i++) {
     if(i == Unclup) systVec.at(i)->SetPtEtaPhiE(MetUnclUp[0],0,MetUnclUp[1],MetUnclUp[0]);
     else if(i == Uncldown) systVec.at(i)->SetPtEtaPhiE(MetUnclDown[0],0,MetUnclDown[1],MetUnclDown[0]);
     else if(systVec.at(i) != nullptr) addP4Syst(Reco, i);

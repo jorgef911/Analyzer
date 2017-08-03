@@ -379,7 +379,7 @@ void Analyzer::preprocess(int event) {
   TriggerCuts(*(trigPlace[1]), *(trigName[1]), CUTS::eRTrig2);
 
   ////check update met is ok  
-  for(int i=0; i < syst_names.size(); i++) {
+  for(size_t i=0; i < syst_names.size(); i++) {
      //////Smearing
     smearLepton(*_Electron, CUTS::eGElec, _Electron->pstats["Smear"], distats["Electron_systematics"], i);
     smearLepton(*_Muon, CUTS::eGMuon, _Muon->pstats["Smear"], distats["Muon_systematics"], i);
@@ -1569,7 +1569,7 @@ void Analyzer::fill_histogram() {
 
   backup_wgt=wgt;
 
-  for(int i = 0; i < syst_names.size(); i++) {
+  for(size_t i = 0; i < syst_names.size(); i++) {
     for(Particle* ipart: allParticles) ipart->setCurrentP(i);
     _MET->setCurrentP(i);
     active_part =&syst_parts.at(i);
