@@ -39,6 +39,10 @@ const vector<CUTS> Analyzer::jetCuts = {
   CUTS::eR1stJet, CUTS::eR2ndJet, CUTS::eRBJet
 };
 
+const vector<CUTS> Analyzer::nonParticleCuts = {
+  CUTS::eRVertex,CUTS::eRTrig1, CUTS::eRTrig2,
+};
+
 const unordered_map<string, CUTS> Analyzer::cut_num = {
   {"NGenTau", CUTS::eGTau},                             {"NGenTop", CUTS::eGTop},
   {"NGenElectron", CUTS::eGElec},                       {"NGenMuon", CUTS::eGMuon},
@@ -391,6 +395,7 @@ void Analyzer::preprocess(int event) {
     smearJet(*_Jet,CUTS::eGJet,_Jet->pstats["Smear"], i);
     smearJet(*_FatJet,CUTS::eGJet,_FatJet->pstats["Smear"], i);
     updateMet(i);
+    
   }
   
   for(size_t i=0; i < syst_names.size(); i++) {
@@ -496,9 +501,10 @@ bool Analyzer::fillCuts(bool fillCounter) {
     int min= cut_info->at(cut).first;
     int max= cut_info->at(cut).second;
     int nparticles = active_part->at(cut_num.at(cut))->size();
-    //    if(!fillCounter) cout << cut << ": " << nparticles << " (" << min << ", " << max << ")" <<endl;
+    //if(!fillCounter) cout << cut << ": " << nparticles << " (" << min << ", " << max << ")" <<endl;
     if( (nparticles >= min) && (nparticles <= max || max == -1)) {
       if((cut_num.at(cut) == CUTS::eR1stJet || cut_num.at(cut) == CUTS::eR2ndJet) && active_part->at(cut_num.at(cut))->at(0) == -1 ) {
+        //cout<<"here   "<<endl;
         prevTrue = false;
         continue;  ////dirty dirty hack
       }
@@ -507,7 +513,8 @@ bool Analyzer::fillCuts(bool fillCounter) {
         cuts_cumul[i] += (prevTrue) ? 1 : 0;
         maxCut += (prevTrue) ? 1 : 0;
       }
-    } else {
+    }else {
+      //cout<<"here 2  "<<endl;
       prevTrue = false;
     }
   }
@@ -1573,35 +1580,39 @@ void Analyzer::fill_histogram() {
 
   backup_wgt=wgt;
 
-  
   for(size_t i = 0; i < syst_names.size(); i++) {
     for(Particle* ipart: allParticles) ipart->setCurrentP(i);
     _MET->setCurrentP(i);
     active_part =&syst_parts.at(i);
-
     //////i == 0 is orig or no syst case
     if(i == 0) {
       active_part = &goodParts;
       fillCuts(true);
       for(auto it: *groups) {
-        fill_Folder(it, maxCut, histo);
+        fill_Folder(it, maxCut, histo, false);
       }
+    }else{
+      //get the non particle conditions:
+      for(auto itCut : nonParticleCuts){
+        active_part->at(itCut)=goodParts.at(itCut);
+      }
+      //cout<<"________________"<<i<<endl;
       if(!fillCuts(false)) continue;
       for(auto it: *syst_histo.get_groups()) {
-        fill_Folder(it, i, syst_histo);
+        fill_Folder(it, i, syst_histo, true);
       }
     }
   }
 }
 
 ///Function that fills up the histograms
-void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto) {
+void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, bool issyst) {
   /*be aware in this function
    * the following definition is used:
    * histAddVal(val, name) histo.addVal(val, group, max, name, wgt)
    * so each histogram knows the group, max and weight!
    */
-  if(group == "FillRun") {
+  if(group == "FillRun" && (&ihisto==&histo)) {
     if(crbins != 1) {
       for(int i = 0; i < crbins; i++) {
         ihisto.addVal(false, group, i, "Events", 1);
@@ -1850,7 +1861,6 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto) {
       } else {
         histAddVal(diMass, "NotReconstructableMass");
       }
-
       double PZeta = getPZeta(part1,part2).first;
       double PZetaVis = getPZeta(part1,part2).second;
       histAddVal(calculateLeptonMetMt(part1), "Part1MetMt");

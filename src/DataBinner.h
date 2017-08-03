@@ -40,7 +40,9 @@ protected:
 public:
 
   bool is1D;
-  DataPiece(string _name, int _Nfold) : name(_name), is1D(true) {};
+  DataPiece(string _name, int _Nfold) : name(_name), is1D(true) {
+    TH1::AddDirectory(false);  
+  };
   virtual ~DataPiece() {};
   virtual void write_histogram(vector<string>&, TFile*) {};
   virtual void bin(int, double, double) {};

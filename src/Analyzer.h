@@ -75,7 +75,7 @@ private:
   void CRfillCuts();
   ///// Functions /////
   //void fill_Folder(string, const int, string syst="");
-  void fill_Folder(string, const int, Histogramer& ihisto);
+  void fill_Folder(string, const int, Histogramer& ihisto, bool issyst);
 
   void getInputs();
   void setupJob(string);
@@ -197,6 +197,7 @@ private:
 
   const static vector<CUTS> genCuts;
   const static vector<CUTS> jetCuts;
+  const static vector<CUTS> nonParticleCuts;
   double pu_weight, wgt, backup_wgt;
   unordered_map<int, GenFill*> genMaper;
 

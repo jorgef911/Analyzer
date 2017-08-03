@@ -5,7 +5,8 @@ using namespace std;
 Piece1D::Piece1D(string _name, int _bins, double _begin, double _end, int _Nfold) :
 DataPiece(_name, _Nfold), begin(_begin), end(_end), bins(_bins) {
   for(int i = 0; i < _Nfold; i++) {
-    string hname = name + to_string(i);
+    //string hname = name + to_string(i);
+    string hname = name;
     TH1D tmp((hname).c_str(), name.c_str(), bins, begin, end);
     tmp.Sumw2();
     histograms.push_back(tmp);
@@ -32,7 +33,8 @@ DataPiece(_name, _Nfold), beginx(_beginx), endx(_endx), beginy(_beginy), endy(_e
 
 
   for(int i = 0; i < _Nfold; ++i) {
-    string hname = name + to_string(i);
+    //string hname = name + to_string(i);
+    string hname = name;
     TH2D tmp((hname).c_str(), name.c_str(), binx, beginx, endx, biny, beginy, endy);
     tmp.Sumw2();
     histograms.push_back(tmp);
