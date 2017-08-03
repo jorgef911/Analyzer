@@ -16,6 +16,8 @@
 
 typedef vector<int>::iterator vec_iter;
 
+
+
 //////////////////////////////////////////////////////////////////
 ///////////////////CONSTANTS DEFINITONS///////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -313,6 +315,7 @@ void Analyzer::setupCR(string var, double val) {
 
 
 
+
 ////destructor
 Analyzer::~Analyzer() {
 
@@ -472,6 +475,7 @@ void Analyzer::getGoodParticles(int syst){
 
   ////Dijet cuts
   getGoodDiJets(distats["DiJet"],syst);
+
 }
 
 
@@ -499,16 +503,15 @@ bool Analyzer::fillCuts(bool fillCounter) {
         continue;  ////dirty dirty hack
       }
       if(fillCounter && crbins == 1) {
-	cuts_per[i]++;
-	cuts_cumul[i] += (prevTrue) ? 1 : 0;
-	maxCut += (prevTrue) ? 1 : 0;
+        cuts_per[i]++;
+        cuts_cumul[i] += (prevTrue) ? 1 : 0;
+        maxCut += (prevTrue) ? 1 : 0;
       }
     } else {
       prevTrue = false;
-      if(!fillCounter) return false;
     }
   }
-
+  
   if(crbins != 1) {
     if(!prevTrue) {
       maxCut = -1;
@@ -520,7 +523,7 @@ bool Analyzer::fillCuts(bool fillCounter) {
       factor /= 2;
       /////get variable value from maper.first.
       if(tester->test(this)) { ///pass cut
-	maxCut += factor;
+        maxCut += factor;
       }
     }
     if(isData && blinded && maxCut == SignalRegion) return false;
@@ -574,6 +577,7 @@ void Analyzer::printCuts() {
   histo.fill_histogram();
   if(doSystematics)
     syst_histo.fill_histogram();
+
 }
 
 /////////////PRIVATE FUNCTIONS////////////////
@@ -1048,9 +1052,9 @@ void Analyzer::getGoodGen(const PartStats& stats) {
   if(! neededCuts.isPresent(CUTS::eGen)) return;
   for(size_t j = 0; j < _Gen->size(); j++) {
     //we are not interested in pythia info here!
-    if(_Gen->status->at(j)>10){
-      continue;
-    }
+    //if(_Gen->status->at(j)>10){
+      //continue;
+    //}
     int id = abs(_Gen->pdg_id->at(j));
     if(genMaper[id] != nullptr && _Gen->status->at(j) == genMaper[id]->status) {
       if(id == 15 && (_Gen->pt(j) < stats.pmap.at("TauPtCut").first || _Gen->pt(j) > stats.pmap.at("TauPtCut").second || abs(_Gen->eta(j)) > stats.dmap.at("TauEtaCut"))) continue;
@@ -1569,6 +1573,7 @@ void Analyzer::fill_histogram() {
 
   backup_wgt=wgt;
 
+  
   for(size_t i = 0; i < syst_names.size(); i++) {
     for(Particle* ipart: allParticles) ipart->setCurrentP(i);
     _MET->setCurrentP(i);
@@ -1579,13 +1584,11 @@ void Analyzer::fill_histogram() {
       active_part = &goodParts;
       fillCuts(true);
       for(auto it: *groups) {
-
-	fill_Folder(it, maxCut, histo);
+        fill_Folder(it, maxCut, histo);
       }
-    } else { // other systematics
       if(!fillCuts(false)) continue;
       for(auto it: *syst_histo.get_groups()) {
-	fill_Folder(it, i, syst_histo);
+        fill_Folder(it, i, syst_histo);
       }
     }
   }
@@ -1914,5 +1917,4 @@ double normPhi(double phi) {
 double absnormPhi(double phi) {
   return abs(normPhi(phi));
 }
-
 

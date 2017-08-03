@@ -36,15 +36,11 @@ weight -- weight given to the value.
 class DataPiece {
 protected:
   const string name;
-  const int fold_width;
-  vector<double> data;
-
 
 public:
 
   bool is1D;
-  DataPiece(string _name, int _Nfold, int _fold_width) :
-  name(_name), fold_width(_fold_width), data(_Nfold*_fold_width, 0), is1D(true) {TH1::AddDirectory(false);};
+  DataPiece(string _name, int _Nfold) : name(_name), is1D(true) {};
   virtual ~DataPiece() {};
   virtual void write_histogram(vector<string>&, TFile*) {};
   virtual void bin(int, double, double) {};
@@ -58,12 +54,12 @@ private:
   const double begin, end;
   const int bins;
 
-  double  width;
+  vector<TH1D> histograms;
+
 
 public:
   Piece1D(string, int, double, double, int);
   void write_histogram(vector<string>&, TFile*);
-  int get_bin(double) const;
   void bin(int, double, double);
 };
 
@@ -73,12 +69,11 @@ private:
   const double beginx, endx, beginy, endy;
   const int binx, biny;
 
-  double widthx, widthy;
+  vector<TH2D> histograms;
 
 public:
   Piece2D(string, int, double, double, int, double, double, int);
   void write_histogram(vector<string>&, TFile*);
-  int get_bin(double, bool) const;
   void bin(int, double, double, double);
 };
 
