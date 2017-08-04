@@ -1573,11 +1573,11 @@ void Analyzer::fill_histogram() {
 
   const vector<string>* groups = histo.get_groups();
   if(!isData){
-    wgt = pu_weight;
+    wgt = 1.;
+    if(distats["Run"].bfind("UsePileUpWeight")) wgt*= pu_weight;
     if(distats["Run"].bfind("ApplyGenWeight")) wgt *= (gen_weight > 0) ? 1.0 : -1.0;
-    //backup current weight
   }else  wgt=1.;
-
+  //backup current weight
   backup_wgt=wgt;
 
   for(size_t i = 0; i < syst_names.size(); i++) {
@@ -1620,6 +1620,7 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
           //put the weighted events in bin 3
           ihisto.addVal(2, group,i, "Events", (gen_weight > 0) ? 1.0 : -1.0);
         }
+        ihisto.addVal(wgt, group, i, "Weight", 1);
       }
     }
     else{
@@ -1628,6 +1629,7 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
         //put the weighted events in bin 3
         ihisto.addVal(2, group,ihisto.get_maxfolder(), "Events", (gen_weight > 0) ? 1.0 : -1.0);
       }
+      ihisto.addVal(wgt, group, ihisto.get_maxfolder(), "Weight", 1);
     }
     histAddVal(true, "Events");
     histAddVal(bestVertices, "NVertices");
@@ -1691,6 +1693,7 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
       histAddVal(part->p4(it).Pt(), "Pt");
       histAddVal(part->p4(it).Eta(), "Eta");
       histAddVal(part->p4(it).Phi(), "Phi");
+      histAddVal(part->p4(it).DeltaPhi(_MET->p4()), "MetDphi");
       if(part->type == PType::Tau) {
         histAddVal(_Tau->nProngs->at(it), "NumSignalTracks");
         histAddVal(_Tau->charge(it), "Charge");
@@ -1819,6 +1822,18 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
     histAddVal(leaddijetdeltaEta, "LargestDeltaEta");
     histAddVal(leaddijetdeltaR, "LargestDeltaR");
     histAddVal(etaproduct, "LargestMassEtaProduct");
+    
+    for(auto index : *goodParts[CUTS::eRTau1] ) {
+      histAddVal2(calculateLeptonMetMt(_Tau->p4(index)), leaddijetmass, "mTvsLeadingMass");
+      histAddVal2(calculateLeptonMetMt(_Tau->p4(index)), leaddijetdeltaEta, "mTvsLeadingDeltaEta");
+      histAddVal2(calculateLeptonMetMt(_Tau->p4(index)), leaddijetdeltaR, "mTvsLeadingDeltaR");
+      histAddVal2(calculateLeptonMetMt(_Tau->p4(index)), leaddijetpt, "mTvsLeadingPt");
+      histAddVal2((absnormPhi(_Tau->p4(index).Phi()-_MET->phi())), leaddijetmass, "MetDphiVSLeadingMass");
+      histAddVal2((absnormPhi(_Tau->p4(index).Phi()-_MET->phi())), leaddijetdeltaEta, "MetDphiVSLeadingDeltaEta");
+      histAddVal2((absnormPhi(_Tau->p4(index).Phi()-_MET->phi())), leaddijetdeltaR, "MetDphiVSLeadingDeltaR");
+      histAddVal2((absnormPhi(_Tau->p4(index).Phi()-_MET->phi())), leaddijetpt, "MetDphiVSLeadingPt");
+    }
+
 
 
     ////diparticle stuff
