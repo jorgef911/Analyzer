@@ -53,6 +53,15 @@ DepGraph::DepGraph() {
   add_edge(cutint(CUTS::eDiJet), cutint(CUTS::eRJet1), g);
   add_edge(cutint(CUTS::eDiJet), cutint(CUTS::eRJet2), g);
   
+  add_edge(cutint(CUTS::eElec1Jet1), cutint(CUTS::eRElec1), g);
+  add_edge(cutint(CUTS::eElec1Jet1), cutint(CUTS::eRJet1), g);
+  add_edge(cutint(CUTS::eElec1Jet2), cutint(CUTS::eRElec1), g);
+  add_edge(cutint(CUTS::eElec1Jet2), cutint(CUTS::eRJet2), g);
+  add_edge(cutint(CUTS::eElec2Jet1), cutint(CUTS::eRElec2), g);
+  add_edge(cutint(CUTS::eElec2Jet1), cutint(CUTS::eRJet1), g);
+  add_edge(cutint(CUTS::eElec2Jet2), cutint(CUTS::eRElec2), g);
+  add_edge(cutint(CUTS::eElec2Jet2), cutint(CUTS::eRJet2), g);
+  
   add_edge(cutint(CUTS::eSusyCom), cutint(CUTS::eR1stJet), g);
   add_edge(cutint(CUTS::eSusyCom), cutint(CUTS::eR2ndJet), g);
 

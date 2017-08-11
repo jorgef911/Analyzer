@@ -63,6 +63,8 @@ const unordered_map<string, CUTS> Analyzer::cut_num = {
   {"NElectron2Tau1Combinations", CUTS::eElec2Tau1},     {"NElectron2Tau2Combinations", CUTS::eElec2Tau2},
   {"NMuon1Electron1Combinations", CUTS::eMuon1Elec1},   {"NMuon1Electron2Combinations", CUTS::eMuon1Elec2},
   {"NMuon2Electron1Combinations", CUTS::eMuon2Elec1},   {"NMuon2Electron2Combinations", CUTS::eMuon2Elec2},
+  {"NElectron1Jet1Combinations", CUTS::eElec1Jet1},     {"NElectron1Jet2Combinations", CUTS::eElec1Jet2},
+  {"NElectron2Jet1Combinations", CUTS::eElec2Jet1},     {"NElectron2Jet2Combinations", CUTS::eElec2Jet2},
   {"NLeadJetCombinations", CUTS::eSusyCom},             {"METCut", CUTS::eMET},
   {"NRecoWJet", CUTS::eRWjet},                          {"NRecoVertex", CUTS::eRVertex}
 };
@@ -283,6 +285,10 @@ void Analyzer::create_fillInfo() {
   fillInfo["FillMuon1Electron2"] =  new FillVals(CUTS::eMuon1Elec1, FILLER::Dipart, _Muon, _Electron);
   fillInfo["FillMuon2Electron1"] =  new FillVals(CUTS::eMuon2Elec1, FILLER::Dipart, _Muon, _Electron);
   fillInfo["FillMuon2Electron2"] =  new FillVals(CUTS::eMuon2Elec2, FILLER::Dipart, _Muon, _Electron);
+  fillInfo["FillElectron1Jet1"] =   new FillVals(CUTS::eElec1Jet1, FILLER::Dilepjet, _Electron, _Jet);
+  fillInfo["FillElectron1Jet2"] =   new FillVals(CUTS::eElec1Jet1, FILLER::Dilepjet, _Electron, _Jet);
+  fillInfo["FillElectron2Jet1"] =   new FillVals(CUTS::eElec2Jet1, FILLER::Dilepjet, _Electron, _Jet);
+  fillInfo["FillElectron2Jet2"] =   new FillVals(CUTS::eElec2Jet2, FILLER::Dilepjet, _Electron, _Jet);
 
   //////I hate this solution so much.  Its terrible
   fillInfo["FillElectron1Electron2"] =     new FillVals(CUTS::eDiElec, FILLER::Single, _Electron, _Electron);
@@ -477,6 +483,12 @@ void Analyzer::getGoodParticles(int syst){
   getGoodLeptonCombos(*_Tau, *_Tau, CUTS::eRTau1, CUTS::eRTau2, CUTS::eDiTau, distats["DiTau"],syst);
   getGoodLeptonCombos(*_Electron, *_Electron, CUTS::eRElec1, CUTS::eRElec2, CUTS::eDiElec, distats["DiElectron"],syst);
   getGoodLeptonCombos(*_Muon, *_Muon, CUTS::eRMuon1, CUTS::eRMuon2, CUTS::eDiMuon, distats["DiMuon"],syst);
+  
+  //
+  getGoodLeptonJetCombos(*_Electron, *_Jet, CUTS::eRElec1, CUTS::eRJet1, CUTS::eElec1Jet1, distats["Electron1Jet1"],syst);
+  getGoodLeptonJetCombos(*_Electron, *_Jet, CUTS::eRElec1, CUTS::eRJet2, CUTS::eElec1Jet2, distats["Electron1Jet2"],syst);
+  getGoodLeptonJetCombos(*_Electron, *_Jet, CUTS::eRElec2, CUTS::eRJet1, CUTS::eElec2Jet1, distats["Electron2Jet1"],syst);
+  getGoodLeptonJetCombos(*_Electron, *_Jet, CUTS::eRElec2, CUTS::eRJet2, CUTS::eElec2Jet2, distats["Electron2Jet2"],syst);
 
   ////Dijet cuts
   getGoodDiJets(distats["DiJet"],syst);
@@ -733,6 +745,7 @@ void Analyzer::setupGeneral() {
   read_info(filespace + "MuonTau_info.in");
   read_info(filespace + "MuonElectron_info.in");
   read_info(filespace + "DiParticle_info.in");
+  read_info(filespace + "ElectronJet_info.in");
   read_info(filespace + "VBFCuts_info.in");
   read_info(filespace + "Run_info.in");
   read_info(filespace + "Systematics_info.in");
@@ -1482,6 +1495,42 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
   }
 }
 
+/////abs for values
+///Find the number of lepton combos that pass the dilepton cuts
+void Analyzer::getGoodLeptonJetCombos(Lepton& lep1, Jet& jet1, CUTS ePos1, CUTS ePos2, CUTS ePosFin, const PartStats& stats, const int syst) {
+  if(! neededCuts.isPresent(ePosFin)) return;
+  string systname = syst_names.at(syst);
+  if(!lep1.needSyst(syst) && !jet1.needSyst(syst)) {
+    active_part->at(ePosFin)=goodParts[ePosFin];
+    return;
+  }
+
+  TLorentzVector llep1, ljet1;
+  // ----Separation cut between jets (remove overlaps)
+  for(auto ij2 : *active_part->at(ePos1)) {
+    llep1 = lep1.p4(ij2);
+    for(auto ij1 : *active_part->at(ePos1)) {
+      ljet1 = _Jet->p4(ij1);
+      
+      bool passCuts = true;
+      for(auto cut : stats.bset) {
+        if(!passCuts) break;
+        else if(cut == "DiscrByDeltaR") passCuts = (ljet1.DeltaR(llep1) >= stats.dmap.at("DeltaRCut"));
+        else if(cut == "DiscrByDeltaEta") passCuts = passCutRange(abs(ljet1.Eta() - llep1.Eta()), stats.pmap.at("DeltaEtaCut"));
+        else if(cut == "DiscrByDeltaPhi") passCuts = passCutRange(absnormPhi(ljet1.Phi() - llep1.Phi()), stats.pmap.at("DeltaPhiCut"));  
+        else if(cut == "DiscrByOSEta") passCuts = (ljet1.Eta() * llep1.Eta() < 0);
+        else if(cut == "DiscrByMassReco") passCuts = passCutRange((ljet1+llep1).M(), stats.pmap.at("MassCut"));
+        else if(cut == "DiscrByCosDphi") passCuts = passCutRange(cos(absnormPhi(ljet1.Phi() - llep1.Phi())), stats.pmap.at("CosDphiCut"));
+        else cout << "cut: " << cut << " not listed" << endl;
+      }
+      ///Particlesp that lead to good combo are totjet * part1 + part2
+      /// final / totjet = part1 (make sure is integer)
+      /// final % totjet = part2
+      if(passCuts) active_part->at(ePosFin)->push_back(ij1*_Jet->size() + ij2);
+    }
+  }
+}
+
 
 //////////////LOOK INTO DIJET PICKING
 ///////HOW TO GET RID OF REDUNCENCIES??
@@ -1508,7 +1557,7 @@ void Analyzer::getGoodDiJets(const PartStats& stats, const int syst) {
       bool passCuts = true;
       for(auto cut : stats.bset) {
 	if(!passCuts) break;
-	else if (cut == "DiscrByDeltaR") passCuts = (jet1.DeltaR(jet2) >= stats.dmap.at("DeltaRCut"));
+	else if(cut == "DiscrByDeltaR") passCuts = (jet1.DeltaR(jet2) >= stats.dmap.at("DeltaRCut"));
 	else if(cut == "DiscrByDeltaEta") passCuts = passCutRange(abs(jet1.Eta() - jet2.Eta()), stats.pmap.at("DeltaEtaCut"));
 	else if(cut == "DiscrByDeltaPhi") passCuts = passCutRange(absnormPhi(jet1.Phi() - jet2.Phi()), stats.pmap.at("DeltaPhiCut"));  
 	else if(cut == "DiscrByOSEta") passCuts = (jet1.Eta() * jet2.Eta() < 0);
@@ -1733,6 +1782,7 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
     histAddVal(_MET->HT(), "HT");
     histAddVal(_MET->HT() + _MET->MHT(), "Meff");
     histAddVal(_MET->pt(), "Met");
+    histAddVal(_MET->phi(), "MetPhi");
 
   } else if(group == "FillLeadingJet" && active_part->at(CUTS::eSusyCom)->size() == 0) {
 
@@ -1837,6 +1887,63 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
 
 
     ////diparticle stuff
+    
+  } else if(fillInfo[group]->type == FILLER::Dilepjet) {
+    Jet* jet = static_cast<Jet*>(fillInfo[group]->part);
+    Lepton* lep = static_cast<Lepton*>(fillInfo[group]->part2);
+    CUTS ePos = fillInfo[group]->ePos;
+    string digroup = group;
+    digroup.erase(0,4);
+
+    TLorentzVector part1;
+    TLorentzVector part2;
+
+    for(auto it : *active_part->at(ePos)) {
+
+      int p1= (it) / _Jet->size();;
+      int p2= (it) % _Jet->size();;
+
+      part1 = lep->p4(p2);
+      part2 = jet->p4(p1);
+
+      histAddVal2(part1.Pt(),part2.Pt(), "Part1PtVsPart2Pt");
+      histAddVal(part1.DeltaR(part2), "DeltaR");
+      if(group.find("Di") != string::npos) {
+        histAddVal((part1.Pt() - part2.Pt()) / (part1.Pt() + part2.Pt()), "DeltaPtDivSumPt");
+        histAddVal(part1.Pt() - part2.Pt(), "DeltaPt");
+      } else {
+        histAddVal((part2.Pt() - part1.Pt()) / (part1.Pt() + part2.Pt()), "DeltaPtDivSumPt");
+        histAddVal(part2.Pt() - part1.Pt(), "DeltaPt");
+      }
+      histAddVal(cos(absnormPhi(part2.Phi() - part1.Phi())), "CosDphi");
+      histAddVal(absnormPhi(part1.Phi() - _MET->phi()), "Part1MetDeltaPhi");
+      histAddVal2(absnormPhi(part1.Phi() - _MET->phi()), cos(absnormPhi(part2.Phi() - part1.Phi())), "Part1MetDeltaPhiVsCosDphi");
+      histAddVal(absnormPhi(part2.Phi() - _MET->phi()), "Part2MetDeltaPhi");
+      histAddVal(cos(absnormPhi(atan2(part1.Py() - part2.Py(), part1.Px() - part2.Px()) - _MET->phi())), "CosDphi_DeltaPtAndMet");
+      
+      double diMass = diParticleMass(part1,part2, distats[digroup].smap.at("HowCalculateMassReco"));
+      if(passDiParticleApprox(part1,part2, distats[digroup].smap.at("HowCalculateMassReco"))) {
+        histAddVal(diMass, "ReconstructableMass");
+      } else {
+        histAddVal(diMass, "NotReconstructableMass");
+      }
+      double PZeta = getPZeta(part1,part2).first;
+      double PZetaVis = getPZeta(part1,part2).second;
+      histAddVal(calculateLeptonMetMt(part1), "Part1MetMt");
+      histAddVal(calculateLeptonMetMt(part2), "Part2MetMt");
+      histAddVal(PZeta, "PZeta");
+      histAddVal(PZetaVis, "PZetaVis");
+      histAddVal2(PZetaVis,PZeta, "Zeta2D");
+      histAddVal((distats.at(digroup).dmap.at("PZetaCutCoefficient") * PZeta) + (distats.at(digroup).dmap.at("PZetaVisCutCoefficient") * PZetaVis), "Zeta1D");
+
+      if ((active_part->at(CUTS::eR1stJet)->size()>0 && active_part->at(CUTS::eR1stJet)->at(0) != -1) && (active_part->at(CUTS::eR2ndJet)->size()>0 && active_part->at(CUTS::eR2ndJet)->at(0) != -1)) {
+        TLorentzVector TheLeadDiJetVect = _Jet->p4(active_part->at(CUTS::eR1stJet)->at(0)) + _Jet->p4(active_part->at(CUTS::eR2ndJet)->at(0));
+
+        histAddVal(absnormPhi(part1.Phi() - TheLeadDiJetVect.Phi()), "Part1DiJetDeltaPhi");
+        histAddVal(absnormPhi(part2.Phi() - TheLeadDiJetVect.Phi()), "Part2DiJetDeltaPhi");
+        histAddVal(diParticleMass(TheLeadDiJetVect, part1+part2, "VectorSumOfVisProductsAndMet"), "DiJetReconstructableMass");
+      }
+    }
   } else if(fillInfo[group]->type == FILLER::Dipart) {
     Lepton* lep1 = static_cast<Lepton*>(fillInfo[group]->part);
     Lepton* lep2 = static_cast<Lepton*>(fillInfo[group]->part2);

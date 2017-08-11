@@ -103,7 +103,8 @@ private:
   void getGoodRecoJets(CUTS, const PartStats&, const int);
   void getGoodRecoFatJets(CUTS, const PartStats&, const int);
 
-  void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&, const int);
+  void getGoodLeptonCombos(Lepton&, Lepton&, CUTS, CUTS, CUTS, const PartStats&, const int);
+  void getGoodLeptonJetCombos(Lepton&, Jet&, CUTS, CUTS, CUTS, const PartStats&, const int);
   void getGoodDiJets(const PartStats&, const int);
 
   void VBFTopologyCut(const PartStats&, const int);
