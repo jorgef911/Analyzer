@@ -8,6 +8,15 @@ typedef adjacency_list<vecS, vecS, directedS> mygraph;
 
 DepGraph::DepGraph() {
   
+  add_edge(cutint(CUTS::eGTau), cutint(CUTS::eGen), g);
+  add_edge(cutint(CUTS::eGTop), cutint(CUTS::eGen), g);
+  add_edge(cutint(CUTS::eGElec), cutint(CUTS::eGen), g);
+  add_edge(cutint(CUTS::eGMuon), cutint(CUTS::eGen), g);
+  add_edge(cutint(CUTS::eGZ), cutint(CUTS::eGen), g);
+  add_edge(cutint(CUTS::eGW), cutint(CUTS::eGen), g);
+  add_edge(cutint(CUTS::eGHiggs), cutint(CUTS::eGen), g);
+  add_edge(cutint(CUTS::eGJet), cutint(CUTS::eGen), g);
+  
   add_edge(cutint(CUTS::eMuon1Tau1), cutint(CUTS::eRMuon1), g);
   add_edge(cutint(CUTS::eMuon1Tau1), cutint(CUTS::eRTau1), g);
   add_edge(cutint(CUTS::eMuon1Tau2), cutint(CUTS::eRMuon1), g);

@@ -67,12 +67,6 @@ const unordered_map<string, CUTS> Analyzer::cut_num = {
   {"NRecoWJet", CUTS::eRWjet},                          {"NRecoVertex", CUTS::eRVertex}
 };
 
-unordered_map<int, GenFill*> genMaper {
-  {5, new GenFill(2, CUTS::eGJet)},     {6,  new GenFill(2, CUTS::eGTop)},
-  {11, new GenFill(1, CUTS::eGElec)},   {13, new GenFill(1, CUTS::eGMuon)},
-  {15, new GenFill(2, CUTS::eGTau)},    {23, new GenFill(2, CUTS::eGZ)},
-  {24, new GenFill(2, CUTS::eGW)},      {25, new GenFill(2, CUTS::eGHiggs)}
-};
 
 
 //////////////////////////////////////////////////////
@@ -421,7 +415,8 @@ void Analyzer::preprocess(int event) {
     ( event < 1000 && event % 100 == 0 ) ||
     ( event < 10000 && event % 1000 == 0 ) ||
     ( event >= 10000 && event % 10000 == 0 ) ) {
-       cout << setprecision(2)<<event << " Events analyzed "<< static_cast<double>(event)/nentries*100. <<"% done"<<endl;;
+       cout << setprecision(2)<<event << " Events analyzed "<< static_cast<double>(event)/nentries*100. <<"% done"<<endl;
+       cout << fixed;
   }
 }
 
@@ -723,6 +718,13 @@ void Analyzer::updateMet(int syst) {
 
 /////sets up other values needed for analysis that aren't particle specific
 void Analyzer::setupGeneral() {
+  
+  genMaper = {
+    {5, new GenFill(2, CUTS::eGJet)},     {6,  new GenFill(2, CUTS::eGTop)},
+    {11, new GenFill(1, CUTS::eGElec)},   {13, new GenFill(1, CUTS::eGMuon)},
+    {15, new GenFill(2, CUTS::eGTau)},    {23, new GenFill(2, CUTS::eGZ)},
+    {24, new GenFill(2, CUTS::eGW)},      {25, new GenFill(2, CUTS::eGHiggs)}
+};
 
   SetBranch("nTruePUInteractions", nTruePU);
   SetBranch("bestVertices", bestVertices);
@@ -1063,13 +1065,13 @@ void Analyzer::getGoodGen(const PartStats& stats) {
       //continue;
     //}
     int id = abs(_Gen->pdg_id->at(j));
-    if(genMaper[id] != nullptr && _Gen->status->at(j) == genMaper[id]->status) {
+    if(genMaper.find(id) != genMaper.end() && _Gen->status->at(j) == genMaper.at(id)->status) {
       if(id == 15 && (_Gen->pt(j) < stats.pmap.at("TauPtCut").first || _Gen->pt(j) > stats.pmap.at("TauPtCut").second || abs(_Gen->eta(j)) > stats.dmap.at("TauEtaCut"))) continue;
-      active_part->at(genMaper[id]->ePos)->push_back(j);
+      active_part->at(genMaper.at(id)->ePos)->push_back(j);
     }
     //something special for jet
-    if( (id<5 || id==9 ||  id==21) && genMaper[5] != nullptr && _Gen->status->at(j) == genMaper[5]->status) {
-      active_part->at(genMaper[5]->ePos)->push_back(j);
+    if( (id<5 || id==9 ||  id==21) && genMaper.find(id) != genMaper.end() && _Gen->status->at(j) == genMaper.at(5)->status) {
+      active_part->at(genMaper.at(5)->ePos)->push_back(j);
     }
   }
 
@@ -1109,11 +1111,9 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
     bool passCuts = true;
     if (fabs(lvec.Eta()) > stats.dmap.at("EtaCut")) passCuts = false;
     else if (lvec.Pt() < stats.pmap.at("PtCut").first || lvec.Pt() > stats.pmap.at("PtCut").second) passCuts = false;
-      
-      // if((lep.pstats.at("Smear").bmap.at("MatchToGen")) && (!isData)) {   /////check
-      // 	if(matchLeptonToGen(lvec, lep.pstats.at("Smear") ,eGenPos) == TLorentzVector(0,0,0,0)) continue;
-      // }
-
+    if(( find(lep.pstats.at("Smear").bset.begin(),lep.pstats.at("Smear").bset.end(),"MatchToGen")!=lep.pstats.at("Smear").bset.end()) && (!isData)) {   /////check
+      if(matchLeptonToGen(lvec, lep.pstats.at("Smear") ,eGenPos) == TLorentzVector(0,0,0,0)) continue;
+    }
     for( auto cut: stats.bset) {
       if(!passCuts) break;
       else if(cut == "DoDiscrByIsolation") {
@@ -1508,7 +1508,7 @@ void Analyzer::getGoodDiJets(const PartStats& stats, const int syst) {
       bool passCuts = true;
       for(auto cut : stats.bset) {
 	if(!passCuts) break;
-	else if (cut == "DiscrByDeltaR") passCuts = (jet1.DeltaR(jet2) >= stats.dmap.at("DeltaRCut"));
+	else if(cut == "DiscrByDeltaR") passCuts = (jet1.DeltaR(jet2) >= stats.dmap.at("DeltaRCut"));
 	else if(cut == "DiscrByDeltaEta") passCuts = passCutRange(abs(jet1.Eta() - jet2.Eta()), stats.pmap.at("DeltaEtaCut"));
 	else if(cut == "DiscrByDeltaPhi") passCuts = passCutRange(absnormPhi(jet1.Phi() - jet2.Phi()), stats.pmap.at("DeltaPhiCut"));  
 	else if(cut == "DiscrByOSEta") passCuts = (jet1.Eta() * jet2.Eta() < 0);
@@ -1733,6 +1733,7 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
     histAddVal(_MET->HT(), "HT");
     histAddVal(_MET->HT() + _MET->MHT(), "Meff");
     histAddVal(_MET->pt(), "Met");
+    histAddVal(_MET->phi(), "MetPhi");
 
   } else if(group == "FillLeadingJet" && active_part->at(CUTS::eSusyCom)->size() == 0) {
 
