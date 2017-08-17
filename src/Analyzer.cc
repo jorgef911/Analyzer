@@ -69,12 +69,6 @@ const unordered_map<string, CUTS> Analyzer::cut_num = {
   {"NRecoWJet", CUTS::eRWjet},                          {"NRecoVertex", CUTS::eRVertex}
 };
 
-unordered_map<int, GenFill*> genMaper {
-  {5, new GenFill(2, CUTS::eGJet)},     {6,  new GenFill(2, CUTS::eGTop)},
-  {11, new GenFill(1, CUTS::eGElec)},   {13, new GenFill(1, CUTS::eGMuon)},
-  {15, new GenFill(2, CUTS::eGTau)},    {23, new GenFill(2, CUTS::eGZ)},
-  {24, new GenFill(2, CUTS::eGW)},      {25, new GenFill(2, CUTS::eGHiggs)}
-};
 
 
 //////////////////////////////////////////////////////
@@ -773,6 +767,13 @@ void Analyzer::updateMet(int syst) {
 
 /////sets up other values needed for analysis that aren't particle specific
 void Analyzer::setupGeneral() {
+  
+  genMaper = {
+    {5, new GenFill(2, CUTS::eGJet)},     {6,  new GenFill(2, CUTS::eGTop)},
+    {11, new GenFill(1, CUTS::eGElec)},   {13, new GenFill(1, CUTS::eGMuon)},
+    {15, new GenFill(2, CUTS::eGTau)},    {23, new GenFill(2, CUTS::eGZ)},
+    {24, new GenFill(2, CUTS::eGW)},      {25, new GenFill(2, CUTS::eGHiggs)}
+};
 
   SetBranch("nTruePUInteractions", nTruePU);
   SetBranch("bestVertices", bestVertices);
@@ -1114,13 +1115,13 @@ void Analyzer::getGoodGen(const PartStats& stats) {
       //continue;
     //}
     int id = abs(_Gen->pdg_id->at(j));
-    if(genMaper[id] != nullptr && _Gen->status->at(j) == genMaper[id]->status) {
+    if(genMaper.find(id) != genMaper.end() && _Gen->status->at(j) == genMaper.at(id)->status) {
       if(id == 15 && (_Gen->pt(j) < stats.pmap.at("TauPtCut").first || _Gen->pt(j) > stats.pmap.at("TauPtCut").second || abs(_Gen->eta(j)) > stats.dmap.at("TauEtaCut"))) continue;
-      active_part->at(genMaper[id]->ePos)->push_back(j);
+      active_part->at(genMaper.at(id)->ePos)->push_back(j);
     }
     //something special for jet
-    if( (id<5 || id==9 ||  id==21) && genMaper[5] != nullptr && _Gen->status->at(j) == genMaper[5]->status) {
-      active_part->at(genMaper[5]->ePos)->push_back(j);
+    if( (id<5 || id==9 ||  id==21) && genMaper.find(id) != genMaper.end() && _Gen->status->at(j) == genMaper.at(5)->status) {
+      active_part->at(genMaper.at(5)->ePos)->push_back(j);
     }
   }
 
@@ -1160,11 +1161,9 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
     bool passCuts = true;
     if (fabs(lvec.Eta()) > stats.dmap.at("EtaCut")) passCuts = false;
     else if (lvec.Pt() < stats.pmap.at("PtCut").first || lvec.Pt() > stats.pmap.at("PtCut").second) passCuts = false;
-      
-      // if((lep.pstats.at("Smear").bmap.at("MatchToGen")) && (!isData)) {   /////check
-      // 	if(matchLeptonToGen(lvec, lep.pstats.at("Smear") ,eGenPos) == TLorentzVector(0,0,0,0)) continue;
-      // }
-
+    if(( find(lep.pstats.at("Smear").bset.begin(),lep.pstats.at("Smear").bset.end(),"MatchToGen")!=lep.pstats.at("Smear").bset.end()) && (!isData)) {   /////check
+      if(matchLeptonToGen(lvec, lep.pstats.at("Smear") ,eGenPos) == TLorentzVector(0,0,0,0)) continue;
+    }
     for( auto cut: stats.bset) {
       if(!passCuts) break;
       else if(cut == "DoDiscrByIsolation") {
@@ -1981,6 +1980,56 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
         histAddVal(absnormPhi(part2.Phi() - TheLeadDiJetVect.Phi()), "Part2DiJetDeltaPhi");
         histAddVal(diParticleMass(TheLeadDiJetVect, part1+part2, "VectorSumOfVisProductsAndMet"), "DiJetReconstructableMass");
       }
+      //electron tau stuff:
+      if(lep->type == PType::Electron){
+        //loop over taus to find a match in the unisolated taus:
+        int matchedTauInd=-1;
+        TLorentzVector matchedEle;
+        TLorentzVector unmatchedEle;
+        for( size_t itau =0; itau< _Tau->size(); itau++){
+          if(part2.DeltaR(_Tau->p4(itau))<0.3){
+            //we are sure that part1 passes the tight id
+            matchedTauInd=itau;
+            matchedEle=part2;
+            unmatchedEle=part1;
+          }
+        }
+        if(matchedTauInd>=0){
+          if(find(active_part->at(CUTS::eRTau1)->begin(),active_part->at(CUTS::eRTau1)->end(),matchedTauInd)!=active_part->at(CUTS::eRTau1)->end()){
+            histAddVal(_Tau->p4(matchedTauInd).Pt(), "Part1Part2GoodTauMatchPt");
+            histAddVal(_Tau->p4(matchedTauInd).Pt()-matchedEle.Pt(), "Part1Part2GoodTauMatchDeltaPt");
+            histAddVal((_Tau->p4(matchedTauInd)+unmatchedEle).M(), "Part1Part2GoodTauMatchMass");
+            histAddVal((matchedEle+unmatchedEle).M(), "Part1Part2EleGoodMatchMass");
+            histAddVal(matchedEle.Pt(), "Part1Part2EleGoodMatchPt");
+            histAddVal(_Tau->leadChargedCandPtError->at(matchedTauInd),"Part1Part2leadChargedCandPtErrorGoodMatched");
+            histAddVal(_Tau->leadChargedCandValidHits->at(matchedTauInd),"Part1Part2leadChargedCandValidHitGoodMatched");
+            histAddVal2( matchedEle.Pt(),   (_Tau->p4(matchedTauInd).Pt()-matchedEle.Pt())/matchedEle.Pt(), "Part1Part2TauGoodMatchPt_vs_DeltaPt");
+            histAddVal2( matchedEle.Pt(),   matchedEle.Eta(), "Part1Part2TauGoodMatchPt_vs_eta");
+            histAddVal2( _Tau->pt(matchedTauInd),   _Tau->decayMode->at(matchedTauInd), "Part1Part2TauGoodMatchPt_vs_Decay");
+          }else{
+            histAddVal(_Tau->p4(matchedTauInd).Pt(), "Part1Part2TauMatchPt");
+            histAddVal(_Tau->p4(matchedTauInd).Pt()-matchedEle.Pt(), "Part1Part2TauMatchDeltaPt");
+            histAddVal((_Tau->p4(matchedTauInd)+unmatchedEle).M(), "Part1Part2TauMatchMass");
+            histAddVal((matchedEle+unmatchedEle).M(), "Part1Part2EleMatchMass");
+            histAddVal(matchedEle.Pt(), "Part1Part2EleMatchPt");
+            histAddVal(_Tau->leadChargedCandPtError->at(matchedTauInd),"Part1Part2leadChargedCandPtErrorMatched");
+            histAddVal(_Tau->leadChargedCandValidHits->at(matchedTauInd),"Part1Part2leadChargedCandValidHitsMatched");
+            histAddVal2( matchedEle.Pt(),   (_Tau->p4(matchedTauInd).Pt()-matchedEle.Pt())/matchedEle.Pt(), "Part1Part2TauMatchPt_vs_DeltaPt");
+            histAddVal2( matchedEle.Pt(),   matchedEle.Eta(), "Part1Part2TauMatchPt_vs_eta");
+            histAddVal2( _Tau->pt(matchedTauInd),   _Tau->decayMode->at(matchedTauInd), "Part1Part2TauMatchPt_vs_Decay");
+          }
+        }else{
+          histAddVal((part1+part2).M(), "Part1Part2EleUnMatchMass");
+          histAddVal(part2.Pt(), "Part1Part2EleUnMatchPt");
+          histAddVal2( part2.Pt(),   part2.Eta(), "Part1Part2UnMatchPt_vs_eta");
+          if(!isData){
+            histAddVal(part2.Pt(), "Part1Part2EleUnMatchPt_gen_"+to_string(abs(matchToGenPdg(part2,0.3))));
+          }
+          histAddVal(jet->chargedMultiplicity->at(p1), "Part1Part2EleUnMatchJetMultiplicity");
+        }
+      }
+
+
     }
   } else if(fillInfo[group]->type == FILLER::Dipart) {
     Lepton* lep1 = static_cast<Lepton*>(fillInfo[group]->part);
