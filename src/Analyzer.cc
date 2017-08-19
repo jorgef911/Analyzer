@@ -439,10 +439,10 @@ void Analyzer::getGoodParticles(int syst){
   getGoodRecoLeptons(*_Tau, CUTS::eRTau1, CUTS::eGTau, _Tau->pstats["Tau1"],syst);
   getGoodRecoLeptons(*_Tau, CUTS::eRTau2, CUTS::eGTau, _Tau->pstats["Tau2"],syst);
 
+  getGoodRecoJets(CUTS::eRBJet, _Jet->pstats["BJet"],syst);
   getGoodRecoJets(CUTS::eRJet1, _Jet->pstats["Jet1"],syst);
   getGoodRecoJets(CUTS::eRJet2, _Jet->pstats["Jet2"],syst);
   getGoodRecoJets(CUTS::eRCenJet, _Jet->pstats["CentralJet"],syst);
-  getGoodRecoJets(CUTS::eRBJet, _Jet->pstats["BJet"],syst);
   getGoodRecoJets(CUTS::eR1stJet, _Jet->pstats["FirstLeadingJet"],syst);
   getGoodRecoJets(CUTS::eR2ndJet, _Jet->pstats["SecondLeadingJet"],syst);
 
@@ -1111,7 +1111,7 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
     if (fabs(lvec.Eta()) > stats.dmap.at("EtaCut")) passCuts = false;
     else if (lvec.Pt() < stats.pmap.at("PtCut").first || lvec.Pt() > stats.pmap.at("PtCut").second) passCuts = false;
     
-    if(( find(lep.pstats.at("Smear").bset.begin(),lep.pstats.at("Smear").bset.end(),"MatchToGen")!=lep.pstats.at("Smear").bset.end()) && (!isData)) {   /////check
+    if((lep.pstats.at("Smear").bfind("MatchToGen")) && (!isData)) {   /////check
       if(matchLeptonToGen(lvec, lep.pstats.at("Smear") ,eGenPos) == TLorentzVector(0,0,0,0)) continue;
     }
     
@@ -1208,6 +1208,9 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats, const int syst
         double bjet_SF = reader.eval_auto_bounds("central", BTagEntry::FLAV_B, lvec.Eta(), lvec.Pt());
         passCuts = (isData || ((double) rand()/(RAND_MAX)) <  bjet_SF);
       }
+    }
+    if(_Jet->pstats["BJet"].bfind("RemoveBJetsFromJets") and ePos!=CUTS::eRBJet){
+      passCuts=find(active_part->at(CUTS::eRBJet)->begin(), active_part->at(CUTS::eRBJet)->end(), i) == active_part->at(CUTS::eRBJet)->end();
     }
     if(passCuts) active_part->at(ePos)->push_back(i);
     i++;

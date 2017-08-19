@@ -155,3 +155,5 @@ Tau2MatchingDeltaR 0.3
 ApplyJetBTagging 1
 JetBTaggingCut 0.600
 MatchBToGen   0
+# if this is on b-jets will be removed from all the other jet collections 
+RemoveBJetsFromJets  0
