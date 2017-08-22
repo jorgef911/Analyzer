@@ -899,7 +899,7 @@ void Analyzer::setCutNeeds() {
     _Muon->unBranch();
   }
 
-  if( !neededCuts.isPresent(CUTS::eGen)) {
+  if( !neededCuts.isPresent(CUTS::eGen) and !isData) {
     cout<<"Gen not needed. They will be deactivated!"<<endl;
     _Gen->unBranch();
  
