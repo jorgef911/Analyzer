@@ -33,17 +33,19 @@ LeadTrackThreshold 3.0
 DoDiscrByIsolation false
 DiscrByMinIsolation ZERO
 DiscrByMaxIsolation byTightIsolationMVArun2v1DBnewDMwLT
-DiscrByProngType 1or2or3hps
+
+DiscrByProngType true
+ProngType  1or2or3hps
 
 DoDiscrAgainstElectron false
 DiscrAgainstElectron againstElectronMVALooseMVA6
-SelectTausThatAreElectrons false
+SelectTausThatAreElectrons true
 
 DoDiscrAgainstMuon false
 DiscrAgainstMuon againstMuonTight3
 SelectTausThatAreMuons false
 
-DoDiscrByCrackCut true
+DoDiscrByCrackCut false
 
 RemoveOverlapWithMuon1s false
 RemoveOverlapWithMuon2s false

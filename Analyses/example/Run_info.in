@@ -12,7 +12,6 @@ isData false
 ApplyGenWeight  true
 ApplyTauIDSF true
 
-
 ///------Triggers-----///
 
 Trigger1FirstRequirement HLT_IsoMu24_eta2p1_v
@@ -32,7 +31,7 @@ DiscrByMet true
 MetCut 30.0 10000.0
 
 DiscrByMHT false
-MhtCut 50.0
+MhtCut 30.0
 DiscrByHT false
 HtCut 30.0
 
@@ -40,4 +39,3 @@ HtCut 30.0
 ApplyJetLooseIDforMhtAndHt true
 JetPtForMhtAndHt 30.0
 JetEtaForMhtAndHt 5.0
-ApplyJetLo

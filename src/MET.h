@@ -46,25 +46,24 @@ public:
   TLorentzVector p4() const;
   TLorentzVector& p4();
 
-  void setPtEtaPhiESyst( double, double, double, double, string);
-  void addPtEtaPhiESyst(double, double, double, double, string);
-  void addP4Syst(TLorentzVector, string);
-  void setCurrentP(string);
+  void addPtEtaPhiESyst(double, double, double, double, int);
+  void addP4Syst(TLorentzVector, int);
+  void setCurrentP(int);
   string getName() {return GenName;};
-  void update(string);
+  void update(PartStats&, Jet&, int);
 
   TLorentzVector Reco;
   TLorentzVector *cur_P;
 
-  unordered_map<string, TLorentzVector* > systVec;
-  unordered_map<string, double > systdeltaMEx;
-  unordered_map<string, double > systdeltaMEy;
-  unordered_map<string, double > syst_HT;
-  unordered_map<string, double > syst_MHT;
-  unordered_map<string, double > syst_MHTphi;
+  vector<TLorentzVector* > systVec;
+  vector<double> systdeltaMEx;
+  vector<double> systdeltaMEy;
+  vector<double> syst_HT;
+  vector<double> syst_MHT;
+  vector<double> syst_MHTphi;
 
 
-  string activeSystematic;
+  int activeSystematic;
 
 protected:
   TTree* BOOM;
@@ -73,7 +72,9 @@ protected:
   //note this is only for pt and phi
   double MetUnclUp[2] = {0, 0};
   double MetUnclDown[2] = {0, 0};
-  bool hasUncl=false;
+  vector<string> syst_names;
+  int Unclup=-1;
+  int Uncldown=-1;
 
 };
 

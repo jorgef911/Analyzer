@@ -55,7 +55,7 @@ CXXFLAGS = -O0 -g -pg -Wall $(ROOTCFLAGS) -I./
 LDFLAGS = -O0 -g -Wall $(ROOTLIBS) -lGenVector
 endif
 
-CXXFLAGS+=$(EXTRA_CFLAGS)
+CXXFLAGS+=$(EXTRA_CFLAGS) -Wno-deprecated
 LDFLAGS+=$(EXTRA_LDFLAGS)
 LIBS=
 

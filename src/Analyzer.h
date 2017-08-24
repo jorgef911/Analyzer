@@ -35,6 +35,7 @@ struct CRTester;
 #include "CRTest.h"
 #include "Systematics.h"
 #include "JetScaleResolution.h"
+#include "DepGraph.h"
 
 
 double normPhi(double phi);
@@ -52,7 +53,7 @@ public:
   ~Analyzer();
   void clear_values();
   void preprocess(int);
-  void fillCuts();
+  bool fillCuts(bool);
   void printCuts();
   void writeout();
   int nentries;
@@ -75,7 +76,7 @@ private:
   void CRfillCuts();
   ///// Functions /////
   //void fill_Folder(string, const int, string syst="");
-  void fill_Folder(string, const int, Histogramer& ihisto, int syst=-1 );
+  void fill_Folder(string, const int, Histogramer& ihisto, bool issyst);
 
   void getInputs();
   void setupJob(string);
@@ -85,8 +86,8 @@ private:
   void initializeTrigger();
   void setCutNeeds();
 
-  void smearLepton(Lepton&, CUTS, const PartStats&, string syst="orig");
-  void smearJet(Particle&, CUTS, const PartStats&, string syst="orig");
+  void smearLepton(Lepton&, CUTS, const PartStats&, const PartStats&, int syst=0);
+  void smearJet(Particle&, CUTS, const PartStats&, int syst=0);
 
   bool JetMatchesLepton(const Lepton&, const TLorentzVector&, double, CUTS);
   TLorentzVector matchLeptonToGen(const TLorentzVector&, const PartStats&, CUTS);
@@ -99,14 +100,14 @@ private:
   void getGoodParticles(int);
   void getGoodTauNu();
   void getGoodGen(const PartStats&);
-  void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&, const string&);
-  void getGoodRecoJets(CUTS, const PartStats&, const string&);
-  void getGoodRecoFatJets(CUTS, const PartStats&, const string&);
+  void getGoodRecoLeptons(const Lepton&, const CUTS, const CUTS, const PartStats&, const int);
+  void getGoodRecoJets(CUTS, const PartStats&, const int);
+  void getGoodRecoFatJets(CUTS, const PartStats&, const int);
 
-  void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&, const string&);
-  void getGoodDiJets(const PartStats&, const string&);
+  void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&, const int);
+  void getGoodDiJets(const PartStats&, const int);
 
-  void VBFTopologyCut(const PartStats&, const string&);
+  void VBFTopologyCut(const PartStats&, const int);
   void TriggerCuts(vector<int>&, const vector<string>&, CUTS);
 
 
@@ -127,9 +128,11 @@ private:
   void create_fillInfo();
 
   inline bool passCutRange(string, double, const PartStats&);
-
-  void updateMet(string syst="orig");
-  void treatMuons_Met(string syst="orig");
+  bool passCutRange(double, const pair<double, double>&);
+  bool findCut(const vector<string>&, string);
+  
+  void updateMet(int syst=0);
+  //  void treatMuons_Met(string syst="orig");
   double getPileupWeight(float);
   unordered_map<CUTS, vector<int>*, EnumHash> getArray();
 
@@ -170,6 +173,8 @@ private:
   vector<Particle*> allParticles;
   vector<string> syst_names;
 
+  DepGraph neededCuts;
+
   static const unordered_map<string, CUTS> cut_num;
   static const unordered_map<CUTS, vector<CUTS>, EnumHash> adjList;
 
@@ -196,6 +201,7 @@ private:
 
   const static vector<CUTS> genCuts;
   const static vector<CUTS> jetCuts;
+  const static vector<CUTS> nonParticleCuts;
   double pu_weight, wgt, backup_wgt;
   unordered_map<int, GenFill*> genMaper;
 

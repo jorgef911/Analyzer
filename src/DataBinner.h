@@ -40,7 +40,9 @@ protected:
 public:
 
   bool is1D;
-  DataPiece(string _name, int _Nfold) : name(_name), is1D(true) {};
+  DataPiece(string _name, int _Nfold) : name(_name), is1D(true) {
+    TH1::AddDirectory(false);  
+  };
   virtual ~DataPiece() {};
   virtual void write_histogram(vector<string>&, TFile*) {};
   virtual void bin(int, double, double) {};
@@ -116,12 +118,12 @@ public:
   void Add_Hist(string, string, int, double, double, int);
   void Add_Hist(string, string, int, double, double, int, double, double, int);
   void write_histogram(TFile*, vector<string>&);
-  void setControlRegions() {CR = true;}
+  void setSingleFill() {fillSingle = true;}
 
 private:
   unordered_map<string, DataPiece*> datamap;
   vector<string> order;
-  bool CR = false;
+  bool fillSingle = false;
 };
 
 #endif

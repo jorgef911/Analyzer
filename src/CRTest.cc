@@ -65,7 +65,7 @@ bool CRTester::test(Analyzer* analyzer) {
       else if(variable == "OSEta") pass = pass && (part1.Eta() * part2.Eta() > cutVal);
       else if(variable == "DiscrByOSLSType"){
         if(info->ePos==CUTS::eDiElec || info->ePos==CUTS::eDiMuon || info->ePos==CUTS::eDiTau ){
-          pass = pass && (info->part->charge->at(index / BIG_NUM) * info->part2->charge->at(index % BIG_NUM) > cutVal);
+          pass = pass && (info->part->charge(index / BIG_NUM) * info->part2->charge(index % BIG_NUM) > cutVal);
         }
       }
     }
