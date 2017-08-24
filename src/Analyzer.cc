@@ -1753,17 +1753,19 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
       }
     }
     if((part->type != PType::Jet ) && active_part->at(ePos)->size() > 0) {
-      double leadpt = 0;
-      double leadeta = 0;
+      vector<pair<double, int> > ptIndexVector;
       for(auto it : *active_part->at(ePos)) {
-        if(part->p4(it).Pt() >= leadpt) {
-          leadpt = part->p4(it).Pt();
-          leadeta = part->p4(it).Eta();
-        }
+        ptIndexVector.push_back(make_pair(part->pt(it),it));
       }
-
-      histAddVal(leadpt, "FirstLeadingPt");
-      histAddVal(leadeta, "FirstLeadingEta");
+      sort(ptIndexVector.begin(),ptIndexVector.end());
+      if(ptIndexVector.size()>0){
+        histAddVal(part->pt(ptIndexVector.back().second), "FirstLeadingPt");
+        histAddVal(part->eta(ptIndexVector.back().second), "FirstLeadingEta");
+      }
+      if(ptIndexVector.size()>1){
+        histAddVal(part->pt(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingPt");
+        histAddVal(part->eta(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingEta");
+      }
     }
 
 
