@@ -60,8 +60,10 @@ void parseCommandLine(int argc, char *argv[], vector<string> &inputnames, string
       usage();
     }else if(inputnames.size()==0){
       inputnames.push_back(argv[arg]);
+      cout << "Analyser: Inputfilelist " << inputnames.back() << endl;
     }else if(outputname==""){
       outputname = argv[arg];
+      cout << "Analyser: Outputfile " << outputname << endl;
     }
   }
 
@@ -117,6 +119,7 @@ int main (int argc, char* argv[]) {
   for(size_t i=0; i < Nentries; i++) {
     testing.clear_values();
     testing.preprocess(i);
+    testing.fill_efficiency();
     testing.fill_histogram();
     //this will be set if ctrl+c is pressed
     if(do_break){

@@ -140,6 +140,12 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   } else {
     allParticles= {_Electron,_Muon,_Tau,_Jet,_FatJet};
   }
+  
+  
+  particleCutMap[_Tau]      = make_pair({CUTS::eRTau1, CUTS::eRTau2},CUTS::eGTau);
+  particleCutMap[_Muon]     = make_pair({CUTS::eRMuon1, CUTS::eRMuon2},CUTS::eGMuon);
+  particleCutMap[_Electron] = make_pair({CUTS::eRElec1, CUTS::eRElec2},CUTS::eGElec);
+  //particleCutMap[_Jet]      = {CUTS::eRJet1, CUTS::eRJet2};
 
 
   // for(Particle* ipart: allParticles){
@@ -260,7 +266,7 @@ void Analyzer::create_fillInfo() {
   fillInfo["FillJet2"] =       new FillVals(CUTS::eRJet2, FILLER::Single, _Jet);
   fillInfo["FillBJet"] =       new FillVals(CUTS::eRBJet, FILLER::Single, _Jet);
   fillInfo["FillCentralJet"] = new FillVals(CUTS::eRCenJet, FILLER::Single, _Jet);
-  fillInfo["FillWJet"] =     new FillVals(CUTS::eRWjet, FILLER::Single, _FatJet);
+  fillInfo["FillWJet"] =       new FillVals(CUTS::eRWjet, FILLER::Single, _FatJet);
 
   fillInfo["FillDiElectron"] = new FillVals(CUTS::eDiElec, FILLER::Dipart, _Electron, _Electron);
   fillInfo["FillDiMuon"] =     new FillVals(CUTS::eDiMuon, FILLER::Dipart, _Muon, _Muon);
@@ -289,6 +295,17 @@ void Analyzer::create_fillInfo() {
   fillInfo["FillElectron1Electron2"] =     new FillVals(CUTS::eDiElec, FILLER::Single, _Electron, _Electron);
   fillInfo["FillMuon1Muon2"] =             new FillVals(CUTS::eDiMuon, FILLER::Single, _Muon, _Muon);
   fillInfo["FillTau1Tau2"] =               new FillVals(CUTS::eDiTau, FILLER::Single, _Tau, _Tau);
+  
+  //efficiency plots
+  //In principal the efficiency plots should only be used, when also the object is used, but hey nobody knows!
+  fillInfo["FillTauEfficiency1"] =       new FillVals(CUTS::eRTau1, FILLER::Single, _Tau);
+  fillInfo["FillTauEfficiency2"] =       new FillVals(CUTS::eRTau2, FILLER::Single, _Tau);
+  fillInfo["FillMuonEfficiency1"] =      new FillVals(CUTS::eRMuon1, FILLER::Single, _Muon);
+  fillInfo["FillMuonEfficiency2"] =      new FillVals(CUTS::eRMuon2, FILLER::Single, _Muon);
+  fillInfo["FillElectronEfficiency1"] =  new FillVals(CUTS::eRElec1, FILLER::Single, _Electron);
+  fillInfo["FillElectronEfficiency2"] =  new FillVals(CUTS::eRElec2, FILLER::Single, _Electron);
+  fillInfo["FillJetEfficiency1"] =       new FillVals(CUTS::eRJet1, FILLER::Single, _Jet);
+  fillInfo["FillJetEfficiency2"] =       new FillVals(CUTS::eRJet2, FILLER::Single, _Jet);
 
 
 
@@ -525,6 +542,33 @@ void Analyzer::getGoodParticles(int syst){
   ////Dijet cuts
   getGoodDiJets(distats["DiJet"],syst);
 
+}
+
+
+
+void Analyzer::fill_efficiency() {
+  //cut efficiency
+  
+  
+  for(Particle* part : allParticles){
+    //no efficiency for gen particles
+    if(part->getName().find("Gen") != string::npos)
+      continue;
+    //we don't want to make met efficiency plots
+    if(particleCutMap.find(part) != particleCutMap.end())
+      continue;
+    for(size_t i=0; i < part->size(); i++){
+      //make match to gen
+      if(matchLeptonToGen(part->p4(i), part.pstats.at("Smear") ,particleCutMap.at(part)->second) == TLorentzVector(0,0,0,0)) continue;
+      //check if the particle is part of the reco 
+      for(vector<CUTS> cut:  particleCutMap.at(part).first{
+        bool id_particle= (find(active_part->at(cut)->begin(),active_part->at(cut)->end(),i)!=active_part->at(cut)->end());
+        histo.addEffiency("eff_"+typeStringMap.at(part.type)+"Pt",part->pt(i),id_particle);
+        histo.addEffiency("eff_"+typeStringMap.at(part.type)+"Eta",part->eta(i),id_particle);
+        histo.addEffiency("eff_"+typeStringMap.at(part.type)+"phi",part->phi(i),id_particle);
+      }
+    }
+  }
 }
 
 
@@ -1052,7 +1096,7 @@ TLorentzVector Analyzer::matchLeptonToGen(const TLorentzVector& lvec, const Part
 }
 
 
-///Tau specific matching fucntion.  Works by seeing if a tau doesn't decay into a muon/electron and has
+///Tau specific matching function.  Works by seeing if a tau doesn't decay into a muon/electron and has
 //a matching tau neutrino showing that the tau decayed and decayed hadronically
 TLorentzVector Analyzer::matchTauToGen(const TLorentzVector& lvec, double lDeltaR) {
   TLorentzVector genVec(0,0,0,0);
@@ -1412,8 +1456,8 @@ void Analyzer::VBFTopologyCut(const PartStats& stats, const int syst) {
       double alpha = (dijet.M() > 0) ? ljet2.Pt() / dijet.M() : -1;
       passCuts = passCuts && passCutRange(alpha, stats.pmap.at("AlphaCut"));
     }
-    else if(cut == "DiscrByDphi1") passCuts = passCuts && passCutRange(abs(dphi1), stats.pmap.at("DPhi1Cut"));
-    else if(cut == "DiscrByDphi2") passCuts = passCuts && passCutRange(abs(dphi2), stats.pmap.at("DPhi2Cut"));
+    else if(cut == "DiscrByDphi1") passCuts = passCuts && passCutRange(abs(dphi1), stats.pmap.at("Dphi1Cut"));
+    else if(cut == "DiscrByDphi2") passCuts = passCuts && passCutRange(abs(dphi2), stats.pmap.at("Dphi2Cut"));
 
     else cout << "cut: " << cut << " not listed" << endl;
   }
@@ -1555,7 +1599,7 @@ void Analyzer::getGoodLeptonJetCombos(Lepton& lep1, Jet& jet1, CUTS ePos1, CUTS 
   // ----Separation cut between jets (remove overlaps)
   for(auto ij2 : *active_part->at(ePos1)) {
     llep1 = lep1.p4(ij2);
-    for(auto ij1 : *active_part->at(ePos1)) {
+    for(auto ij1 : *active_part->at(ePos2)) {
       ljet1 = _Jet->p4(ij1);
       
       bool passCuts = true;
@@ -1951,8 +1995,8 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
       int p1= (it) / _Jet->size();;
       int p2= (it) % _Jet->size();;
 
-      part1 = lep->p4(p2);
-      part2 = jet->p4(p1);
+      part1 = lep->p4(p1);
+      part2 = jet->p4(p2);
 
       histAddVal2(part1.Pt(),part2.Pt(), "Part1PtVsPart2Pt");
       histAddVal(part1.DeltaR(part2), "DeltaR");
@@ -2036,7 +2080,7 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
           if(!isData){
             histAddVal(part2.Pt(), "Part1Part2EleUnMatchPt_gen_"+to_string(abs(matchToGenPdg(part2,0.3))));
           }
-          histAddVal(jet->chargedMultiplicity->at(p1), "Part1Part2EleUnMatchJetMultiplicity");
+          histAddVal(jet->chargedMultiplicity->at(p2), "Part1Part2EleUnMatchJetMultiplicity");
         }
       }
 

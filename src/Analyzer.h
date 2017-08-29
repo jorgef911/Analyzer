@@ -169,7 +169,7 @@ private:
   unordered_map<string,bool> gen_selection;
   vector<Particle*> allParticles;
   vector<string> syst_names;
-
+  unordered_map<Particle*,  pair<vector<CUTS>,CUTS>  >  particleCutMap;
   DepGraph neededCuts;
 
   static const unordered_map<string, CUTS> cut_num;

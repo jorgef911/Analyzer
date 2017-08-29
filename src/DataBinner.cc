@@ -5,9 +5,7 @@ using namespace std;
 Piece1D::Piece1D(string _name, int _bins, double _begin, double _end, int _Nfold) :
 DataPiece(_name, _Nfold), begin(_begin), end(_end), bins(_bins) {
   for(int i = 0; i < _Nfold; i++) {
-    //string hname = name + to_string(i);
-    string hname = name;
-    TH1D tmp((hname).c_str(), name.c_str(), bins, begin, end);
+    TH1D tmp(name.c_str(), name.c_str(), bins, begin, end);
     tmp.Sumw2();
     histograms.push_back(tmp);
   }
@@ -33,9 +31,7 @@ DataPiece(_name, _Nfold), beginx(_beginx), endx(_endx), beginy(_beginy), endy(_e
 
 
   for(int i = 0; i < _Nfold; ++i) {
-    //string hname = name + to_string(i);
-    string hname = name;
-    TH2D tmp((hname).c_str(), name.c_str(), binx, beginx, endx, biny, beginy, endy);
+    TH2D tmp(name.c_str(), name.c_str(), binx, beginx, endx, biny, beginy, endy);
     tmp.Sumw2();
     histograms.push_back(tmp);
   }
@@ -52,6 +48,27 @@ void Piece2D::write_histogram(vector<string>& folders, TFile* outfile) {
     histograms.at(i).Write();
   }
 }
+
+Piece1DEff::Piece1DEff(string _name, int _bins, double _begin, double _end, int _Nfold) :
+DataPiece(_name, _Nfold), begin(_begin), end(_end), bins(_bins) {
+  for(int i = 0; i < _Nfold; i++) {
+    TEfficiency tmp(name.c_str(), name.c_str(), bins, begin, end);
+    tmp.Sumw2();
+    histograms.push_back(tmp);
+  }
+}
+
+void Piece1DEff::bin(int folder, double y, bool passFail) {
+  histograms.at(folder).Fill(y,passFail);
+}
+
+void Piece1DEff::write_histogram(vector<string>& folders, TFile* outfile) {
+  for(int i =0; i < (int)folders.size(); i++) {
+    outfile->cd(folders.at(i).c_str());
+    histograms.at(i).Write();
+  }
+}
+
 
 /*---------------------------------------------------------------------------------------*/
 
@@ -132,6 +149,10 @@ void DataBinner::AddPoint(string name, int maxfolder, double valuex, double valu
       datamap.at(name)->bin(i,valuex, valuey, weight);
     }
   }
+}
+
+void DataBinner::AddEff(string name, int maxfolder, double valuex, bool passFail) {
+  datamap.at(name)->bin(maxfolder, valuex, passFail);
 }
 
 void DataBinner::write_histogram(TFile* outfile, vector<string>& folders) {

@@ -39,6 +39,14 @@ struct PartStats {
 
 enum class PType { Electron, Muon, Tau, Jet, FatJet, None};
 
+unordered_map<PType,std::string> typeStringMap;
+typeStringMap[PType::Electron]= "Electron";
+typeStringMap[PType::Muon]= "Muon";
+typeStringMap[PType::Tau]= "Tau";
+typeStringMap[PType::Jet]= "Jet";
+typeStringMap[PType::FatJet]= "FatJet";
+typeStringMap[PType::None]= "Particle";
+
 class Particle {
 
 public:

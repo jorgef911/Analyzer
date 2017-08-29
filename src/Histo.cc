@@ -313,6 +313,11 @@ void Histogramer::addVal(double valuex, double valuey, string group, int maxcut,
       else break;
     }
   }
-
   data[group]->AddPoint(histn, maxFolder, valuex, valuey, weight);
 }
+
+void Histogramer::addEffiency(string histn ,double value ,bool passFail,int maxFolder=0){
+  
+  data[group]->AddEff(histn, maxFolder, value,passFail);
+}
+
