@@ -21,8 +21,8 @@ GenMatchingDeltaR 0.1
 
 //RECO CUTS///
 
-EtaCut 2.5
-PtCut 20.0 9999.9
+EtaCut 2.1
+PtCut 50.0 9999.9
 
 DoDiscrByLeadTrack false
 LeadTrackThreshold 3.0
@@ -30,7 +30,7 @@ LeadTrackThreshold 3.0
 
 DoDiscrByIsolation false
 DiscrByMinIsolation ZERO
-DiscrByMaxIsolation byTightIsolationMVArun2v1DBnewDMwLT
+DiscrByMaxIsolation byMediumIsolationMVArun2v1DBoldDMwLT
 
 DiscrByProngType true
 ProngType  1or2or3hps
@@ -69,15 +69,15 @@ MetMtCut 0.0    50.0
 
 //----RECO CUTS----////
 
-EtaCut 2.5
-PtCut 20.0 9999.9
+EtaCut 2.1
+PtCut 50.0 9999.9
 
 DoDiscrByLeadTrack 0
 LeadTrackThreshold 5.0
 
 DoDiscrByIsolation false
 DiscrByMinIsolation ZERO
-DiscrByMaxIsolation byTightIsolationMVArun2v1DBnewDMwLT
+DiscrByMaxIsolation byMediumIsolationMVArun2v1DBoldDMwLT
 DiscrByProngType 1or2or3hps
 
 DoDiscrAgainstElectron 0

@@ -7,6 +7,7 @@ DataHistos data_75bins_69200.root
 MCHistos MC_75bins.root
 DataPUHistName pileup
 MCPUHistName pileup
+UsePileUpWeight  true
 
 isData false
 ApplyGenWeight  false
