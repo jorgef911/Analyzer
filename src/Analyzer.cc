@@ -394,18 +394,6 @@ void Analyzer::preprocess(int event) {
   
   for(size_t i=0; i < syst_names.size(); i++) {
     string systname = syst_names.at(i);
-    if(systname.find("Met")!=string::npos){
-      //does not influence the particle selection:
-
-      for(auto e: Enum<CUTS>()) {
-        if(e!=CUTS::eMET){
-          continue;
-        }
-        syst_parts.at(i)[e]=goodParts[e];
-      }
-      continue;
-    }
-
     for( auto part: allParticles) part->setCurrentP(i);
     _MET->setCurrentP(i);
     getGoodParticles(i);
