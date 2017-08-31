@@ -622,12 +622,12 @@ double Analyzer::getTauDataMCScaleFactor(int updown){
   //for(size_t i=0; i<_Tau->size();i++){
   for(auto i : *active_part->at(CUTS::eRTau1)){
     if(matchTauToGen(_Tau->p4(i),0.4)!=TLorentzVector()){
-      /*
+      
       if(updown==-1) sf*=  _Tau->pstats["Smear"].dmap.at("TauSF") * (1.-(0.35*_Tau->pt(i)/1000.0));
       else if(updown==0) sf*=  _Tau->pstats["Smear"].dmap.at("TauSF");
       else if(updown==1) sf*=  _Tau->pstats["Smear"].dmap.at("TauSF") * (1.+(0.05*_Tau->pt(i)/1000.0));
-      */
       
+      /*
       if(updown==-1){
 	sf*=  _Tau->pstats["Smear"].dmap.at("TauSF") * (1.-(0.35*_Tau->pt(i)/1000.0));
 	cout<<setprecision(10)<< "NTau  " << i  << "  Tau PT  " << _Tau->pt(i) << " SF "<< sf << " down "<< updown <<endl;
@@ -638,7 +638,7 @@ double Analyzer::getTauDataMCScaleFactor(int updown){
 	sf*=  _Tau->pstats["Smear"].dmap.at("TauSF") * (1.+(0.05*_Tau->pt(i)/1000.0));
 	cout<<setprecision(10)<< "NTau  " << i  << "  Tau PT  " << _Tau->pt(i) << " SF "<< sf << " up "<< updown <<endl;
       }
-
+      */
     }
   }
   return sf;
@@ -1622,19 +1622,19 @@ void Analyzer::fill_histogram() {
   if(!isData){
     wgt = 1.;
     if(distats["Run"].bfind("UsePileUpWeight")) wgt*= pu_weight;
-    cout << "PU_weight " << wgt << endl;
+    //    cout << "PU_weight " << wgt << endl;
 
     if(distats["Run"].bfind("ApplyGenWeight")) wgt *= (gen_weight > 0) ? 1.0 : -1.0;
-    cout<<"Gen_weight  "<< wgt <<endl;
+    //    cout<<"Gen_weight  "<< wgt <<endl;
     //add weight here
     if(distats["Run"].bfind("ApplyTauIDSF")) wgt *= getTauDataMCScaleFactor(0);
-    cout<<"weight normal "<< wgt/backup_wgt <<endl;
+    //    cout<<"weight normal "<< wgt/backup_wgt <<endl;
 
     if(isVSample && distats["Run"].bfind("ApplyZBoostSF")){
-      cout<<" TAU SF " << active_part->at(CUTS::eGZ)->size() <<endl;
+      //      cout<<" TAU SF " << active_part->at(CUTS::eGZ)->size() <<endl;
       
       if((active_part->at(CUTS::eGElec)->size() + active_part->at(CUTS::eGTau)->size() + active_part->at(CUTS::eGMuon)->size()) >=1 && (active_part->at(CUTS::eGZ)->size() ==1 || active_part->at(CUTS::eGW)->size() ==1)){
-	cout<<" Z or W " <<endl;
+	//	cout<<" Z or W " <<endl;
 	double boostz = 0;
 	if(active_part->at(CUTS::eGZ)->size() ==1){
 	  boostz = _Gen->pt(active_part->at(CUTS::eGZ)->at(0));
