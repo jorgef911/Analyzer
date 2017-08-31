@@ -927,6 +927,12 @@ void Analyzer::setCutNeeds() {
     _Gen->unBranch();
  
   }
+  
+  if(!isData){
+    neededCuts.loadCuts(CUTS::eGen);
+    neededCuts.loadCuts(CUTS::eGZ);
+    neededCuts.loadCuts(CUTS::eGW);
+  }
 
   cout << "Cuts being filled: " << endl;
   for(auto cut : neededCuts.getCuts()) {
@@ -1628,13 +1634,13 @@ void Analyzer::fill_histogram() {
     //    cout<<"Gen_weight  "<< wgt <<endl;
     //add weight here
     if(distats["Run"].bfind("ApplyTauIDSF")) wgt *= getTauDataMCScaleFactor(0);
-    //    cout<<"weight normal "<< wgt/backup_wgt <<endl;
+    cout<<"weight normal "<< wgt/backup_wgt <<endl;
 
-    if(isVSample && distats["Run"].bfind("ApplyZBoostSF")){
-      //      cout<<" TAU SF " << active_part->at(CUTS::eGZ)->size() <<endl;
-      
+    //    if(isVSample && distats["Run"].bfind("ApplyZBoostSF")){
+    if(distats["Run"].bfind("ApplyZBoostSF")){
+      //if(active_part->at(CUTS::eGZ)->size()==0) cout<<" No Z " <<endl;
       if((active_part->at(CUTS::eGElec)->size() + active_part->at(CUTS::eGTau)->size() + active_part->at(CUTS::eGMuon)->size()) >=1 && (active_part->at(CUTS::eGZ)->size() ==1 || active_part->at(CUTS::eGW)->size() ==1)){
-	//	cout<<" Z or W " <<endl;
+	//cout<<" Z or W " <<endl;
 	double boostz = 0;
 	if(active_part->at(CUTS::eGZ)->size() ==1){
 	  boostz = _Gen->pt(active_part->at(CUTS::eGZ)->at(0));
