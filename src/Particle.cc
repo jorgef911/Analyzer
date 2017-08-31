@@ -10,7 +10,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-
 //particle is a objet that stores multiple versions of the particle candidates
 Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string> _syst_names) : BOOM(_BOOM), GenName(_GenName), syst_names(_syst_names) {
   type = PType::None;
@@ -309,6 +308,9 @@ vector<CUTS> Lepton::findExtraCuts() {
   vector<CUTS> return_vec;
   auto& tmpset = pstats["Smear"];
   if(tmpset.bfind("SmearTheParticle") || tmpset.bfind("MatchToGen")) {
+    return_vec.push_back(cutMap.at(type));
+  }
+  if(tmpset.bfind("doEfficiencyPlots")){
     return_vec.push_back(cutMap.at(type));
   }
   return return_vec;

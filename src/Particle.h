@@ -39,13 +39,6 @@ struct PartStats {
 
 enum class PType { Electron, Muon, Tau, Jet, FatJet, None};
 
-unordered_map<PType,std::string> typeStringMap;
-typeStringMap[PType::Electron]= "Electron";
-typeStringMap[PType::Muon]= "Muon";
-typeStringMap[PType::Tau]= "Tau";
-typeStringMap[PType::Jet]= "Jet";
-typeStringMap[PType::FatJet]= "FatJet";
-typeStringMap[PType::None]= "Particle";
 
 class Particle {
 
@@ -85,14 +78,14 @@ public:
   
   PType type;
   unordered_map<string, PartStats> pstats;
+  const map<PType,CUTS> cutMap = {{PType::Electron, CUTS::eGElec}, {PType::Muon, CUTS::eGMuon},
+				  {PType::Tau, CUTS::eGTau}};
 
 
 protected:
   void getPartStats(string);
   TTree* BOOM;
   string GenName;
-  const map<PType,CUTS> cutMap = {{PType::Electron, CUTS::eGElec}, {PType::Muon, CUTS::eGMuon},
-				  {PType::Tau, CUTS::eGTau}};
   unordered_map<CUTS, string, EnumHash> jetNameMap = {
     {CUTS::eRJet1, "Jet1"},               {CUTS::eRJet2, "Jet2"},
     {CUTS::eRCenJet, "CentralJet"},      {CUTS::eRBJet, "BJet"},

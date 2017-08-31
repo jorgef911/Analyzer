@@ -1,4 +1,5 @@
 #include "Analyzer.h"
+#include <regex>
 
 //// Used to convert Enums to integers
 #define ival(x) static_cast<int>(x)
@@ -141,10 +142,13 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
     allParticles= {_Electron,_Muon,_Tau,_Jet,_FatJet};
   }
   
-  
-  particleCutMap[_Tau]      = make_pair({CUTS::eRTau1, CUTS::eRTau2},CUTS::eGTau);
-  particleCutMap[_Muon]     = make_pair({CUTS::eRMuon1, CUTS::eRMuon2},CUTS::eGMuon);
-  particleCutMap[_Electron] = make_pair({CUTS::eRElec1, CUTS::eRElec2},CUTS::eGElec);
+  vector<CUTS> tmp_cut_vec;
+  tmp_cut_vec={CUTS::eRTau1, CUTS::eRTau2};
+  particleCutMap[_Tau]      = make_pair(tmp_cut_vec,CUTS::eGTau);
+  tmp_cut_vec={CUTS::eRMuon1, CUTS::eRMuon2};
+  particleCutMap[_Muon]     = make_pair(tmp_cut_vec,CUTS::eGMuon);
+  tmp_cut_vec={CUTS::eRElec1, CUTS::eRElec2};
+  particleCutMap[_Electron] = make_pair(tmp_cut_vec,CUTS::eGElec);
   //particleCutMap[_Jet]      = {CUTS::eRJet1, CUTS::eRJet2};
 
 
@@ -551,21 +555,28 @@ void Analyzer::fill_efficiency() {
   
   
   for(Particle* part : allParticles){
+    
+    regex genName_regex(".*([A-Z][^[:space:]]+)");
+    smatch mGen;
+    std::string tmps=part->getName();
+    regex_match(tmps, mGen, genName_regex);
     //no efficiency for gen particles
     if(part->getName().find("Gen") != string::npos)
       continue;
     //we don't want to make met efficiency plots
-    if(particleCutMap.find(part) != particleCutMap.end())
+    if(particleCutMap.find(part) == particleCutMap.end())
+      continue;
+    if(part->cutMap.find(part->type) == part->cutMap.end())
       continue;
     for(size_t i=0; i < part->size(); i++){
       //make match to gen
-      if(matchLeptonToGen(part->p4(i), part.pstats.at("Smear") ,particleCutMap.at(part)->second) == TLorentzVector(0,0,0,0)) continue;
+      if(matchLeptonToGen(part->p4(i), part->pstats.at("Smear") ,part->cutMap.at(part->type)) == TLorentzVector(0,0,0,0)) continue;
       //check if the particle is part of the reco 
-      for(vector<CUTS> cut:  particleCutMap.at(part).first{
+      for(CUTS cut:  particleCutMap.at(part).first){
         bool id_particle= (find(active_part->at(cut)->begin(),active_part->at(cut)->end(),i)!=active_part->at(cut)->end());
-        histo.addEffiency("eff_"+typeStringMap.at(part.type)+"Pt",part->pt(i),id_particle);
-        histo.addEffiency("eff_"+typeStringMap.at(part.type)+"Eta",part->eta(i),id_particle);
-        histo.addEffiency("eff_"+typeStringMap.at(part.type)+"phi",part->phi(i),id_particle);
+        histo.addEffiency("eff_"+string(mGen[1])+"Pt",part->pt(i),id_particle,0);
+        histo.addEffiency("eff_"+string(mGen[1])+"Eta",part->eta(i),id_particle,0);
+        histo.addEffiency("eff_"+string(mGen[1])+"Phi",part->phi(i),id_particle,0);
       }
     }
   }

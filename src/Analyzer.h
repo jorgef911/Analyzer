@@ -56,6 +56,7 @@ public:
   void printCuts();
   void writeout();
   int nentries;
+  void fill_efficiency();
   void fill_histogram();
   void setControlRegions() { histo.setControlRegions();}
 

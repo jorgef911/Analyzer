@@ -109,20 +109,6 @@ outname(rhs.outname), NFolders(rhs.NFolders), isData(rhs.isData), fillSingle(rhs
 Histogramer::~Histogramer() {
   if(outfile != nullptr)
     outfile->Close();
-//<<<<<<< HEAD
-
-  //// for(auto it: data_order) {
-  ////   delete data[it];
-  ////   data[it] = nullptr;
-  //// }
-//=======
-  //for(auto it: data) {
-    //if( it.second != nullptr) {
-      //delete it.second;
-      //it.second = nullptr;
-    //}
-  //}
-//>>>>>>> systematics_ElectronAsTau
 }
 
 
@@ -167,6 +153,20 @@ void Histogramer::read_hist(string filename) {
   }
 
   info_file.close();
+  
+  data["Eff"] = new DataBinner();
+  for(string s : *get_groups()){
+    regex reg ("(Tau|Muon|Electron)");
+    smatch m;
+    string stringkey = s.erase(0,4);
+    if(regex_search(stringkey,m,reg)){
+      string name="eff_"+string(m[1]);
+      data["Eff"]->Add_Hist(name+"Pt",  300, 0, 3000, 1);
+      data["Eff"]->Add_Hist(name+"Eta", 100, -5, 5, 1);
+      data["Eff"]->Add_Hist(name+"Phi", 100, -3.14159, 3.14159, 1);
+    }
+  }
+  data_order.push_back("Eff");
 }
 
 
@@ -280,6 +280,7 @@ void Histogramer::fill_histogram() {
   for(auto it: folders) {
     outfile->mkdir( it.c_str() );
   }
+  outfile->mkdir("Eff");
 
   for(auto it: data_order) {
     data[it]->write_histogram(outfile, folders);
@@ -318,6 +319,6 @@ void Histogramer::addVal(double valuex, double valuey, string group, int maxcut,
 
 void Histogramer::addEffiency(string histn ,double value ,bool passFail,int maxFolder=0){
   
-  data[group]->AddEff(histn, maxFolder, value,passFail);
+  data["Eff"]->AddEff(histn, maxFolder, value,passFail);
 }
 

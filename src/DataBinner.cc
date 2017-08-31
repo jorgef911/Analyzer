@@ -53,7 +53,6 @@ Piece1DEff::Piece1DEff(string _name, int _bins, double _begin, double _end, int 
 DataPiece(_name, _Nfold), begin(_begin), end(_end), bins(_bins) {
   for(int i = 0; i < _Nfold; i++) {
     TEfficiency tmp(name.c_str(), name.c_str(), bins, begin, end);
-    tmp.Sumw2();
     histograms.push_back(tmp);
   }
 }
@@ -63,10 +62,11 @@ void Piece1DEff::bin(int folder, double y, bool passFail) {
 }
 
 void Piece1DEff::write_histogram(vector<string>& folders, TFile* outfile) {
-  for(int i =0; i < (int)folders.size(); i++) {
-    outfile->cd(folders.at(i).c_str());
-    histograms.at(i).Write();
-  }
+  if(wroteOutput)
+    return;
+  outfile->cd("Eff");
+  histograms.at(0).Write();
+  wroteOutput=true;
 }
 
 
@@ -120,6 +120,11 @@ void DataBinner::Add_Hist(string shortname, string fullname, int bin, double lef
 
 void DataBinner::Add_Hist(string shortname, string fullname, int binx, double leftx, double rightx, int biny, double lefty, double righty, int Nfolder) {
   datamap[shortname] = new Piece2D(fullname, binx, leftx, rightx, biny, lefty, righty, Nfolder);
+  order.push_back(shortname);
+}
+
+void DataBinner::Add_Hist(string shortname, int bin, double left, double right, int Nfolder) {
+  datamap[shortname] = new Piece1DEff(shortname, bin, left, right, Nfolder);
   order.push_back(shortname);
 }
 
