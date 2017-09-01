@@ -126,7 +126,7 @@ private:
   pair<double, double> getPZeta(const TLorentzVector&, const TLorentzVector&);
   void create_fillInfo();
 
-  double getZBoostWeight(const TLorentzVector&, const TLorentzVector&);
+  double getZBoostWeight();
 
 
   inline bool passCutRange(string, double, const PartStats&);

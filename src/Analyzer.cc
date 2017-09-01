@@ -203,6 +203,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   if(infiles[0].find("DY") != string::npos){
     isVSample = true;
     if(infiles[0].find("DYJetsToLL_M-50_HT-") != string::npos){
+      //gen_selection["DY_noMass_gt_100"]=true;
       gen_selection["DY_noMass_gt_200"]=true;
     //get the DY1Jet DY2Jet ...
     }else if(infiles[0].find("JetsToLL_TuneCUETP8M1_13TeV") != string::npos){
@@ -626,19 +627,6 @@ double Analyzer::getTauDataMCScaleFactor(int updown){
       if(updown==-1) sf*=  _Tau->pstats["Smear"].dmap.at("TauSF") * (1.-(0.35*_Tau->pt(i)/1000.0));
       else if(updown==0) sf*=  _Tau->pstats["Smear"].dmap.at("TauSF");
       else if(updown==1) sf*=  _Tau->pstats["Smear"].dmap.at("TauSF") * (1.+(0.05*_Tau->pt(i)/1000.0));
-      
-      /*
-      if(updown==-1){
-	sf*=  _Tau->pstats["Smear"].dmap.at("TauSF") * (1.-(0.35*_Tau->pt(i)/1000.0));
-	cout<<setprecision(10)<< "NTau  " << i  << "  Tau PT  " << _Tau->pt(i) << " SF "<< sf << " down "<< updown <<endl;
-      }else if(updown==0){ 
-	sf*=  _Tau->pstats["Smear"].dmap.at("TauSF");
-	cout<<setprecision(10)<< "NTau  " << i  << "  Tau PT  " << _Tau->pt(i) << " SF "<< sf << " normal "<< updown <<endl;
-      }else if(updown==1){
-	sf*=  _Tau->pstats["Smear"].dmap.at("TauSF") * (1.+(0.05*_Tau->pt(i)/1000.0));
-	cout<<setprecision(10)<< "NTau  " << i  << "  Tau PT  " << _Tau->pt(i) << " SF "<< sf << " up "<< updown <<endl;
-      }
-      */
     }
   }
   return sf;
@@ -883,6 +871,12 @@ void Analyzer::setCutNeeds() {
     neededCuts.loadCuts(it->info->ePos);
   }
   
+  if(!isData and distats["Run"].bfind("ApplyZBoostSF") and isVSample){
+    neededCuts.loadCuts(CUTS::eGen);
+    neededCuts.loadCuts(CUTS::eGZ);
+    neededCuts.loadCuts(CUTS::eGW);
+  }
+  
   neededCuts.loadCuts(_Jet->findExtraCuts());
   if(doSystematics) {
     neededCuts.loadCuts(CUTS::eGen);
@@ -928,12 +922,6 @@ void Analyzer::setCutNeeds() {
  
   }
   
-  if(!isData){
-    neededCuts.loadCuts(CUTS::eGen);
-    neededCuts.loadCuts(CUTS::eGZ);
-    neededCuts.loadCuts(CUTS::eGW);
-  }
-
   cout << "Cuts being filled: " << endl;
   for(auto cut : neededCuts.getCuts()) {
     cout << enumNames.at(static_cast<CUTS>(cut)) << "   ";
@@ -1102,15 +1090,7 @@ void Analyzer::getGoodGen(const PartStats& stats) {
     if( (id<5 || id==9 ||  id==21) && genMaper.find(id) != genMaper.end() && _Gen->status->at(j) == genMaper.at(5)->status) {
       active_part->at(genMaper.at(5)->ePos)->push_back(j);
     }
-    /*
-    //    if(id == 23 && (_Gen->status->at(j) == 44 || _Gen->status->at(j) == 44)){
-    if(id == 23 && _Gen->status->at(j) == 62){
-      active_part->at(genMaper.at(23)->ePos)->push_back(j);
-    }
-    */
-
   }
-
 }
 
 ////Tau neutrino specific function used for calculating the number of hadronic taus
@@ -1509,7 +1489,7 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
           passCuts = passCuts && passCutRange(diMass, stats.pmap.at("MassCut"));
         }
         else if(cut == "DiscrByCosDphiPtAndMet"){       
-	  double CosDPhi1 = cos(absnormPhi(part1.Phi() - _MET->phi()));       
+          double CosDPhi1 = cos(absnormPhi(part1.Phi() - _MET->phi()));       
           passCuts = passCuts && passCutRange(CosDPhi1, stats.pmap.at("CosDphiPtAndMetCut"));
         }
 
@@ -1518,7 +1498,7 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
       }
 
        if (stats.bfind("DiscrByOSLSType")){
-	 //   if it is 1 or 0 it will end up in the bool map!!
+          //   if it is 1 or 0 it will end up in the bool map!!
          if(stats.bfind("DiscrByOSLSType") && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
        }else if (stats.dmap.find("DiscrByOSLSType") != stats.dmap.end() ){
          if(lep1.charge(i1) * lep2.charge(i2) > 0) continue;
@@ -1618,9 +1598,29 @@ pair<double, double> Analyzer::getPZeta(const TLorentzVector& Tobj1, const TLore
   return make_pair(px*zetaX + py*zetaY, visPx*zetaX + visPy*zetaY);
 }
 
-double Analyzer::getZBoostWeight(const TLorentzVector& Tobj1, const TLorentzVector& Tobj2){  //new7.28.17
-  return (Tobj1 + Tobj2).Pt();  //new7.28.17
-}  //new7.28.17
+double Analyzer::getZBoostWeight(){
+  double boostweigth=1.;
+  if((active_part->at(CUTS::eGElec)->size() + active_part->at(CUTS::eGTau)->size() + active_part->at(CUTS::eGMuon)->size()) >=1 && (active_part->at(CUTS::eGZ)->size() ==1 || active_part->at(CUTS::eGW)->size() ==1)){
+    //cout<<" Z or W " <<endl;
+    double boostz = 0;
+    if(active_part->at(CUTS::eGZ)->size() ==1){
+      boostz = _Gen->pt(active_part->at(CUTS::eGZ)->at(0));
+    }
+    if(active_part->at(CUTS::eGW)->size() ==1){
+      boostz = _Gen->pt(active_part->at(CUTS::eGW)->at(0));
+    }
+    if(boostz > 0 && boostz <= 50) {boostweigth = 1.1192;}
+    else if (boostz > 50 && boostz <= 100) {boostweigth = 1.1034;}
+    else if (boostz > 100 && boostz <= 150) {boostweigth = 1.0675;}
+    else if (boostz > 150 && boostz <= 200) {boostweigth = 1.0637;}
+    else if (boostz > 200 && boostz <= 300) {boostweigth = 1.0242;}
+    else if (boostz > 300 && boostz <= 400) {boostweigth = 0.9453;}
+    else if (boostz > 400 && boostz <= 600) {boostweigth = 0.8579;}
+    else if (boostz >= 600) {boostweigth = 0.7822;}
+    else {boostweigth = 1;}
+  }
+  return boostweigth;
+}
 
 
 ////Grabs a list of the groups of histograms to be filled and asked Fill_folder to fill up the histograms
@@ -1633,39 +1633,13 @@ void Analyzer::fill_histogram() {
   if(!isData){
     wgt = 1.;
     if(distats["Run"].bfind("UsePileUpWeight")) wgt*= pu_weight;
-    //    cout << "PU_weight " << wgt << endl;
-
     if(distats["Run"].bfind("ApplyGenWeight")) wgt *= (gen_weight > 0) ? 1.0 : -1.0;
-    //    cout<<"Gen_weight  "<< wgt <<endl;
     //add weight here
     if(distats["Run"].bfind("ApplyTauIDSF")) wgt *= getTauDataMCScaleFactor(0);
-    //    cout<<"weight normal "<< wgt/backup_wgt <<endl;
 
-    //    if(isVSample && distats["Run"].bfind("ApplyZBoostSF")){
-    if(distats["Run"].bfind("ApplyZBoostSF")){
-      //if(active_part->at(CUTS::eGZ)->size()==0) cout<<" No Z " <<endl;
-      if((active_part->at(CUTS::eGElec)->size() + active_part->at(CUTS::eGTau)->size() + active_part->at(CUTS::eGMuon)->size()) >=1 && (active_part->at(CUTS::eGZ)->size() ==1 || active_part->at(CUTS::eGW)->size() ==1)){
-	//cout<<" Z or W " <<endl;
-	double boostz = 0;
-	if(active_part->at(CUTS::eGZ)->size() ==1){
-	  boostz = _Gen->pt(active_part->at(CUTS::eGZ)->at(0));
-	}
-	if(active_part->at(CUTS::eGW)->size() ==1){
-	  boostz = _Gen->pt(active_part->at(CUTS::eGW)->at(0));
-	}
-	if(boostz > 0 && boostz <= 50) {wgt *= 1.1192;}
-	else if (boostz > 50 && boostz <= 100) {wgt *= 1.1034;}
-	else if (boostz > 100 && boostz <= 150) {wgt *= 1.0675;}
-	else if (boostz > 150 && boostz <= 200) {wgt *= 1.0637;}
-	else if (boostz > 200 && boostz <= 300) {wgt *= 1.0242;}
-	else if (boostz > 300 && boostz <= 400) {wgt *= 0.9453;}
-	else if (boostz > 400 && boostz <= 600) {wgt *= 0.8579;}
-	else if (boostz >= 600) {wgt *= 0.7822;}
-	else {wgt *= 1;}
-      }
+    if(distats["Run"].bfind("ApplyZBoostSF") && isVSample){
+      wgt *= getZBoostWeight();
     }
-
-    backup_wgt=wgt;
   }else  wgt=1.;
   //backup current weight
   backup_wgt=wgt;
