@@ -745,8 +745,8 @@ void Analyzer::setupGeneral() {
   genMaper = {
     {5, new GenFill(2, CUTS::eGJet)},     {6,  new GenFill(2, CUTS::eGTop)},
     {11, new GenFill(1, CUTS::eGElec)},   {13, new GenFill(1, CUTS::eGMuon)},
-    {15, new GenFill(2, CUTS::eGTau)},    {23, new GenFill(2, CUTS::eGZ)},
-    {24, new GenFill(2, CUTS::eGW)},      {25, new GenFill(2, CUTS::eGHiggs)}
+    {15, new GenFill(2, CUTS::eGTau)},    {23, new GenFill(62, CUTS::eGZ)},
+    {24, new GenFill(62, CUTS::eGW)},      {25, new GenFill(2, CUTS::eGHiggs)}
 };
 
   SetBranch("nTruePUInteractions", nTruePU);
@@ -1102,6 +1102,13 @@ void Analyzer::getGoodGen(const PartStats& stats) {
     if( (id<5 || id==9 ||  id==21) && genMaper.find(id) != genMaper.end() && _Gen->status->at(j) == genMaper.at(5)->status) {
       active_part->at(genMaper.at(5)->ePos)->push_back(j);
     }
+    /*
+    //    if(id == 23 && (_Gen->status->at(j) == 44 || _Gen->status->at(j) == 44)){
+    if(id == 23 && _Gen->status->at(j) == 62){
+      active_part->at(genMaper.at(23)->ePos)->push_back(j);
+    }
+    */
+
   }
 
 }
@@ -1468,6 +1475,7 @@ bool Analyzer::passDiParticleApprox(const TLorentzVector& Tobj1, const TLorentzV
 void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS ePos2, CUTS ePosFin, const PartStats& stats, const int syst) {
   if(! neededCuts.isPresent(ePosFin)) return;
   string systname = syst_names.at(syst);
+
   if(!lep1.needSyst(syst) && !lep2.needSyst(syst)) {
     active_part->at(ePosFin)=goodParts[ePosFin];
     return;
@@ -1481,7 +1489,6 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
     for(auto i2 : *active_part->at(ePos2)) {
       if(sameParticle && i2 <= i1) continue;
       part2 = lep2.p4(i2);
-
       bool passCuts = true;
       for(auto cut : stats.bset) {
         if(!passCuts) break;
@@ -1509,23 +1516,21 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
 
         else cout << "cut: " << cut << " not listed" << endl;
       }
-      
 
-      // if (stats.bmap.find("DiscrByOSLSType") != stats.bmap.end() ){
-      //   //if it is 1 or 0 it will end up in the bool map!!
-      //   if(stats.bmap.at("DiscrByOSLSType") && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
-      // }else if (stats.dmap.find("DiscrByOSLSType") != stats.dmap.end() ){
-      //   if(lep1.charge(i1) * lep2.charge(i2) > 0) continue;
-      // }else if (stats.smap.find("DiscrByOSLSType") != stats.smap.end() ){
-      //   if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
-      //   else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge(i1) * lep2.charge(i2) >= 0)) continue;
-      // }
-
+       if (stats.bfind("DiscrByOSLSType")){
+	 //   if it is 1 or 0 it will end up in the bool map!!
+         if(stats.bfind("DiscrByOSLSType") && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
+       }else if (stats.dmap.find("DiscrByOSLSType") != stats.dmap.end() ){
+         if(lep1.charge(i1) * lep2.charge(i2) > 0) continue;
+       }else if (stats.smap.find("DiscrByOSLSType") != stats.smap.end() ){
+         if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
+         else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge(i1) * lep2.charge(i2) >= 0)) continue;
+       }
 
       ///Particlesp that lead to good combo are nGen * part1 + part2
       /// final / nGen = part1 (make sure is integer)
       /// final % nGen = part2
-      active_part->at(ePosFin)->push_back(i1*BIG_NUM + i2);
+      if(passCuts) active_part->at(ePosFin)->push_back(i1*BIG_NUM + i2);
     }
   }
 }
@@ -1634,7 +1639,7 @@ void Analyzer::fill_histogram() {
     //    cout<<"Gen_weight  "<< wgt <<endl;
     //add weight here
     if(distats["Run"].bfind("ApplyTauIDSF")) wgt *= getTauDataMCScaleFactor(0);
-    cout<<"weight normal "<< wgt/backup_wgt <<endl;
+    //    cout<<"weight normal "<< wgt/backup_wgt <<endl;
 
     //    if(isVSample && distats["Run"].bfind("ApplyZBoostSF")){
     if(distats["Run"].bfind("ApplyZBoostSF")){
