@@ -1835,22 +1835,6 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
       }
     }
 
-    /*
-    if((part->type != PType::Jet ) && active_part->at(ePos)->size() > 0) {
-      double leadpt = 0;
-      double leadeta = 0;
-      for(auto it : *active_part->at(ePos)) {
-        if(part->p4(it).Pt() >= leadpt) {
-          leadpt = part->p4(it).Pt();
-          leadeta = part->p4(it).Eta();
-        }
-      }
-
-      histAddVal(leadpt, "FirstLeadingPt");
-      histAddVal(leadeta, "FirstLeadingEta");
-    }
-*/
-
     histAddVal(active_part->at(ePos)->size(), "N");
 
 
