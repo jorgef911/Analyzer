@@ -29,7 +29,7 @@ PtCut 10.0 9999.9
 DoDiscrByTightID 1
 DoDiscrBySoftID 0
 
-DoDiscrByIsolation 0
+DoDiscrByIsolation 1
 IsoSumPtCutValue 0.0 0.15
 
 //----MET TOPOLOGY CUTS----//
@@ -50,14 +50,14 @@ MetMtCut 0. 100.
 
 //----RECO CUTS----//
 
-EtaCut 2.5
+EtaCut 2.1
 PtCut 20.0 9999.9
 
-DoDiscrByTightID 0
+DoDiscrByTightID 1
 DoDiscrBySoftID 0
 
-DoDiscrByIsolation 0
-IsoSumPtCutValue 0.0 0.2
+DoDiscrByIsolation 1
+IsoSumPtCutValue 0.0 0.15
 
 //----MET TOPOLOGY CUTS----//
 
