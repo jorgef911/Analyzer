@@ -1577,21 +1577,22 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
       }
       
 
-      // if (stats.bmap.find("DiscrByOSLSType") != stats.bmap.end() ){
-      //   //if it is 1 or 0 it will end up in the bool map!!
-      //   if(stats.bmap.at("DiscrByOSLSType") && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
-      // }else if (stats.dmap.find("DiscrByOSLSType") != stats.dmap.end() ){
-      //   if(lep1.charge(i1) * lep2.charge(i2) > 0) continue;
-      // }else if (stats.smap.find("DiscrByOSLSType") != stats.smap.end() ){
-      //   if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
-      //   else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge(i1) * lep2.charge(i2) >= 0)) continue;
-      // }
+      if (stats.bfind("DiscrByOSLSType") ){
+       //if it is 1 or 0 it will end up in the bool map!!
+       if(stats.bfind("DiscrByOSLSType") && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
+      }else if (stats.dmap.find("DiscrByOSLSType") != stats.dmap.end() ){
+       if(lep1.charge(i1) * lep2.charge(i2) > 0) continue;
+      }else if (stats.smap.find("DiscrByOSLSType") != stats.smap.end() ){
+       if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
+       else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge(i1) * lep2.charge(i2) >= 0)) continue;
+      }
 
 
       ///Particlesp that lead to good combo are nGen * part1 + part2
       /// final / nGen = part1 (make sure is integer)
       /// final % nGen = part2
-      active_part->at(ePosFin)->push_back(i1*BIG_NUM + i2);
+      if(passCuts)
+        active_part->at(ePosFin)->push_back(i1*BIG_NUM + i2);
     }
   }
 }
