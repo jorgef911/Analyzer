@@ -18,6 +18,7 @@ Particle::Particle(TTree* _BOOM, string _GenName, string filename, vector<string
   regex genName_regex(".*([A-Z][^[:space:]]+)");
   regex syst_regex("([A-Za-z]+).+");
   smatch mGen, mSyst;
+  
   regex_match(GenName, mGen, genName_regex);
 
   for( auto item : syst_names) {

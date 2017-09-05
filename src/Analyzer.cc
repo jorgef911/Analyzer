@@ -211,26 +211,37 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
     setupCR(maper.first, maper.second);
   }
   // check if we need to make gen level cuts to cross clean the samples:
+
+  isVSample = false;
   if(infiles[0].find("DY") != string::npos){
+    isVSample = true;
     if(infiles[0].find("DYJetsToLL_M-50_HT-") != string::npos){
-      gen_selection["DY_noMass_gt_200"]=true;
+      gen_selection["DY_noMass_gt_100"]=true;
+      //gen_selection["DY_noMass_gt_200"]=true;
     //get the DY1Jet DY2Jet ...
     }else if(infiles[0].find("JetsToLL_TuneCUETP8M1_13TeV") != string::npos){
-      gen_selection["DY_noMass_gt_200"]=true;
+      gen_selection["DY_noMass_gt_100"]=true;
     }else{
       //set it to false!!
+      gen_selection["DY_noMass_gt_100"]=false;
       gen_selection["DY_noMass_gt_200"]=false;
     }
+    
     if(infiles[0].find("DYJetsToLL_M-50_TuneCUETP8M1_13TeV") != string::npos){
       gen_selection["DY_noMass_gt_100"]=true;
     }else{
       //set it to false!!
       gen_selection["DY_noMass_gt_100"]=false;
+      gen_selection["DY_noMass_gt_200"]=false;
     }
   }else{
     //set it to false!!
     gen_selection["DY_noMass_gt_200"]=false;
     gen_selection["DY_noMass_gt_100"]=false;
+  }
+
+  if(infiles[0].find("WJets") != string::npos){
+    isVSample = true;
   }
 
   for(auto iselect : gen_selection){
@@ -458,18 +469,6 @@ void Analyzer::preprocess(int event) {
   
   for(size_t i=0; i < syst_names.size(); i++) {
     string systname = syst_names.at(i);
-    if(systname.find("Met")!=string::npos){
-      //does not influence the particle selection:
-
-      for(auto e: Enum<CUTS>()) {
-        if(e!=CUTS::eMET){
-          continue;
-        }
-        syst_parts.at(i)[e]=goodParts[e];
-      }
-      continue;
-    }
-
     for( auto part: allParticles) part->setCurrentP(i);
     _MET->setCurrentP(i);
     getGoodParticles(i);
@@ -725,6 +724,21 @@ bool Analyzer::select_mc_background(){
   return true;
 }
 
+
+double Analyzer::getTauDataMCScaleFactor(int updown){
+  double sf=1.;
+  //for(size_t i=0; i<_Tau->size();i++){
+  for(auto i : *active_part->at(CUTS::eRTau1)){
+    if(matchTauToGen(_Tau->p4(i),0.4)!=TLorentzVector()){
+      
+      if(updown==-1) sf*=  _Tau->pstats["Smear"].dmap.at("TauSF") * (1.-(0.35*_Tau->pt(i)/1000.0));
+      else if(updown==0) sf*=  _Tau->pstats["Smear"].dmap.at("TauSF");
+      else if(updown==1) sf*=  _Tau->pstats["Smear"].dmap.at("TauSF") * (1.+(0.05*_Tau->pt(i)/1000.0));
+    }
+  }
+  return sf;
+}
+
 ///Calculates met from values from each file plus smearing and treating muons as neutrinos
 void Analyzer::updateMet(int syst) {
   _MET->update(distats["Run"], *_Jet,  syst);
@@ -826,8 +840,8 @@ void Analyzer::setupGeneral() {
   genMaper = {
     {5, new GenFill(2, CUTS::eGJet)},     {6,  new GenFill(2, CUTS::eGTop)},
     {11, new GenFill(1, CUTS::eGElec)},   {13, new GenFill(1, CUTS::eGMuon)},
-    {15, new GenFill(2, CUTS::eGTau)},    {23, new GenFill(2, CUTS::eGZ)},
-    {24, new GenFill(2, CUTS::eGW)},      {25, new GenFill(2, CUTS::eGHiggs)}
+    {15, new GenFill(2, CUTS::eGTau)},    {23, new GenFill(62, CUTS::eGZ)},
+    {24, new GenFill(62, CUTS::eGW)},      {25, new GenFill(2, CUTS::eGHiggs)}
 };
 
   SetBranch("nTruePUInteractions", nTruePU);
@@ -965,6 +979,12 @@ void Analyzer::setCutNeeds() {
     neededCuts.loadCuts(it->info->ePos);
   }
   
+  if(!isData and distats["Run"].bfind("ApplyZBoostSF") and isVSample){
+    neededCuts.loadCuts(CUTS::eGen);
+    neededCuts.loadCuts(CUTS::eGZ);
+    neededCuts.loadCuts(CUTS::eGW);
+  }
+  
   neededCuts.loadCuts(_Jet->findExtraCuts());
   if(doSystematics) {
     neededCuts.loadCuts(CUTS::eGen);
@@ -1009,7 +1029,7 @@ void Analyzer::setCutNeeds() {
     _Gen->unBranch();
  
   }
-
+  
   cout << "Cuts being filled: " << endl;
   for(auto cut : neededCuts.getCuts()) {
     cout << enumNames.at(static_cast<CUTS>(cut)) << "   ";
@@ -1179,7 +1199,6 @@ void Analyzer::getGoodGen(const PartStats& stats) {
       active_part->at(genMaper.at(5)->ePos)->push_back(j);
     }
   }
-
 }
 
 ////Tau neutrino specific function used for calculating the number of hadronic taus
@@ -1499,7 +1518,11 @@ double Analyzer::diParticleMass(const TLorentzVector& Tobj1, const TLorentzVecto
   bool ratioNotInRange = false;
   TLorentzVector The_LorentzVect;
 
+  if(howCalc == "InvariantMass") {
+    return (Tobj1 + Tobj2).M();
+  }
 
+  
   //////check this equation/////
   if(howCalc == "CollinearApprox") {
     double denominator = (Tobj1.Px() * Tobj2.Py()) - (Tobj2.Px() * Tobj1.Py());
@@ -1540,6 +1563,7 @@ bool Analyzer::passDiParticleApprox(const TLorentzVector& Tobj1, const TLorentzV
 void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS ePos2, CUTS ePosFin, const PartStats& stats, const int syst) {
   if(! neededCuts.isPresent(ePosFin)) return;
   string systname = syst_names.at(syst);
+
   if(!lep1.needSyst(syst) && !lep2.needSyst(syst)) {
     active_part->at(ePosFin)=goodParts[ePosFin];
     return;
@@ -1553,7 +1577,6 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
     for(auto i2 : *active_part->at(ePos2)) {
       if(sameParticle && i2 <= i1) continue;
       part2 = lep2.p4(i2);
-
       bool passCuts = true;
       for(auto cut : stats.bset) {
         if(!passCuts) break;
@@ -1573,22 +1596,25 @@ void Analyzer::getGoodLeptonCombos(Lepton& lep1, Lepton& lep2, CUTS ePos1, CUTS 
           double diMass = diParticleMass(part1,part2, stats.smap.at("HowCalculateMassReco"));
           passCuts = passCuts && passCutRange(diMass, stats.pmap.at("MassCut"));
         }
+        else if(cut == "DiscrByCosDphiPtAndMet"){       
+          double CosDPhi1 = cos(absnormPhi(part1.Phi() - _MET->phi()));       
+          passCuts = passCuts && passCutRange(CosDPhi1, stats.pmap.at("CosDphiPtAndMetCut"));
+        }
+
+
         else cout << "cut: " << cut << " not listed" << endl;
       }
-      
-
-      if (stats.bfind("DiscrByOSLSType") ){
-       //if it is 1 or 0 it will end up in the bool map!!
-       if(stats.bfind("DiscrByOSLSType") && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
+      if (stats.bfind("DiscrByOSLSType")){
+        //   if it is 1 or 0 it will end up in the bool map!!
+        if(stats.bfind("DiscrByOSLSType") && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
       }else if (stats.dmap.find("DiscrByOSLSType") != stats.dmap.end() ){
-       if(lep1.charge(i1) * lep2.charge(i2) > 0) continue;
+        if(lep1.charge(i1) * lep2.charge(i2) > 0) continue;
       }else if (stats.smap.find("DiscrByOSLSType") != stats.smap.end() ){
-       if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
-       else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge(i1) * lep2.charge(i2) >= 0)) continue;
+        if(stats.smap.at("DiscrByOSLSType") == "LS" && (lep1.charge(i1) * lep2.charge(i2) <= 0)) continue;
+        else if(stats.smap.at("DiscrByOSLSType") == "OS" && (lep1.charge(i1) * lep2.charge(i2) >= 0)) continue;
       }
 
-
-      ///Particlesp that lead to good combo are nGen * part1 + part2
+      ///Particles that lead to good combo are nGen * part1 + part2
       /// final / nGen = part1 (make sure is integer)
       /// final % nGen = part2
       if(passCuts)
@@ -1716,6 +1742,29 @@ pair<double, double> Analyzer::getPZeta(const TLorentzVector& Tobj1, const TLore
   return make_pair(px*zetaX + py*zetaY, visPx*zetaX + visPy*zetaY);
 }
 
+double Analyzer::getZBoostWeight(){
+  double boostweigth=1.;
+  if((active_part->at(CUTS::eGElec)->size() + active_part->at(CUTS::eGTau)->size() + active_part->at(CUTS::eGMuon)->size()) >=1 && (active_part->at(CUTS::eGZ)->size() ==1 || active_part->at(CUTS::eGW)->size() ==1)){
+    //cout<<" Z or W " <<endl;
+    double boostz = 0;
+    if(active_part->at(CUTS::eGZ)->size() ==1){
+      boostz = _Gen->pt(active_part->at(CUTS::eGZ)->at(0));
+    }
+    if(active_part->at(CUTS::eGW)->size() ==1){
+      boostz = _Gen->pt(active_part->at(CUTS::eGW)->at(0));
+    }
+    if(boostz > 0 && boostz <= 50) {boostweigth = 1.1192;}
+    else if (boostz > 50 && boostz <= 100) {boostweigth = 1.1034;}
+    else if (boostz > 100 && boostz <= 150) {boostweigth = 1.0675;}
+    else if (boostz > 150 && boostz <= 200) {boostweigth = 1.0637;}
+    else if (boostz > 200 && boostz <= 300) {boostweigth = 1.0242;}
+    else if (boostz > 300 && boostz <= 400) {boostweigth = 0.9453;}
+    else if (boostz > 400 && boostz <= 600) {boostweigth = 0.8579;}
+    else if (boostz >= 600) {boostweigth = 0.7822;}
+    else {boostweigth = 1;}
+  }
+  return boostweigth;
+}
 
 
 ////Grabs a list of the groups of histograms to be filled and asked Fill_folder to fill up the histograms
@@ -1729,6 +1778,12 @@ void Analyzer::fill_histogram() {
     wgt = 1.;
     if(distats["Run"].bfind("UsePileUpWeight")) wgt*= pu_weight;
     if(distats["Run"].bfind("ApplyGenWeight")) wgt *= (gen_weight > 0) ? 1.0 : -1.0;
+    //add weight here
+    if(distats["Run"].bfind("ApplyTauIDSF")) wgt *= getTauDataMCScaleFactor(0);
+
+    if(distats["Run"].bfind("ApplyZBoostSF") && isVSample){
+      wgt *= getZBoostWeight();
+    }
   }else  wgt=1.;
   //backup current weight
   backup_wgt=wgt;
@@ -1792,14 +1847,12 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
     TLorentzVector genVec;
     int i = 0;
     for(vec_iter it=active_part->at(CUTS::eGTau)->begin(); it!=active_part->at(CUTS::eGTau)->end(); it++, i++) {
-
       int nu = active_part->at(CUTS::eNuTau)->at(i);
       if(nu != -1) {
         genVec = _Gen->p4(*it) - _Gen->p4(nu);
         histAddVal(genVec.Pt(), "HadTauPt");
         histAddVal(genVec.Eta(), "HadTauEta");
         nhadtau++;
-
       }
       histAddVal(_Gen->energy(*it), "TauEnergy");
       histAddVal(_Gen->pt(*it), "TauPt");
@@ -1811,6 +1864,21 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
     }
     histAddVal(active_part->at(CUTS::eGTau)->size(), "NTau");
     histAddVal(nhadtau, "NHadTau");
+
+    for(auto it : *active_part->at(CUTS::eGZ)) {
+      histAddVal(_Gen->pt(it), "ZPt");
+      histAddVal(_Gen->eta(it), "ZEta");
+      histAddVal(_Gen->p4(it).M(), "ZMass");
+    }
+    histAddVal(active_part->at(CUTS::eGZ)->size(), "NZ");
+
+    for(auto it : *active_part->at(CUTS::eGW)) {
+      histAddVal(_Gen->pt(it), "WPt");
+      histAddVal(_Gen->eta(it), "WEta");
+      histAddVal(_Gen->p4(it).M(), "WMass");
+    }
+    histAddVal(active_part->at(CUTS::eGW)->size(), "NW");
+
 
     for(auto it : *active_part->at(CUTS::eGMuon)) {
       histAddVal(_Gen->energy(it), "MuonEnergy");
@@ -1848,6 +1916,11 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
       histAddVal(part->p4(it).Phi(), "Phi");
       histAddVal(part->p4(it).DeltaPhi(_MET->p4()), "MetDphi");
       if(part->type == PType::Tau) {
+        if(_Tau->nProngs->at(it) == 1){
+          histAddVal(part->pt(it), "Pt_1prong");
+        }else if(_Tau->nProngs->at(it) == 3){
+          histAddVal(part->pt(it), "Pt_3prong");
+        }
         histAddVal(_Tau->nProngs->at(it), "NumSignalTracks");
         histAddVal(_Tau->charge(it), "Charge");
         histAddVal(_Tau->leadChargedCandPt->at(it), "SeedTrackPt");
@@ -1863,20 +1936,22 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
         histAddVal(_FatJet->tau2->at(it)/_FatJet->tau1->at(it), "tau2Overtau1");
       }
     }
+
     if((part->type != PType::Jet ) && active_part->at(ePos)->size() > 0) {
-      double leadpt = 0;
-      double leadeta = 0;
+      vector<pair<double, int> > ptIndexVector;
       for(auto it : *active_part->at(ePos)) {
-        if(part->p4(it).Pt() >= leadpt) {
-          leadpt = part->p4(it).Pt();
-          leadeta = part->p4(it).Eta();
-        }
+        ptIndexVector.push_back(make_pair(part->pt(it),it));
       }
-
-      histAddVal(leadpt, "FirstLeadingPt");
-      histAddVal(leadeta, "FirstLeadingEta");
+      sort(ptIndexVector.begin(),ptIndexVector.end());
+      if(ptIndexVector.size()>0){
+        histAddVal(part->pt(ptIndexVector.back().second), "FirstLeadingPt");
+        histAddVal(part->eta(ptIndexVector.back().second), "FirstLeadingEta");
+      }
+      if(ptIndexVector.size()>1){
+        histAddVal(part->pt(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingPt");
+        histAddVal(part->eta(ptIndexVector.at(ptIndexVector.size()-2).second), "SecondLeadingEta");
+      }
     }
-
 
     histAddVal(active_part->at(ePos)->size(), "N");
 
@@ -1928,7 +2003,6 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
     histAddVal2(fabs(first.Eta()-second.Eta()), dphiDijets, "DeltaEtaVsDeltaPhiLeadSubl");
 
     histAddVal(absnormPhi(_MET->phi() - LeadDiJet.Phi()), "MetDeltaPhi");
-
 
 
     histAddVal(sqrt( pow(dphi1,2.0) + pow((TMath::Pi() - dphi2),2.0) ), "R1");
@@ -2126,6 +2200,11 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
         histAddVal(part2.Pt() - part1.Pt(), "DeltaPt");
       }
       histAddVal(cos(absnormPhi(part2.Phi() - part1.Phi())), "CosDphi");
+
+      histAddVal(cos(absnormPhi(part1.Phi() - _MET->phi())), "Part1CosDphiPtandMet");
+      histAddVal(cos(absnormPhi(part2.Phi() - _MET->phi())), "Part2CosDphiPtandMet");
+
+
       histAddVal(absnormPhi(part1.Phi() - _MET->phi()), "Part1MetDeltaPhi");
       histAddVal2(absnormPhi(part1.Phi() - _MET->phi()), cos(absnormPhi(part2.Phi() - part1.Phi())), "Part1MetDeltaPhiVsCosDphi");
       histAddVal(absnormPhi(part2.Phi() - _MET->phi()), "Part2MetDeltaPhi");
@@ -2137,6 +2216,13 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
       } else {
         histAddVal(diMass, "NotReconstructableMass");
       }
+
+      double InvMass = diParticleMass(part1,part2, "InvariantMass");
+      histAddVal(InvMass, "InvariantMass");
+
+      double ptSum = part1.Pt() + part2.Pt();
+      histAddVal(ptSum, "SumOfPt");
+
       double PZeta = getPZeta(part1,part2).first;
       double PZetaVis = getPZeta(part1,part2).second;
       histAddVal(calculateLeptonMetMt(part1), "Part1MetMt");

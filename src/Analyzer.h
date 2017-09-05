@@ -69,6 +69,7 @@ public:
   }
   double getZeta(const TLorentzVector& Tobj1, const TLorentzVector& Tobj2, string partName) {
     return distats[partName].dmap.at("PZetaCutCoefficient") * getPZeta(Tobj1, Tobj2).first;
+
   }
 
 
@@ -122,9 +123,13 @@ private:
   bool isInTheCracks(float);
   bool passedLooseJetID(int);
   bool select_mc_background();
+  double getTauDataMCScaleFactor(int updown);
 
   pair<double, double> getPZeta(const TLorentzVector&, const TLorentzVector&);
   void create_fillInfo();
+
+  double getZBoostWeight();
+
 
   inline bool passCutRange(string, double, const PartStats&);
   bool passCutRange(double, const pair<double, double>&);
@@ -167,7 +172,10 @@ private:
   unordered_map<CUTS, vector<int>*, EnumHash> goodParts;
   vector<unordered_map<CUTS, vector<int>*, EnumHash>> syst_parts;
   unordered_map<CUTS, bool, EnumHash> need_cut;
+
   unordered_map<string,bool> gen_selection;
+  bool isVSample;
+
   vector<Particle*> allParticles;
   vector<string> syst_names;
   unordered_map<Particle*,  pair<vector<CUTS>,CUTS>  >  particleCutMap;
