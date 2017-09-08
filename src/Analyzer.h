@@ -83,6 +83,9 @@ private:
   void getInputs();
   void setupJob(string);
   void initializePileupInfo(string, string, string, string);
+  void initializeMCSelection(vector<string> infiles);
+  void initializeWkfactor();
+  
   void read_info(string);
   void setupGeneral();
   void initializeTrigger();
@@ -125,12 +128,11 @@ private:
   bool passedLooseJetID(int);
   bool select_mc_background();
   double getTauDataMCScaleFactor(int updown);
+  double getWkfactor();
+  double getZBoostWeight();
 
   pair<double, double> getPZeta(const TLorentzVector&, const TLorentzVector&);
   void create_fillInfo();
-
-  double getZBoostWeight();
-
 
   inline bool passCutRange(string, double, const PartStats&);
   bool passCutRange(double, const pair<double, double>&);
@@ -175,6 +177,11 @@ private:
   unordered_map<CUTS, bool, EnumHash> need_cut;
 
   unordered_map<string,bool> gen_selection;
+  
+  TH1D* k_ele_h;
+  TH1D* k_mu_h;
+  TH1D* k_tau_h;
+  
   bool isVSample;
 
   vector<Particle*> allParticles;

@@ -194,10 +194,8 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
     syst_histo=Histogramer(1, filespace+"Hist_syst_entries.in", filespace+"Cuts.in", outfile, isData, cr_variables,syst_names);
   systematics = Systematics(distats);
   jetScaleRes = JetScaleResolution("Pileup/Summer16_23Sep2016V4_MC_Uncertainty_AK4PFchs.txt", "",  "Pileup/Spring16_25nsV6_MC_PtResolution_AK4PFchs.txt", "Pileup/Spring16_25nsV6_MC_SF_AK4PFchs.txt");
-
-
-
-
+  
+  
 
   ///this can be done nicer
   //put the variables that you use here:
@@ -222,7 +220,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   zBoostTree["jet_mass"]=0;
   
 
-  histo.createTree(&zBoostTree,"zboost");
+  histo.createTree(&zBoostTree,"TauTauTree");
 
 
   if(setCR) {
@@ -238,46 +236,16 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
 
     setupCR(maper.first, maper.second);
   }
-  // check if we need to make gen level cuts to cross clean the samples:
 
-  isVSample = false;
-  if(infiles[0].find("DY") != string::npos){
-    isVSample = true;
-    if(infiles[0].find("DYJetsToLL_M-50_HT-") != string::npos){
-      gen_selection["DY_noMass_gt_100"]=true;
-      //gen_selection["DY_noMass_gt_200"]=true;
-    //get the DY1Jet DY2Jet ...
-    }else if(infiles[0].find("JetsToLL_TuneCUETP8M1_13TeV") != string::npos){
-      gen_selection["DY_noMass_gt_100"]=true;
-    }else{
-      //set it to false!!
-      gen_selection["DY_noMass_gt_100"]=false;
-      gen_selection["DY_noMass_gt_200"]=false;
-    }
-    
-    if(infiles[0].find("DYJetsToLL_M-50_TuneCUETP8M1_13TeV") != string::npos){
-      gen_selection["DY_noMass_gt_100"]=true;
-    }else{
-      //set it to false!!
-      gen_selection["DY_noMass_gt_100"]=false;
-      gen_selection["DY_noMass_gt_200"]=false;
-    }
-  }else{
-    //set it to false!!
-    gen_selection["DY_noMass_gt_200"]=false;
-    gen_selection["DY_noMass_gt_100"]=false;
-  }
-
-  if(infiles[0].find("WJets") != string::npos){
-    isVSample = true;
-  }
 
   for(auto iselect : gen_selection){
     if(iselect.second){
       cout<<"Waning: The selection "<< iselect.first<< " is active!"<<endl;
     }
   }
-
+  
+  initializeMCSelection(infiles);
+  initializeWkfactor();
   setCutNeeds();
 
   std::cout << "setup complete" << std::endl << endl;
@@ -930,6 +898,42 @@ void Analyzer::initializeTrigger() {
     }
   }
   BAAM->SetBranchStatus("triggernames", 0);
+}
+
+void Analyzer::initializeMCSelection(vector<string> infiles) {
+    // check if we need to make gen level cuts to cross clean the samples:
+
+  isVSample = false;
+  if(infiles[0].find("DY") != string::npos){
+    isVSample = true;
+    if(infiles[0].find("DYJetsToLL_M-50_HT-") != string::npos){
+      gen_selection["DY_noMass_gt_100"]=true;
+      //gen_selection["DY_noMass_gt_200"]=true;
+    //get the DY1Jet DY2Jet ...
+    }else if(infiles[0].find("JetsToLL_TuneCUETP8M1_13TeV") != string::npos){
+      gen_selection["DY_noMass_gt_100"]=true;
+    }else{
+      //set it to false!!
+      gen_selection["DY_noMass_gt_100"]=false;
+      gen_selection["DY_noMass_gt_200"]=false;
+    }
+    
+    if(infiles[0].find("DYJetsToLL_M-50_TuneCUETP8M1_13TeV") != string::npos){
+      gen_selection["DY_noMass_gt_100"]=true;
+    }else{
+      //set it to false!!
+      gen_selection["DY_noMass_gt_100"]=false;
+      gen_selection["DY_noMass_gt_200"]=false;
+    }
+  }else{
+    //set it to false!!
+    gen_selection["DY_noMass_gt_200"]=false;
+    gen_selection["DY_noMass_gt_100"]=false;
+  }
+
+  if(infiles[0].find("WJets") != string::npos){
+    isVSample = true;
+  }
 }
 
 
@@ -1795,6 +1799,23 @@ double Analyzer::getZBoostWeight(){
 }
 
 
+double Analyzer::getWkfactor(){
+  double kfactor=1.;
+  if((active_part->at(CUTS::eGElec)->size() + active_part->at(CUTS::eGTau)->size() + active_part->at(CUTS::eGMuon)->size()) >=1 && (active_part->at(CUTS::eGW)->size() ==1)){
+    if(active_part->at(CUTS::eGElec)->size()){
+      kfactor=k_ele_h->GetBinContent(k_ele_h->FindBin(_Gen->p4(active_part->at(CUTS::eGW)->at(0)).M()));
+    }
+    if(active_part->at(CUTS::eGMuon)->size()){
+      kfactor=k_mu_h->GetBinContent(k_mu_h->FindBin(_Gen->p4(active_part->at(CUTS::eGW)->at(0)).M()));
+    }
+    if(active_part->at(CUTS::eGTau)->size()){
+      kfactor=k_tau_h->GetBinContent(k_tau_h->FindBin(_Gen->p4(active_part->at(CUTS::eGW)->at(0)).M()));
+    }
+  }
+  return kfactor;
+}
+
+
 ////Grabs a list of the groups of histograms to be filled and asked Fill_folder to fill up the histograms
 void Analyzer::fill_histogram() {
   if(distats["Run"].bfind("ApplyGenWeight") && gen_weight == 0.0) return;
@@ -2396,10 +2417,10 @@ void Analyzer::fill_Tree(){
     zBoostTree["jet2_eta"]  = _Jet->eta(j2);
     zBoostTree["jet2_phi"]  = _Jet->phi(j2);
     zBoostTree["jet_mass"]  = mass;
-    zBoostTree["weight"]  = wgt;
+    zBoostTree["weight"]    = wgt;
     
     //put it accidentally in the tree
-    histo.fillTree("zboost");
+    histo.fillTree("TauTauTree");
   }
 }
 
@@ -2424,6 +2445,22 @@ void Analyzer::initializePileupInfo(string MCHisto, string DataHisto, string Dat
 
   file1->Close();
   file2->Close();
+
+}
+
+void Analyzer::initializeWkfactor() {
+  //W-jet k-factor Histograms:
+  TFile k_ele("Pileup/k_faktors_ele.root");
+  TFile k_mu("Pileup/k_faktors_mu.root");
+  TFile k_tau("Pileup/k_faktors_tau.root");
+  
+  k_ele_h =dynamic_cast<TH1D*>(k_ele.FindObjectAny("k_fac_m"));
+  k_mu_h  =dynamic_cast<TH1D*>(k_mu.FindObjectAny("k_fac_m"));
+  k_tau_h =dynamic_cast<TH1D*>(k_tau.FindObjectAny("k_fac_m"));
+  
+  k_ele.Close();
+  k_mu.Close();
+  k_tau.Close();
 
 }
 
