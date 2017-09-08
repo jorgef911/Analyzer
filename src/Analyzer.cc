@@ -129,11 +129,11 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   }
 
   _Electron = new Electron(BOOM, filespace + "Electron_info.in", syst_names);
-  _Muon = new Muon(BOOM, filespace + "Muon_info.in", syst_names);
-  _Tau = new Taus(BOOM, filespace + "Tau_info.in", syst_names);
-  _Jet = new Jet(BOOM, filespace + "Jet_info.in", syst_names);
-  _FatJet = new FatJet(BOOM, filespace + "FatJet_info.in", syst_names);
-  _MET  = new Met(BOOM, "Met_type1PF" , syst_names);
+  _Muon     = new Muon(BOOM, filespace + "Muon_info.in", syst_names);
+  _Tau      = new Taus(BOOM, filespace + "Tau_info.in", syst_names);
+  _Jet      = new Jet(BOOM, filespace + "Jet_info.in", syst_names);
+  _FatJet   = new FatJet(BOOM, filespace + "FatJet_info.in", syst_names);
+  _MET      = new Met(BOOM, "Met_type1PF" , syst_names, distats["Run"].dmap.at("MT2Mass"));
 
   if(!isData) {
     _Gen = new Generated(BOOM, filespace + "Gen_info.in", syst_names);
@@ -195,6 +195,34 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   systematics = Systematics(distats);
   jetScaleRes = JetScaleResolution("Pileup/Summer16_23Sep2016V4_MC_Uncertainty_AK4PFchs.txt", "",  "Pileup/Spring16_25nsV6_MC_PtResolution_AK4PFchs.txt", "Pileup/Spring16_25nsV6_MC_SF_AK4PFchs.txt");
 
+
+
+
+
+  ///this can be done nicer
+  //put the variables that you use here:
+  zBoostTree["tau1_pt"] =0;
+  zBoostTree["tau1_eta"]=0;
+  zBoostTree["tau1_phi"]=0;
+  zBoostTree["tau2_pt"] =0;
+  zBoostTree["tau2_eta"]=0;
+  zBoostTree["tau2_phi"]=0;
+  zBoostTree["met"]     =0;
+  zBoostTree["mt_tau1"] =0;
+  zBoostTree["mt_tau2"] =0;
+  zBoostTree["mt2"]     =0;
+  zBoostTree["cosDphi1"]=0;
+  zBoostTree["cosDphi2"]=0;
+  zBoostTree["jet1_pt"] =0;
+  zBoostTree["jet1_eta"]=0;
+  zBoostTree["jet1_phi"]=0;
+  zBoostTree["jet2_pt"] =0;
+  zBoostTree["jet2_eta"]=0;
+  zBoostTree["jet2_phi"]=0;
+  zBoostTree["jet_mass"]=0;
+  
+
+  histo.createTree(&zBoostTree,"zboost");
 
 
   if(setCR) {
@@ -1799,6 +1827,9 @@ void Analyzer::fill_histogram() {
       for(auto it: *groups) {
         fill_Folder(it, maxCut, histo, false);
       }
+      if(!fillCuts(false)) {
+        fill_Tree();
+      }
     }else{
       //get the non particle conditions:
       for(auto itCut : nonParticleCuts){
@@ -2319,6 +2350,58 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
   }
 }
 
+void Analyzer::fill_Tree(){
+  
+  if(1){
+    //do our dirty tree stuff here:
+    int p1=-1;
+    int p2=-1;
+    if(active_part->at(CUTS::eDiTau)->size()==1){
+      p1= active_part->at(CUTS::eDiTau)->at(0) / BIG_NUM;
+      p2= active_part->at(CUTS::eDiTau)->at(0) % BIG_NUM;
+    } else{
+      return;
+    }
+    int j1=-1;
+    int j2=-1;
+    double mass=0;
+    for(auto it : *active_part->at(CUTS::eDiJet)) {
+      int j1tmp= (it) / _Jet->size();
+      int j2tmp= (it) % _Jet->size();
+      if(diParticleMass(_Jet->p4(j1tmp),_Jet->p4(j2tmp),"")>mass){
+        j1=j1tmp;
+        j2=j2tmp;
+        mass=diParticleMass(_Jet->p4(j1tmp),_Jet->p4(j2tmp),"");
+      }
+    }
+    if(p1<0 or p2<0 or j1<0 or j2 <0)
+      return;
+    zBoostTree["tau1_pt"]   = _Tau->pt(p1);
+    zBoostTree["tau1_eta"]  = _Tau->eta(p1);
+    zBoostTree["tau1_phi"]  = _Tau->phi(p1);
+    zBoostTree["tau2_pt"]   = _Tau->pt(p2);
+    zBoostTree["tau2_eta"]  = _Tau->eta(p2);
+    zBoostTree["tau2_phi"]  = _Tau->phi(p2);
+    zBoostTree["tau_mass"]  = diParticleMass(_Tau->p4(p1),_Tau->p4(p2),"");
+    zBoostTree["met"]       = _MET->pt();
+    zBoostTree["mt_tau1"]   = calculateLeptonMetMt(_Tau->p4(p1));
+    zBoostTree["mt_tau2"]   = calculateLeptonMetMt(_Tau->p4(p2));
+    zBoostTree["mt2"]       = _MET->MT2(_Tau->p4(p1),_Tau->p4(p2));
+    zBoostTree["cosDphi1"]  = absnormPhi(_Tau->phi(p1) - _MET->phi());
+    zBoostTree["cosDphi2"]  = absnormPhi(_Tau->phi(p2) - _MET->phi());
+    zBoostTree["jet1_pt"]   = _Jet->pt(j1);
+    zBoostTree["jet1_eta"]  = _Jet->eta(j1);
+    zBoostTree["jet1_phi"]  = _Jet->phi(j1);
+    zBoostTree["jet2_pt"]   = _Jet->pt(j2);
+    zBoostTree["jet2_eta"]  = _Jet->eta(j2);
+    zBoostTree["jet2_phi"]  = _Jet->phi(j2);
+    zBoostTree["jet_mass"]  = mass;
+    zBoostTree["weight"]  = wgt;
+    
+    //put it accidentally in the tree
+    histo.fillTree("zboost");
+  }
+}
 
 void Analyzer::initializePileupInfo(string MCHisto, string DataHisto, string DataHistoName, string MCHistoName) {
 
@@ -2357,4 +2440,3 @@ double normPhi(double phi) {
 double absnormPhi(double phi) {
   return abs(normPhi(phi));
 }
-

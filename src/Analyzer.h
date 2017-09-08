@@ -58,6 +58,7 @@ public:
   int nentries;
   void fill_efficiency();
   void fill_histogram();
+  void fill_Tree();
   void setControlRegions() { histo.setControlRegions();}
 
   vector<int>* getList(CUTS ePos) {return goodParts[ePos];}
@@ -188,6 +189,8 @@ private:
   bool setTrigger = false;
   vector<string>* trigName[nTrigReq];
   vector<int> cuts_per, cuts_cumul;
+  
+  unordered_map< string,float > zBoostTree;
 
   double maxIso, minIso;
   int leadIndex, maxCut, crbins=1;
@@ -222,4 +225,3 @@ private:
 
 
 #endif
-
