@@ -61,6 +61,7 @@ LIBS=
 
 SRCDIR = src
 BTAGDIR = $(SRCDIR)/btagging
+MT2DIR = $(SRCDIR)/mt2
 OBJDIR = obj
 EXE = Analyzer
 
@@ -71,12 +72,15 @@ OBJECTS = $(SOURCES:$(SRCDIR)/%.cc=$(OBJDIR)/%.o)
 BTAGSRC = $(wildcard $(BTAGDIR)/*.cpp)
 BTAGOBJ = $(BTAGSRC:$(BTAGDIR)/%.cpp=$(OBJDIR)/%.o)
 
+MT2SRC = $(wildcard $(MT2DIR)/*.cc)
+MT2OBJ = $(MT2SRC:$(MT2DIR)/%.cc=$(OBJDIR)/%.o)
+
 #------------------------------------------------------------------------------
 
 all: $(EXE)
 
 
-$(EXE): $(OBJECTS) $(BTAGOBJ)
+$(EXE): $(OBJECTS) $(BTAGOBJ) $(MT2OBJ)
 	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 
@@ -90,6 +94,9 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cc $(SRCDIR)/%.h
 	$(LD) -o $@ $(LDFLAGS) $<  $(LIBS)
 
 $(OBJDIR)/%.o: $(BTAGDIR)/%.cpp $(BTAGDIR)/%.h
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+	
+$(OBJDIR)/%.o: $(MT2DIR)/%.cc $(MT2DIR)/%.hh
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean :
