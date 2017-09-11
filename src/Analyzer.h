@@ -84,7 +84,7 @@ private:
   void setupJob(string);
   void initializePileupInfo(string, string, string, string);
   void initializeMCSelection(vector<string> infiles);
-  void initializeWkfactor();
+  void initializeWkfactor(vector<string> infiles);
   
   void read_info(string);
   void setupGeneral();
@@ -183,6 +183,8 @@ private:
   TH1D* k_tau_h;
   
   bool isVSample;
+  bool isWSample;
+  
 
   vector<Particle*> allParticles;
   vector<string> syst_names;

@@ -245,7 +245,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   }
   
   initializeMCSelection(infiles);
-  initializeWkfactor();
+  initializeWkfactor(infiles);
   setCutNeeds();
 
   std::cout << "setup complete" << std::endl << endl;
@@ -1801,6 +1801,8 @@ double Analyzer::getZBoostWeight(){
 
 double Analyzer::getWkfactor(){
   double kfactor=1.;
+  if(!isWSample)
+    return kfactor;
   if((active_part->at(CUTS::eGElec)->size() + active_part->at(CUTS::eGTau)->size() + active_part->at(CUTS::eGMuon)->size()) >=1 && (active_part->at(CUTS::eGW)->size() ==1)){
     if(active_part->at(CUTS::eGElec)->size()){
       kfactor=k_ele_h->GetBinContent(k_ele_h->FindBin(_Gen->p4(active_part->at(CUTS::eGW)->at(0)).M()));
@@ -2448,7 +2450,13 @@ void Analyzer::initializePileupInfo(string MCHisto, string DataHisto, string Dat
 
 }
 
-void Analyzer::initializeWkfactor() {
+void Analyzer::initializeWkfactor(vector<string> infiles) {
+  if(infiles[0].find("WJets") != string::npos){
+    isWSample = true;
+  }else{
+    isWSample=false;
+    return;
+  }
   //W-jet k-factor Histograms:
   TFile k_ele("Pileup/k_faktors_ele.root");
   TFile k_mu("Pileup/k_faktors_mu.root");
