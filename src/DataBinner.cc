@@ -62,8 +62,9 @@ void Piece1DEff::bin(int folder, double y, bool passFail) {
 }
 
 void Piece1DEff::write_histogram(vector<string>& folders, TFile* outfile) {
-  if(wroteOutput)
-    return;
+  //if(wroteOutput)
+    //return;
+  outfile->cd();
   outfile->cd("Eff");
   histograms.at(0).Write();
   wroteOutput=true;

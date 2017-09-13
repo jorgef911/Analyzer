@@ -188,7 +188,7 @@ private:
 
   vector<Particle*> allParticles;
   vector<string> syst_names;
-  unordered_map<Particle*,  pair<vector<CUTS>,CUTS>  >  particleCutMap;
+  map<CUTS, Particle* >  particleCutMap;
   DepGraph neededCuts;
 
   static const unordered_map<string, CUTS> cut_num;

@@ -142,19 +142,10 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
     allParticles= {_Electron,_Muon,_Tau,_Jet,_FatJet};
   }
   
-  vector<CUTS> tmp_cut_vec;
-  tmp_cut_vec={CUTS::eRTau1, CUTS::eRTau2};
-  particleCutMap[_Tau]      = make_pair(tmp_cut_vec,CUTS::eGTau);
-  tmp_cut_vec={CUTS::eRMuon1, CUTS::eRMuon2};
-  particleCutMap[_Muon]     = make_pair(tmp_cut_vec,CUTS::eGMuon);
-  tmp_cut_vec={CUTS::eRElec1, CUTS::eRElec2};
-  particleCutMap[_Electron] = make_pair(tmp_cut_vec,CUTS::eGElec);
-  //particleCutMap[_Jet]      = {CUTS::eRJet1, CUTS::eRJet2};
+  particleCutMap[CUTS::eGElec]=_Electron;
+  particleCutMap[CUTS::eGMuon]=_Muon;
+  particleCutMap[CUTS::eGTau]=_Tau;
 
-
-  // for(Particle* ipart: allParticles){
-  //   ipart->findExtraCuts();
-  // }
 
   vector<string> cr_variables;
   if(setCR) {
@@ -547,34 +538,71 @@ void Analyzer::getGoodParticles(int syst){
 
 void Analyzer::fill_efficiency() {
   //cut efficiency
-  
-  
-  for(Particle* part : allParticles){
+  const vector<CUTS> goodGenLep={CUTS::eGElec,CUTS::eGMuon,CUTS::eGTau};
+  //just the lepton 1 for now
+  const vector<CUTS> goodRecoLep={CUTS::eRElec1,CUTS::eRMuon1,CUTS::eRTau1};
     
+    
+    
+  for(size_t igen=0;igen<goodGenLep.size();igen++){
+    Particle* part =particleCutMap.at(goodGenLep[igen]);
+    CUTS cut=goodRecoLep[igen];
     regex genName_regex(".*([A-Z][^[:space:]]+)");
     smatch mGen;
     std::string tmps=part->getName();
     regex_match(tmps, mGen, genName_regex);
-    //no efficiency for gen particles
-    if(part->getName().find("Gen") != string::npos)
-      continue;
-    //we don't want to make met efficiency plots
-    if(particleCutMap.find(part) == particleCutMap.end())
-      continue;
-    if(part->cutMap.find(part->type) == part->cutMap.end())
-      continue;
-    for(size_t i=0; i < part->size(); i++){
-      //make match to gen
-      if(matchLeptonToGen(part->p4(i), part->pstats.at("Smear") ,part->cutMap.at(part->type)) == TLorentzVector(0,0,0,0)) continue;
-      //check if the particle is part of the reco 
-      for(CUTS cut:  particleCutMap.at(part).first){
-        bool id_particle= (find(active_part->at(cut)->begin(),active_part->at(cut)->end(),i)!=active_part->at(cut)->end());
-        histo.addEffiency("eff_"+string(mGen[1])+"Pt",part->pt(i),id_particle,0);
-        histo.addEffiency("eff_"+string(mGen[1])+"Eta",part->eta(i),id_particle,0);
-        histo.addEffiency("eff_"+string(mGen[1])+"Phi",part->phi(i),id_particle,0);
+    //loop over all gen leptons
+    for(int iigen : *active_part->at(goodGenLep[igen])){
+      
+      
+      int foundReco=-1;
+      for(size_t ireco=0; ireco<part->size(); ireco++){
+        if(part->p4(ireco).DeltaR(_Gen->p4(iigen))<0.3){
+          foundReco=ireco;
+        }
+      }
+      histo.addEffiency("eff_Reco_"+string(mGen[1])+"Pt", _Gen->pt(iigen), foundReco>=0,0);
+      histo.addEffiency("eff_Reco_"+string(mGen[1])+"Eta",_Gen->eta(iigen),foundReco>=0,0);
+      histo.addEffiency("eff_Reco_"+string(mGen[1])+"Phi",_Gen->phi(iigen),foundReco>=0,0);
+      if(foundReco>=0){
+        bool id_particle= (find(active_part->at(cut)->begin(),active_part->at(cut)->end(),foundReco)!=active_part->at(cut)->end());
+        histo.addEffiency("eff_"+string(mGen[1])+"Pt", _Gen->pt(iigen), id_particle,0);
+        histo.addEffiency("eff_"+string(mGen[1])+"Eta",_Gen->eta(iigen),id_particle,0);
+        histo.addEffiency("eff_"+string(mGen[1])+"Phi",_Gen->phi(iigen),id_particle,0);
       }
     }
   }
+  
+  //for(Particle* part : allParticles){
+    
+    
+    
+    
+    
+    //regex genName_regex(".*([A-Z][^[:space:]]+)");
+    //smatch mGen;
+    //std::string tmps=part->getName();
+    //regex_match(tmps, mGen, genName_regex);
+    ////no efficiency for gen particles
+    //if(part->getName().find("Gen") != string::npos)
+      //continue;
+    ////we don't want to make met efficiency plots
+    //if(particleCutMap.find(part) == particleCutMap.end())
+      //continue;
+    //if(part->cutMap.find(part->type) == part->cutMap.end())
+      //continue;
+    //for(size_t i=0; i < part->size(); i++){
+      ////make match to gen
+      //if(matchLeptonToGen(part->p4(i), part->pstats.at("Smear") ,part->cutMap.at(part->type)) == TLorentzVector(0,0,0,0)) continue;
+      ////check if the particle is part of the reco 
+      //for(CUTS cut:  particleCutMap.at(part).first){
+        //bool id_particle= (find(active_part->at(cut)->begin(),active_part->at(cut)->end(),i)!=active_part->at(cut)->end());
+        //histo.addEffiency("eff_"+string(mGen[1])+"Pt",part->pt(i),id_particle,0);
+        //histo.addEffiency("eff_"+string(mGen[1])+"Eta",part->eta(i),id_particle,0);
+        //histo.addEffiency("eff_"+string(mGen[1])+"Phi",part->phi(i),id_particle,0);
+      //}
+    //}
+  //}
 }
 
 
@@ -1804,14 +1832,18 @@ double Analyzer::getWkfactor(){
   if(!isWSample)
     return kfactor;
   if((active_part->at(CUTS::eGElec)->size() + active_part->at(CUTS::eGTau)->size() + active_part->at(CUTS::eGMuon)->size()) >=1 && (active_part->at(CUTS::eGW)->size() ==1)){
-    if(active_part->at(CUTS::eGElec)->size()){
-      kfactor=k_ele_h->GetBinContent(k_ele_h->FindBin(_Gen->p4(active_part->at(CUTS::eGW)->at(0)).M()));
-    }
-    if(active_part->at(CUTS::eGMuon)->size()){
-      kfactor=k_mu_h->GetBinContent(k_mu_h->FindBin(_Gen->p4(active_part->at(CUTS::eGW)->at(0)).M()));
+    double wmass=_Gen->p4(active_part->at(CUTS::eGW)->at(0)).M();
+    if(wmass<100){
+      return 1.;
     }
     if(active_part->at(CUTS::eGTau)->size()){
-      kfactor=k_tau_h->GetBinContent(k_tau_h->FindBin(_Gen->p4(active_part->at(CUTS::eGW)->at(0)).M()));
+      kfactor=k_ele_h->GetBinContent(k_ele_h->FindBin(wmass));
+    }
+    else if(active_part->at(CUTS::eGMuon)->size()){
+      kfactor=k_mu_h->GetBinContent(k_mu_h->FindBin(wmass));
+    }
+    else if(active_part->at(CUTS::eGElec)->size()){
+      kfactor=k_tau_h->GetBinContent(k_tau_h->FindBin(wmass));
     }
   }
   return kfactor;
@@ -1835,6 +1867,7 @@ void Analyzer::fill_histogram() {
     if(distats["Run"].bfind("ApplyZBoostSF") && isVSample){
       wgt *= getZBoostWeight();
     }
+    wgt*=getWkfactor();
   }else  wgt=1.;
   //backup current weight
   backup_wgt=wgt;
