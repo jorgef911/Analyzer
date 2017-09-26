@@ -395,7 +395,10 @@ void Analyzer::clear_values() {
       it[e]->clear();
     }
   }
-
+  if(infoFile!=BOOM->GetFile()){
+    cout<<"New file!"<<endl;
+    infoFile=BOOM->GetFile();
+  }
   if(version==1 && infoFile!=BOOM->GetFile()){
     cout<<"New file! Will get the trigger info."<<endl;
     infoFile=BOOM->GetFile();
