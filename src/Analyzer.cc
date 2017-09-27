@@ -77,7 +77,7 @@ const unordered_map<string, CUTS> Analyzer::cut_num = {
 //////////////////////////////////////////////////////
 
 ///Constructor
-Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string configFolder) : goodParts(getArray()) {
+Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string configFolder) : goodParts(getArray()), genName_regex(".*([A-Z][^[:space:]]+)") {
   cout << "setup start" << endl;
 
   BOOM= new TChain("TNT/BOOM");
@@ -550,7 +550,6 @@ void Analyzer::fill_efficiency() {
   for(size_t igen=0;igen<goodGenLep.size();igen++){
     Particle* part =particleCutMap.at(goodGenLep[igen]);
     CUTS cut=goodRecoLep[igen];
-    regex genName_regex(".*([A-Z][^[:space:]]+)");
     smatch mGen;
     std::string tmps=part->getName();
     regex_match(tmps, mGen, genName_regex);
@@ -1870,7 +1869,8 @@ void Analyzer::fill_histogram() {
     if(distats["Run"].bfind("ApplyZBoostSF") && isVSample){
       wgt *= getZBoostWeight();
     }
-    wgt*=getWkfactor();
+    //if(distats["Run"].bfind("ApplyPhiCorrectionRECO"))
+    wgt *= getWkfactor();
   }else  wgt=1.;
   //backup current weight
   backup_wgt=wgt;
