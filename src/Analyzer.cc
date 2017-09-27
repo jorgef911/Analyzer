@@ -74,7 +74,7 @@ const unordered_map<string, CUTS> Analyzer::cut_num = {
 //////////////////////////////////////////////////////
 
 ///Constructor
-Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string configFolder) : goodParts(getArray()) {
+Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string configFolder) : goodParts(getArray()), genName_regex(".*([A-Z][^[:space:]]+)") {
   cout << "setup start" << endl;
 
   BOOM= new TChain("TNT/BOOM");
@@ -473,7 +473,6 @@ void Analyzer::getGoodParticles(int syst){
   getGoodDiJets(distats["DiJet"],syst);
 
 }
-
 
 ////Reads cuts from Cuts.in file and see if the event has enough particles
 bool Analyzer::fillCuts(bool fillCounter) {

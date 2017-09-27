@@ -172,6 +172,8 @@ private:
   unordered_map<CUTS, bool, EnumHash> need_cut;
 
   unordered_map<string,bool> gen_selection;
+  regex genName_regex;
+  
   bool isVSample;
 
   vector<Particle*> allParticles;
