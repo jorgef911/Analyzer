@@ -190,26 +190,31 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
 
   ///this can be done nicer
   //put the variables that you use here:
-  zBoostTree["tau1_pt"] =0;
-  zBoostTree["tau1_eta"]=0;
-  zBoostTree["tau1_phi"]=0;
-  zBoostTree["tau2_pt"] =0;
-  zBoostTree["tau2_eta"]=0;
-  zBoostTree["tau2_phi"]=0;
-  zBoostTree["met"]     =0;
-  zBoostTree["mt_tau1"] =0;
-  zBoostTree["mt_tau2"] =0;
-  zBoostTree["mt2"]     =0;
-  zBoostTree["cosDphi1"]=0;
-  zBoostTree["cosDphi2"]=0;
-  zBoostTree["jet1_pt"] =0;
-  zBoostTree["jet1_eta"]=0;
-  zBoostTree["jet1_phi"]=0;
-  zBoostTree["jet2_pt"] =0;
-  zBoostTree["jet2_eta"]=0;
-  zBoostTree["jet2_phi"]=0;
-  zBoostTree["jet_mass"]=0;
-  
+  zBoostTree["tau1_pt"]    =0;
+  zBoostTree["tau1_eta"]   =0;
+  zBoostTree["tau1_phi"]   =0;
+  zBoostTree["tau1_charge"]=0;
+  zBoostTree["tau2_pt"]    =0;
+  zBoostTree["tau2_eta"]   =0;
+  zBoostTree["tau2_phi"]   =0;
+  zBoostTree["tau2_charge"]=0;
+  zBoostTree["tau_mass"]   =0;
+  zBoostTree["met"]        =0;
+  zBoostTree["mt_tau1"]    =0;
+  zBoostTree["mt_tau2"]    =0;
+  zBoostTree["mt2"]        =0;
+  zBoostTree["cosDphi1"]   =0;
+  zBoostTree["cosDphi2"]   =0;
+  zBoostTree["jet1_pt"]    =0;
+  zBoostTree["jet1_eta"]   =0;
+  zBoostTree["jet1_phi"]   =0;
+  zBoostTree["jet2_pt"]    =0;
+  zBoostTree["jet2_eta"]   =0;
+  zBoostTree["jet2_phi"]   =0;
+  zBoostTree["jet_mass"]   =0;
+  zBoostTree["weight"]     =0;
+  zBoostTree["pu_weight"]  =0;
+  zBoostTree["gen_weight"] =0;
 
   histo.createTree(&zBoostTree,"TauTauTree");
 
@@ -1869,8 +1874,9 @@ void Analyzer::fill_histogram() {
     if(distats["Run"].bfind("ApplyZBoostSF") && isVSample){
       wgt *= getZBoostWeight();
     }
-    //if(distats["Run"].bfind("ApplyPhiCorrectionRECO"))
-    wgt *= getWkfactor();
+    if(distats["Run"].bfind("ApplyWKfactor")){
+      wgt *= getWkfactor();
+    }
   }else  wgt=1.;
   //backup current weight
   backup_wgt=wgt;
@@ -1981,16 +1987,20 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
     double mass=0;
     TLorentzVector lep1;
     TLorentzVector lep2;
-    for(size_t i=0; i<_Gen->size(); i++){
+    for(size_t igen=0; igen<_Gen->size(); igen++){
       //if a Z boson is explicitly there
-      if(abs(_Gen->pdg_id->at(i))==11 or abs(_Gen->pdg_id->at(i))==13 or abs(_Gen->pdg_id->at(i))==15){
+      if(abs(_Gen->pdg_id->at(igen))==11 or abs(_Gen->pdg_id->at(igen))==13 or abs(_Gen->pdg_id->at(igen))==15){
         if(lep1!=TLorentzVector(0,0,0,0)){
-          lep2= _Gen->p4(i);
+          lep2= _Gen->p4(igen);
           mass=(lep1+lep2).M();
           //cout<<"mass  leptons "<<mass<<endl;
           break;
         }else{
-          lep1= _Gen->p4(i);
+          //cout<<_Gen->size()<<"   "<<igen<<endl;
+          //if(_Gen->size()>_Gen->cur_P.size()){
+           //_Gen->init();
+          //}
+          lep1= _Gen->RecoP4(igen);
         }
       }
     }
@@ -2433,14 +2443,16 @@ void Analyzer::fill_Tree(){
         mass=diParticleMass(_Jet->p4(j1tmp),_Jet->p4(j2tmp),"");
       }
     }
-    if(p1<0 or p2<0 or j1<0 or j2 <0)
+    if(p1<0 or p2<0)
       return;
     zBoostTree["tau1_pt"]   = _Tau->pt(p1);
     zBoostTree["tau1_eta"]  = _Tau->eta(p1);
     zBoostTree["tau1_phi"]  = _Tau->phi(p1);
+    zBoostTree["tau1_charge"]  = _Tau->charge(p1);
     zBoostTree["tau2_pt"]   = _Tau->pt(p2);
     zBoostTree["tau2_eta"]  = _Tau->eta(p2);
     zBoostTree["tau2_phi"]  = _Tau->phi(p2);
+    zBoostTree["tau2_charge"]  = _Tau->charge(p2);
     zBoostTree["tau_mass"]  = diParticleMass(_Tau->p4(p1),_Tau->p4(p2),"");
     zBoostTree["met"]       = _MET->pt();
     zBoostTree["mt_tau1"]   = calculateLeptonMetMt(_Tau->p4(p1));
@@ -2448,14 +2460,30 @@ void Analyzer::fill_Tree(){
     zBoostTree["mt2"]       = _MET->MT2(_Tau->p4(p1),_Tau->p4(p2));
     zBoostTree["cosDphi1"]  = absnormPhi(_Tau->phi(p1) - _MET->phi());
     zBoostTree["cosDphi2"]  = absnormPhi(_Tau->phi(p2) - _MET->phi());
-    zBoostTree["jet1_pt"]   = _Jet->pt(j1);
-    zBoostTree["jet1_eta"]  = _Jet->eta(j1);
-    zBoostTree["jet1_phi"]  = _Jet->phi(j1);
-    zBoostTree["jet2_pt"]   = _Jet->pt(j2);
-    zBoostTree["jet2_eta"]  = _Jet->eta(j2);
-    zBoostTree["jet2_phi"]  = _Jet->phi(j2);
+    if(j1>=0){
+      zBoostTree["jet1_pt"]   = _Jet->pt(j1);
+      zBoostTree["jet1_eta"]  = _Jet->eta(j1);
+      zBoostTree["jet1_phi"]  = _Jet->phi(j1);
+    }else{
+      zBoostTree["jet1_pt"]   = 0;
+      zBoostTree["jet1_eta"]  = 10;
+      zBoostTree["jet1_phi"]  = 10;
+    }
+    if(j2>=0){
+      zBoostTree["jet2_pt"]   = _Jet->pt(j2);
+      zBoostTree["jet2_eta"]  = _Jet->eta(j2);
+      zBoostTree["jet2_phi"]  = _Jet->phi(j2);
+    }else{           
+      zBoostTree["jet2_pt"]   = 0;
+      zBoostTree["jet2_eta"]  = 10;
+      zBoostTree["jet2_phi"]  = 10;
+    }
     zBoostTree["jet_mass"]  = mass;
     zBoostTree["weight"]    = wgt;
+    if(!isData){
+      zBoostTree["pu_weight"]    = pu_weight;
+      zBoostTree["gen_weight"]    = (gen_weight > 0) ? 1.0 : -1.0;
+    }
     
     //put it accidentally in the tree
     histo.fillTree("TauTauTree");
@@ -2471,13 +2499,16 @@ void Analyzer::initializePileupInfo(string MCHisto, string DataHisto, string Dat
   TFile* file2 = new TFile((PUSPACE+DataHisto).c_str());
   TH1D* histdata = (TH1D*)file2->FindObjectAny(DataHistoName.c_str());
   if(!histdata) throw std::runtime_error("failed to extract histogram");
+  
+  histmc->Scale(1./histmc->Integral());
+  histdata->Scale(1./histdata->Integral());
 
-  double factor = histmc->Integral() / histdata->Integral();
+  //double factor = histmc->Integral() / histdata->Integral();
   double value;
   for(int bin=0; bin < 100; bin++) {
     if(histmc->GetBinContent(bin) == 0) value = 1;
-
-    else value = factor*histdata->GetBinContent(bin) / histmc->GetBinContent(bin);
+    //else value = factor*histdata->GetBinContent(bin) / histmc->GetBinContent(bin);
+    else value = histdata->GetBinContent(bin) / histmc->GetBinContent(bin);
     hPU[bin] = value;
   }
 

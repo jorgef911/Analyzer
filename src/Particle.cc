@@ -56,7 +56,7 @@ double Particle::phi(uint index)const        {return cur_P->at(index).Phi();}
 double Particle::energy(uint index)const     {return cur_P->at(index).E();}
 double Particle::charge(uint index)const     {return 0;}
 
-uint Particle::size()const                   {return Reco.size();}
+uint Particle::size()const                   {return cur_P->size();}
 vector<TLorentzVector>::iterator Particle::begin(){ return cur_P->begin();}
 vector<TLorentzVector>::iterator Particle::end(){ return cur_P->end();}
 vector<TLorentzVector>::const_iterator Particle::begin()const { return cur_P->begin();}
