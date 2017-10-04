@@ -13,11 +13,6 @@ CMSSW_LIB_PATHS += -L$(CMSSW_RELEASE_BASE)/lib/$(SCRAM_ARCH)
 CMSSW_LIB_PATHS += -L$(CMSSW_RELEASE_BASE_NOPATCH)/lib/$(SCRAM_ARCH)
 CMSSW_LIB_PATHS += -L$(CMSSW_BOOST_BASE)/lib
 
-
-#CMSSW_LIBS += -lCondFormatsJetMETObjects
-#CMSSW_LIBS += -lJetMETCorrectionsModules
-#CMSSW_LIBS += -lPhysicsToolsUtilities
-
 # For the headers there are symlinks.
 CMSSW_INC_PATHS := -isystem$(CMSSW_BASE)/src
 CMSSW_INC_PATHS += -isystem$(CMSSW_RELEASE_BASE)/src
