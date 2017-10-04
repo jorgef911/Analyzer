@@ -78,6 +78,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   cout << "setup start" << endl;
 
   BOOM= new TChain("TNT/BOOM");
+  infoFile=0;
 
   for( string infile: infiles){
     BOOM->AddFile(infile.c_str());
@@ -324,6 +325,42 @@ void Analyzer::setupCR(string var, double val) {
 
 ////destructor
 Analyzer::~Analyzer() {
+  clear_values();
+  delete BOOM;
+  delete _Electron;
+  delete _Muon;
+  delete _Tau;
+  delete _Jet;
+  if(!isData) delete _Gen;
+
+  for(auto pair: fillInfo) {
+    delete pair.second;
+    pair.second=nullptr;
+  }
+
+  for(auto e: Enum<CUTS>()) {
+    delete goodParts[e];
+    goodParts[e]=nullptr;
+  }
+  //for(auto &it: syst_parts) {
+    //for(auto e: Enum<CUTS>()) {
+      //if( it[e] != nullptr) {
+      //if(it.find(e) != it.end()){
+        //delete it[e];
+        //it[e]=nullptr;
+      //}
+      //}
+    //}
+  //}
+  for(auto it: testVec){
+    delete it;
+    it=nullptr;
+  }
+
+  for(int i=0; i < nTrigReq; i++) {
+    delete trigPlace[i];
+    delete trigName[i];
+  }
 
 }
 
@@ -341,7 +378,10 @@ void Analyzer::clear_values() {
       it[e]->clear();
     }
   }
-
+  if(infoFile!=BOOM->GetFile()){
+    cout<<"New file!"<<endl;
+    infoFile=BOOM->GetFile();
+  }
   if(version==1 && infoFile!=BOOM->GetFile()){
     cout<<"New file! Will get the trigger info."<<endl;
     infoFile=BOOM->GetFile();
@@ -582,6 +622,9 @@ void Analyzer::printCuts() {
 
 bool Analyzer::select_mc_background(){
   //will return true if Z* mass is smaller than 200GeV
+  if(_Gen == nullptr){
+    return true;
+  }
   if(gen_selection["DY_noMass_gt_200"]){
     TLorentzVector lep1;
     TLorentzVector lep2;
@@ -1235,17 +1278,16 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats, const int syst
   //clean up for first and second jet
   //note the leading jet has to be selected fist!
   if(ePos == CUTS::eR1stJet || ePos == CUTS::eR2ndJet) {
-    int potential = -1;
-    double prevPt = -1;
-    for(auto leadit : *active_part->at(ePos)) {
-      if(((ePos == CUTS::eR2ndJet && (leadit) != leadIndex) || ePos == CUTS::eR1stJet) && _Jet->pt(leadit) > prevPt) {
-        potential = leadit;
-        prevPt = _Jet->pt(leadit);
-      }
+    
+    vector<pair<double, int> > ptIndexVector;
+    for(auto it : *active_part->at(ePos)) {
+      ptIndexVector.push_back(make_pair(_Jet->pt(it),it));
     }
-    active_part->at(ePos)->clear();
-    active_part->at(ePos)->push_back(potential);
-    if(ePos == CUTS::eR1stJet) leadIndex = active_part->at(CUTS::eR1stJet)->at(0);
+    sort(ptIndexVector.begin(),ptIndexVector.end());
+    if(ePos == CUTS::eR1stJet && ptIndexVector.size()>0)
+      active_part->at(ePos)->push_back(ptIndexVector.back().second);
+    if(ePos == CUTS::eR2ndJet && ptIndexVector.size()>1)
+      active_part->at(ePos)->push_back(ptIndexVector.at(ptIndexVector.size()-2).second);
   }
 
 }
@@ -1355,7 +1397,7 @@ void Analyzer::VBFTopologyCut(const PartStats& stats, const int syst) {
     }
   }
 
-  if(active_part->at(CUTS::eR1stJet)->at(0) == -1 || active_part->at(CUTS::eR2ndJet)->at(0) == -1) return;
+  if(active_part->at(CUTS::eR1stJet)->size()==0 || active_part->at(CUTS::eR2ndJet)->size()==0) return;
 
   TLorentzVector ljet1 = _Jet->p4(active_part->at(CUTS::eR1stJet)->at(0));
   TLorentzVector ljet2 = _Jet->p4(active_part->at(CUTS::eR2ndJet)->at(0));
@@ -1377,8 +1419,8 @@ void Analyzer::VBFTopologyCut(const PartStats& stats, const int syst) {
       double alpha = (dijet.M() > 0) ? ljet2.Pt() / dijet.M() : -1;
       passCuts = passCuts && passCutRange(alpha, stats.pmap.at("AlphaCut"));
     }
-    else if(cut == "DiscrByDphi1") passCuts = passCuts && passCutRange(abs(dphi1), stats.pmap.at("DPhi1Cut"));
-    else if(cut == "DiscrByDphi2") passCuts = passCuts && passCutRange(abs(dphi2), stats.pmap.at("DPhi2Cut"));
+    else if(cut == "DiscrByDphi1") passCuts = passCuts && passCutRange(abs(dphi1), stats.pmap.at("Dphi1Cut"));
+    else if(cut == "DiscrByDphi2") passCuts = passCuts && passCutRange(abs(dphi2), stats.pmap.at("Dphi2Cut"));
 
     else cout << "cut: " << cut << " not listed" << endl;
   }
@@ -1755,7 +1797,11 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
           //cout<<"mass  leptons "<<mass<<endl;
           break;
         }else{
-          lep1= _Gen->p4(i);
+          //cout<<_Gen->size()<<"   "<<igen<<endl;
+          //if(_Gen->size()>_Gen->cur_P.size()){
+           //_Gen->init();
+          //}
+          lep1= _Gen->RecoP4(i);
         }
       }
     }
@@ -1819,12 +1865,12 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
     histAddVal(_MET->phi(), "MetPhi");
 
   } else if(group == "FillLeadingJet" && active_part->at(CUTS::eSusyCom)->size() == 0) {
-
-    if(active_part->at(CUTS::eR1stJet)->at(0) != -1) {
+    
+    if(active_part->at(CUTS::eR1stJet)->size()>0) {
       histAddVal(_Jet->p4(active_part->at(CUTS::eR1stJet)->at(0)).Pt(), "FirstPt");
       histAddVal(_Jet->p4(active_part->at(CUTS::eR1stJet)->at(0)).Eta(), "FirstEta");
     }
-    if(active_part->at(CUTS::eR2ndJet)->at(0) != -1) {
+    if(active_part->at(CUTS::eR2ndJet)->size()>0) {
       histAddVal(_Jet->p4(active_part->at(CUTS::eR2ndJet)->at(0)).Pt(), "SecondPt");
       histAddVal(_Jet->p4(active_part->at(CUTS::eR2ndJet)->at(0)).Eta(), "SecondEta");
     }
