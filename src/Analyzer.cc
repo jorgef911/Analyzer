@@ -136,9 +136,11 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   _MET      = new Met(BOOM, "Met_type1PF" , syst_names, distats["Run"].dmap.at("MT2Mass"));
 
   if(!isData) {
+    cout<<"This is MC if not, change the flag!"<<endl;
     _Gen = new Generated(BOOM, filespace + "Gen_info.in", syst_names);
     allParticles= {_Gen,_Electron,_Muon,_Tau,_Jet,_FatJet};
   } else {
+    cout<<"This is Data if not, change the flag!"<<endl;
     allParticles= {_Electron,_Muon,_Tau,_Jet,_FatJet};
   }
   
@@ -199,9 +201,21 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   zBoostTree["tau2_phi"]   =0;
   zBoostTree["tau2_charge"]=0;
   zBoostTree["tau_mass"]   =0;
+  zBoostTree["muo1_pt"]       =0;
+  zBoostTree["muo1_eta"]      =0;
+  zBoostTree["muo1_phi"]      =0;
+  zBoostTree["muo1_charge"]   =0;
+  zBoostTree["ele1_pt"]       =0;
+  zBoostTree["ele1_eta"]      =0;
+  zBoostTree["ele1_phi"]      =0;
+  zBoostTree["ele1_charge"]   =0;
+  zBoostTree["b_jet_n"]    =0;
+  zBoostTree["b_jet_pt"]   =0;
   zBoostTree["met"]        =0;
   zBoostTree["mt_tau1"]    =0;
   zBoostTree["mt_tau2"]    =0;
+  zBoostTree["mt_muo1"]    =0;
+  zBoostTree["mt_ele1"]    =0;
   zBoostTree["mt2"]        =0;
   zBoostTree["cosDphi1"]   =0;
   zBoostTree["cosDphi2"]   =0;
@@ -2429,7 +2443,9 @@ void Analyzer::fill_Tree(){
     if(active_part->at(CUTS::eDiTau)->size()==1){
       p1= active_part->at(CUTS::eDiTau)->at(0) / BIG_NUM;
       p2= active_part->at(CUTS::eDiTau)->at(0) % BIG_NUM;
-    } else{
+    } else if(active_part->at(CUTS::eRTau1)->size()==1) {
+      p1= active_part->at(CUTS::eRTau1)->at(0);
+    }else{
       return;
     }
     int j1=-1;
@@ -2444,23 +2460,66 @@ void Analyzer::fill_Tree(){
         mass=diParticleMass(_Jet->p4(j1tmp),_Jet->p4(j2tmp),"");
       }
     }
-    if(p1<0 or p2<0)
+    if(p1<0)
       return;
     zBoostTree["tau1_pt"]   = _Tau->pt(p1);
     zBoostTree["tau1_eta"]  = _Tau->eta(p1);
     zBoostTree["tau1_phi"]  = _Tau->phi(p1);
     zBoostTree["tau1_charge"]  = _Tau->charge(p1);
-    zBoostTree["tau2_pt"]   = _Tau->pt(p2);
-    zBoostTree["tau2_eta"]  = _Tau->eta(p2);
-    zBoostTree["tau2_phi"]  = _Tau->phi(p2);
-    zBoostTree["tau2_charge"]  = _Tau->charge(p2);
-    zBoostTree["tau_mass"]  = diParticleMass(_Tau->p4(p1),_Tau->p4(p2),"");
     zBoostTree["met"]       = _MET->pt();
-    zBoostTree["mt_tau1"]   = calculateLeptonMetMt(_Tau->p4(p1));
-    zBoostTree["mt_tau2"]   = calculateLeptonMetMt(_Tau->p4(p2));
-    zBoostTree["mt2"]       = _MET->MT2(_Tau->p4(p1),_Tau->p4(p2));
     zBoostTree["cosDphi1"]  = absnormPhi(_Tau->phi(p1) - _MET->phi());
-    zBoostTree["cosDphi2"]  = absnormPhi(_Tau->phi(p2) - _MET->phi());
+    zBoostTree["mt_tau1"]   = calculateLeptonMetMt(_Tau->p4(p1));
+    
+    if(p2>=0){
+      zBoostTree["tau2_pt"]   = _Tau->pt(p2);
+      zBoostTree["tau2_eta"]  = _Tau->eta(p2);
+      zBoostTree["tau2_phi"]  = _Tau->phi(p2);
+      zBoostTree["tau2_charge"]  = _Tau->charge(p2);
+      zBoostTree["tau_mass"]  = diParticleMass(_Tau->p4(p1),_Tau->p4(p2),"");
+      zBoostTree["mt_tau2"]   = calculateLeptonMetMt(_Tau->p4(p2));
+      zBoostTree["mt2"]       = _MET->MT2(_Tau->p4(p1),_Tau->p4(p2));
+      zBoostTree["cosDphi2"]  = absnormPhi(_Tau->phi(p2) - _MET->phi());
+    }else{
+      zBoostTree["tau2_pt"]      = 0;
+      zBoostTree["tau2_eta"]     = 0;
+      zBoostTree["tau2_phi"]     = 0;
+      zBoostTree["tau2_charge"]  = 0;
+      zBoostTree["tau_mass"]     = 0;
+      zBoostTree["mt_tau2"]      = 0;
+      zBoostTree["mt2"]          = 0;
+      zBoostTree["cosDphi2"]     = 0;
+    }
+    
+    if(active_part->at(CUTS::eRMuon1)->size()>0){
+      int imuo=active_part->at(CUTS::eRMuon1)->at(0);
+      zBoostTree["muo1_pt"]       = _Muon->pt(imuo);
+      zBoostTree["muo1_eta"]      = _Muon->eta(imuo);
+      zBoostTree["muo1_phi"]      = _Muon->phi(imuo);
+      zBoostTree["muo1_charge"]   = _Muon->charge(imuo);
+      zBoostTree["mt_muo1"]       = calculateLeptonMetMt(_Muon->p4(imuo));
+      
+    }else{
+      zBoostTree["muo1_pt"]       = 0;
+      zBoostTree["muo1_eta"]      = 0;
+      zBoostTree["muo1_phi"]      = 0;
+      zBoostTree["muo1_charge"]   = 0;
+      zBoostTree["mt_muo1"]       = 0;
+    }
+    if(active_part->at(CUTS::eRElec1)->size()>0){
+      int iele=active_part->at(CUTS::eRElec1)->at(0);
+      zBoostTree["ele1_pt"]       = _Electron->pt(iele);
+      zBoostTree["ele1_eta"]      = _Electron->eta(iele);
+      zBoostTree["ele1_phi"]      = _Electron->phi(iele);
+      zBoostTree["ele1_charge"]   = _Electron->charge(iele);
+      zBoostTree["mt_ele1"]       = calculateLeptonMetMt(_Electron->p4(iele));
+    }else{
+      zBoostTree["ele1_pt"]       = 0;
+      zBoostTree["ele1_eta"]      = 0;
+      zBoostTree["ele1_phi"]      = 0;
+      zBoostTree["ele1_charge"]   = 0;
+      zBoostTree["mt_ele1"]       = 0;
+    }
+    
     if(j1>=0){
       zBoostTree["jet1_pt"]   = _Jet->pt(j1);
       zBoostTree["jet1_eta"]  = _Jet->eta(j1);
@@ -2479,6 +2538,15 @@ void Analyzer::fill_Tree(){
       zBoostTree["jet2_eta"]  = 10;
       zBoostTree["jet2_phi"]  = 10;
     }
+    
+    zBoostTree["b_jet_n"] = active_part->at(CUTS::eRBJet)->size();
+    if(active_part->at(CUTS::eRBJet)->size()>0){
+      int ibjet=active_part->at(CUTS::eRBJet)->at(0);
+      zBoostTree["b_jet_pt"]   = _Jet->pt(ibjet);
+    }else{
+      zBoostTree["b_jet_pt"]   = 0;
+    }
+    
     zBoostTree["jet_mass"]  = mass;
     zBoostTree["weight"]    = wgt;
     if(!isData){
