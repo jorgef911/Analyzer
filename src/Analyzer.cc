@@ -2460,7 +2460,7 @@ void Analyzer::fill_Tree(){
         mass=diParticleMass(_Jet->p4(j1tmp),_Jet->p4(j2tmp),"");
       }
     }
-    if(p1<0)
+    if(p1<0 or p2<0)
       return;
     zBoostTree["tau1_pt"]   = _Tau->pt(p1);
     zBoostTree["tau1_eta"]  = _Tau->eta(p1);
@@ -2470,25 +2470,25 @@ void Analyzer::fill_Tree(){
     zBoostTree["cosDphi1"]  = absnormPhi(_Tau->phi(p1) - _MET->phi());
     zBoostTree["mt_tau1"]   = calculateLeptonMetMt(_Tau->p4(p1));
     
-    if(p2>=0){
-      zBoostTree["tau2_pt"]   = _Tau->pt(p2);
-      zBoostTree["tau2_eta"]  = _Tau->eta(p2);
-      zBoostTree["tau2_phi"]  = _Tau->phi(p2);
-      zBoostTree["tau2_charge"]  = _Tau->charge(p2);
-      zBoostTree["tau_mass"]  = diParticleMass(_Tau->p4(p1),_Tau->p4(p2),"");
-      zBoostTree["mt_tau2"]   = calculateLeptonMetMt(_Tau->p4(p2));
-      zBoostTree["mt2"]       = _MET->MT2(_Tau->p4(p1),_Tau->p4(p2));
-      zBoostTree["cosDphi2"]  = absnormPhi(_Tau->phi(p2) - _MET->phi());
-    }else{
-      zBoostTree["tau2_pt"]      = 0;
-      zBoostTree["tau2_eta"]     = 0;
-      zBoostTree["tau2_phi"]     = 0;
-      zBoostTree["tau2_charge"]  = 0;
-      zBoostTree["tau_mass"]     = 0;
-      zBoostTree["mt_tau2"]      = 0;
-      zBoostTree["mt2"]          = 0;
-      zBoostTree["cosDphi2"]     = 0;
-    }
+    //if(p2>=0){
+    zBoostTree["tau2_pt"]   = _Tau->pt(p2);
+    zBoostTree["tau2_eta"]  = _Tau->eta(p2);
+    zBoostTree["tau2_phi"]  = _Tau->phi(p2);
+    zBoostTree["tau2_charge"]  = _Tau->charge(p2);
+    zBoostTree["tau_mass"]  = diParticleMass(_Tau->p4(p1),_Tau->p4(p2),"");
+    zBoostTree["mt_tau2"]   = calculateLeptonMetMt(_Tau->p4(p2));
+    zBoostTree["mt2"]       = _MET->MT2(_Tau->p4(p1),_Tau->p4(p2));
+    zBoostTree["cosDphi2"]  = absnormPhi(_Tau->phi(p2) - _MET->phi());
+    //}else{
+      //zBoostTree["tau2_pt"]      = 0;
+      //zBoostTree["tau2_eta"]     = 0;
+      //zBoostTree["tau2_phi"]     = 0;
+      //zBoostTree["tau2_charge"]  = 0;
+      //zBoostTree["tau_mass"]     = 0;
+      //zBoostTree["mt_tau2"]      = 0;
+      //zBoostTree["mt2"]          = 0;
+      //zBoostTree["cosDphi2"]     = 0;
+    //}
     
     if(active_part->at(CUTS::eRMuon1)->size()>0){
       int imuo=active_part->at(CUTS::eRMuon1)->at(0);
