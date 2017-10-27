@@ -469,10 +469,13 @@ vector<CUTS> Taus::findExtraCuts() {
   return return_vec;
 }
 
-bool Taus::get_Iso(int index, double onetwo, double max) const {
+bool Taus::get_Iso(int index, double onetwo, double flipisolation) const {
   double maxIsoval = (onetwo == 1) ? maxIso.first->at(index) : maxIso.second->at(index);
   vector<int>* minIsotmp = (onetwo == 1) ? minIso.first : minIso.second;
   double minIsoval = (minIsotmp != 0) ? minIsotmp->at(index) : true;
+  if(flipisolation){
+    return (maxIsoval < 0.5 && minIsoval < 0.5);
+  }
   return (maxIsoval > 0.5 && minIsoval > 0.5);
 }
 
