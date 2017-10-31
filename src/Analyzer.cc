@@ -1697,6 +1697,19 @@ void Analyzer::fill_histogram() {
         fill_Folder(it, maxCut, histo, false);
       }
     }else{
+      if(syst_names[i].find("weight")!=string::npos){
+        if(syst_names[i]=="Tau_weight_Up"){
+          if(distats["Run"].bfind("ApplyTauIDSF")) {
+            wgt/=getTauDataMCScaleFactor(0);
+            wgt *= getTauDataMCScaleFactor(1);
+          }
+        }else if(syst_names[i]=="Tau_weight_Down"){
+          if(distats["Run"].bfind("ApplyTauIDSF")) {
+            wgt/=getTauDataMCScaleFactor(0);
+            wgt *= getTauDataMCScaleFactor(-1);
+          }
+        }
+      }
       //get the non particle conditions:
       for(auto itCut : nonParticleCuts){
         active_part->at(itCut)=goodParts.at(itCut);
@@ -1706,6 +1719,7 @@ void Analyzer::fill_histogram() {
       for(auto it: *syst_histo.get_groups()) {
         fill_Folder(it, i, syst_histo, true);
       }
+      wgt=backup_wgt;
     }
   }
 }
