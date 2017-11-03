@@ -219,6 +219,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   zBoostTree["mt2"]        =0;
   zBoostTree["cosDphi1"]   =0;
   zBoostTree["cosDphi2"]   =0;
+  zBoostTree["jet_n"]      =0;
   zBoostTree["jet1_pt"]    =0;
   zBoostTree["jet1_eta"]   =0;
   zBoostTree["jet1_phi"]   =0;
@@ -227,8 +228,6 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   zBoostTree["jet2_phi"]   =0;
   zBoostTree["jet_mass"]   =0;
   zBoostTree["weight"]     =0;
-  zBoostTree["pu_weight"]  =0;
-  zBoostTree["gen_weight"] =0;
 
   histo.createTree(&zBoostTree,"TauTauTree");
 
@@ -1907,9 +1906,9 @@ void Analyzer::fill_histogram() {
       for(auto it: *groups) {
         fill_Folder(it, maxCut, histo, false);
       }
-      if(!fillCuts(false)) {
+      //if(!fillCuts(false)) {
         fill_Tree();
-      }
+      //}
     }else{
       if(syst_names[i].find("weight")!=string::npos){
         if(syst_names[i]=="Tau_weight_Up"){
@@ -2535,6 +2534,7 @@ void Analyzer::fill_Tree(){
       zBoostTree["mt_ele1"]       = 0;
     }
     
+    zBoostTree["jet_n"]   = active_part->at(CUTS::eRJet1)->size();
     if(j1>=0){
       zBoostTree["jet1_pt"]   = _Jet->pt(j1);
       zBoostTree["jet1_eta"]  = _Jet->eta(j1);
@@ -2564,10 +2564,6 @@ void Analyzer::fill_Tree(){
     
     zBoostTree["jet_mass"]  = mass;
     zBoostTree["weight"]    = wgt;
-    if(!isData){
-      zBoostTree["pu_weight"]    = pu_weight;
-      zBoostTree["gen_weight"]    = (gen_weight > 0) ? 1.0 : -1.0;
-    }
     
     //put it accidentally in the tree
     histo.fillTree("TauTauTree");
