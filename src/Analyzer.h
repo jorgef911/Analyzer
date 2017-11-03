@@ -56,6 +56,7 @@ public:
   void printCuts();
   void writeout();
   int nentries;
+  void fill_efficiency();
   void fill_histogram();
   void fill_Tree();
   void setControlRegions() { histo.setControlRegions();}
@@ -108,7 +109,8 @@ private:
   void getGoodRecoJets(CUTS, const PartStats&, const int);
   void getGoodRecoFatJets(CUTS, const PartStats&, const int);
 
-  void getGoodLeptonCombos(Lepton&, Lepton&, CUTS,CUTS,CUTS, const PartStats&, const int);
+  void getGoodLeptonCombos(Lepton&, Lepton&, CUTS, CUTS, CUTS, const PartStats&, const int);
+  void getGoodLeptonJetCombos(Lepton&, Jet&, CUTS, CUTS, CUTS, const PartStats&, const int);
   void getGoodDiJets(const PartStats&, const int);
 
   void VBFTopologyCut(const PartStats&, const int);
@@ -181,13 +183,17 @@ private:
   TH1D* k_tau_h;
   regex genName_regex;
   
+  TH1D* k_ele_h;
+  TH1D* k_mu_h;
+  TH1D* k_tau_h;
+  
   bool isVSample;
   bool isWSample;
   
 
   vector<Particle*> allParticles;
   vector<string> syst_names;
-
+  map<CUTS, Particle* >  particleCutMap;
   DepGraph neededCuts;
 
   static const unordered_map<string, CUTS> cut_num;

@@ -8,6 +8,7 @@
 #include <cassert>
 #include <TH1.h>
 #include <TH2.h>
+#include <TEfficiency.h>
 #include <TFile.h>
 
 using namespace std;
@@ -47,6 +48,7 @@ public:
   virtual void write_histogram(vector<string>&, TFile*) {};
   virtual void bin(int, double, double) {};
   virtual void bin(int, double, double, double) {};
+  virtual void bin(int, double, bool) {};
 
 };
 
@@ -77,6 +79,21 @@ public:
   Piece2D(string, int, double, double, int, double, double, int);
   void write_histogram(vector<string>&, TFile*);
   void bin(int, double, double, double);
+};
+
+
+class Piece1DEff : public DataPiece {
+private:
+  const double begin, end;
+  const int bins;
+  vector<TEfficiency> histograms;
+  bool wroteOutput;
+
+
+public:
+  Piece1DEff(string, int, double, double, int);
+  void write_histogram(vector<string>&, TFile*);
+  void bin(int, double, bool);
 };
 
 
@@ -117,6 +134,8 @@ public:
   void AddPoint(string,int, double, double, double);
   void Add_Hist(string, string, int, double, double, int);
   void Add_Hist(string, string, int, double, double, int, double, double, int);
+  void Add_Hist(string, int, double, double, int);
+  void AddEff(string, int, double, bool);
   void write_histogram(TFile*, vector<string>&);
   void setSingleFill() {fillSingle = true;}
 

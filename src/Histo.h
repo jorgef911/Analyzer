@@ -43,6 +43,7 @@ public:
 
   void addVal(double, string, int, string, double);
   void addVal(double, double, string, int, string, double);
+  void addEffiency(string,double,bool,int);
   void fill_histogram();
   void setControlRegions();
   void createTree(unordered_map< string , float >*, string);

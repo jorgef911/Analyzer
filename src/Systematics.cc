@@ -46,7 +46,7 @@ void Systematics::loadScaleRes(const PartStats& smear, const PartStats& syst, st
   resolution = 1;
   if(smear.bfind("SmearTheParticle")) {
     scale = smear.dmap.at("PtScaleOffset");
-    resolution = smear.dmap.at("PtScaleOffset");
+    resolution = smear.dmap.at("PtResolutionOffset");
   } 
   if(syst_name.find("_Res_")) {
     resolution = syst_name.find("_Up") ? 1 + syst.dmap.at("res") : 1 - syst.dmap.at("res");

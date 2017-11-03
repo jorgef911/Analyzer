@@ -49,6 +49,28 @@ void Piece2D::write_histogram(vector<string>& folders, TFile* outfile) {
   }
 }
 
+Piece1DEff::Piece1DEff(string _name, int _bins, double _begin, double _end, int _Nfold) :
+DataPiece(_name, _Nfold), begin(_begin), end(_end), bins(_bins) {
+  for(int i = 0; i < _Nfold; i++) {
+    TEfficiency tmp(name.c_str(), name.c_str(), bins, begin, end);
+    histograms.push_back(tmp);
+  }
+}
+
+void Piece1DEff::bin(int folder, double y, bool passFail) {
+  histograms.at(folder).Fill(y,passFail);
+}
+
+void Piece1DEff::write_histogram(vector<string>& folders, TFile* outfile) {
+  //if(wroteOutput)
+    //return;
+  outfile->cd();
+  outfile->cd("Eff");
+  histograms.at(0).Write();
+  wroteOutput=true;
+}
+
+
 /*---------------------------------------------------------------------------------------*/
 
 DataBinner::DataBinner(){}
@@ -102,6 +124,11 @@ void DataBinner::Add_Hist(string shortname, string fullname, int binx, double le
   order.push_back(shortname);
 }
 
+void DataBinner::Add_Hist(string shortname, int bin, double left, double right, int Nfolder) {
+  datamap[shortname] = new Piece1DEff(shortname, bin, left, right, Nfolder);
+  order.push_back(shortname);
+}
+
 
 void DataBinner::AddPoint(string name, int maxfolder, double value, double weight) {
   if(datamap.count(name) == 0)  return;
@@ -128,6 +155,10 @@ void DataBinner::AddPoint(string name, int maxfolder, double valuex, double valu
       datamap.at(name)->bin(i,valuex, valuey, weight);
     }
   }
+}
+
+void DataBinner::AddEff(string name, int maxfolder, double valuex, bool passFail) {
+  datamap.at(name)->bin(maxfolder, valuex, passFail);
 }
 
 void DataBinner::write_histogram(TFile* outfile, vector<string>& folders) {

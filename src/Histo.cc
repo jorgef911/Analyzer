@@ -10,10 +10,11 @@ outfile(nullptr), outname(outfilename), Npdf(_Npdf), isData(_isData) {
   //no syst uncertainty hist object
   if (syst_unvertainties.size()==0){
     read_cuts(cutname, folderCuts);
+    //outfile = new TFile(outfilename.c_str(), "RECREATE");
   }else{
     read_syst(syst_unvertainties);
   }
-
+  
   NFolders = folders.size();
   read_hist(histname);
 
@@ -154,6 +155,20 @@ void Histogramer::read_hist(string filename) {
   }
 
   info_file.close();
+  
+  data["Eff"] = new DataBinner();
+  vector<string> allLepNames={"Electron","Muon","Tau"};
+  for(string s : allLepNames){
+    string name="eff_"+s;
+    data["Eff"]->Add_Hist(name+"Pt",  300, 0, 3000, 1);
+    data["Eff"]->Add_Hist(name+"Eta", 100, -5, 5, 1);
+    data["Eff"]->Add_Hist(name+"Phi", 100, -3.14159, 3.14159, 1);
+    name="eff_Reco_"+s;
+    data["Eff"]->Add_Hist(name+"Pt",  300, 0, 3000, 1);
+    data["Eff"]->Add_Hist(name+"Eta", 100, -5, 5, 1);
+    data["Eff"]->Add_Hist(name+"Phi", 100, -3.14159, 3.14159, 1);
+  }
+  data_order.push_back("Eff");
 }
 
 
@@ -267,7 +282,8 @@ void Histogramer::fill_histogram() {
   for(auto it: folders) {
     outfile->mkdir( it.c_str() );
   }
-
+  if(outfile->GetDirectory("Eff")==nullptr)
+    outfile->mkdir("Eff");
   for(auto it: data_order) {
     data[it]->write_histogram(outfile, folders);
   }
@@ -290,6 +306,20 @@ void Histogramer::fillTree(string name) {
 }
 
 
+void Histogramer::addVal(double valuex, double valuey, string group, int maxcut, string histn, double weight) {
+  int maxFolder=0;
+
+
+  if(fillSingle) maxFolder = maxcut;
+  else {
+    for(int i = 0; i < NFolders; i++) {
+      if(maxcut > folderToCutNum[i]) maxFolder++;
+      else break;
+    }
+  }
+  data[group]->AddPoint(histn, maxFolder, valuex, valuey, weight);
+}
+
 void Histogramer::addVal(double value, string group, int maxcut, string histn, double weight) {
   int maxFolder=0;
 
@@ -301,21 +331,14 @@ void Histogramer::addVal(double value, string group, int maxcut, string histn, d
       else break;
     }
   }
-
   data[group]->AddPoint(histn, maxFolder, value, weight);
-
 }
 
-void Histogramer::addVal(double valuex, double valuey, string group, int maxcut, string histn, double weight) {
-  int maxFolder=0;
 
-  if(fillSingle) maxFolder = maxcut;
-  else {
-    for(int i = 0; i < NFolders; i++) {
-      if(maxcut > folderToCutNum[i]) maxFolder++;
-      else break;
-    }
-  }
 
-  data[group]->AddPoint(histn, maxFolder, valuex, valuey, weight);
+void Histogramer::addEffiency(string histn ,double value ,bool passFail,int maxFolder=0){
+  
+  data["Eff"]->AddEff(histn, maxFolder, value,passFail);
 }
+
+

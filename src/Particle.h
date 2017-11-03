@@ -39,6 +39,7 @@ struct PartStats {
 
 enum class PType { Electron, Muon, Tau, Jet, FatJet, None};
 
+
 class Particle {
 
 public:

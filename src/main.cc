@@ -119,6 +119,7 @@ int main (int argc, char* argv[]) {
   for(size_t i=0; i < Nentries; i++) {
     testing.clear_values();
     testing.preprocess(i);
+    testing.fill_efficiency();
     testing.fill_histogram();
     //this will be set if ctrl+c is pressed
     if(do_break){
