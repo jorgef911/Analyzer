@@ -435,12 +435,16 @@ Taus::Taus(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_B
   string_tau1 = pstats["Tau1"].smap["DiscrByMinIsolation"];
   string_tau2 = pstats["Tau2"].smap["DiscrByMinIsolation"];
   if(string_tau1 != "ZERO") {
-    SetBranch(("Tau_" + string_tau1).c_str(), maxIso.first);
+    SetBranch(("Tau_" + string_tau1).c_str(), minIso.first);
+  }else{
+    minIso.first=nullptr;
   }
   if(string_tau2 != "ZERO" && string_tau1 != string_tau2) {
-    SetBranch(("Tau_"+ string_tau2).c_str(), maxIso.second);
-  } else {
-    maxIso.second = maxIso.first;
+    SetBranch(("Tau_"+ string_tau2).c_str(), minIso.second);
+  } else if (string_tau2 != "ZERO"){
+    minIso.second=nullptr;
+  } else{
+    minIso.second = minIso.first;
   }
 
   SetBranch("Tau_decayModeFindingNewDMs", decayModeFindingNewDMs);
@@ -471,12 +475,22 @@ vector<CUTS> Taus::findExtraCuts() {
 
 bool Taus::get_Iso(int index, double onetwo, double flipisolation) const {
   double maxIsoval = (onetwo == 1) ? maxIso.first->at(index) : maxIso.second->at(index);
-  vector<int>* minIsotmp = (onetwo == 1) ? minIso.first : minIso.second;
-  double minIsoval = (minIsotmp != 0) ? minIsotmp->at(index) : true;
-  if(flipisolation){
-    return (maxIsoval < 0.5 && minIsoval < 0.5);
+  if(!flipisolation){
+    return (maxIsoval > 0.5 );
+  } else{
+    double minIsoval=1;
+    if(onetwo == 1 ){
+      if(minIso.first!=nullptr){
+        minIsoval=minIso.first->at(index);
+      }
+    }else{
+      if(minIso.second!=nullptr){
+        minIsoval=minIso.second->at(index);
+      }
+    }
+    return (maxIsoval < 0.5 && minIsoval > 0.5);
   }
-  return (maxIsoval > 0.5 && minIsoval > 0.5);
+  return (maxIsoval > 0.5 );
 }
 
 bool Taus::pass_against_Elec(CUTS ePos, int index) {
