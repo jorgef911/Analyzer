@@ -179,6 +179,7 @@ private:
   TH1D* k_ele_h;
   TH1D* k_mu_h;
   TH1D* k_tau_h;
+  regex genName_regex;
   
   bool isVSample;
   bool isWSample;
