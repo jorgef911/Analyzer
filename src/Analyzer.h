@@ -177,10 +177,6 @@ private:
   unordered_map<CUTS, bool, EnumHash> need_cut;
 
   unordered_map<string,bool> gen_selection;
-  
-  TH1D* k_ele_h;
-  TH1D* k_mu_h;
-  TH1D* k_tau_h;
   regex genName_regex;
   
   TH1D* k_ele_h;

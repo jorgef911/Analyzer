@@ -13,6 +13,7 @@ isData false
 ApplyGenWeight  true
 ApplyTauIDSF false
 ApplyZBoostSF true
+ApplyWKfactor true
 
 
 ///------Triggers-----///
