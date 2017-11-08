@@ -19,6 +19,9 @@ CMSSW_INC_PATHS += -isystem$(CMSSW_RELEASE_BASE)/src
 CMSSW_INC_PATHS += -isystem$(CMSSW_BOOST_BASE)/include
 endif
 
+ifndef MYANA
+MYANA:=SpecialAna
+endif
 
 CXX = g++
 CXXFLAGS += -Wall $(ROOTCFLAGS) -I./
@@ -28,10 +31,13 @@ LD = g++
 LDFLAGS += -Wall $(ROOTLIBS) -lGenVector
 LDSPEED = -O3
 
+
+EXTRA_CFLAGS:= -DMYANA=$(MYANA)/SpechialAnalysis.h
+EXTRA_LDFLAGS:=
 # Gather all additional flags
 ifndef CMSSW_RELEASE_BASE
-EXTRA_CFLAGS  := $(CMSSW_INC_PATHS)
-EXTRA_LDFLAGS := $(CMSSW_LIB_PATHS) $(CMSSW_LIBS)
+EXTRA_CFLAGS  += $(CMSSW_INC_PATHS)
+EXTRA_LDFLAGS += $(CMSSW_LIB_PATHS) $(CMSSW_LIBS)
 endif
 
 
@@ -71,12 +77,16 @@ BTAGOBJ = $(BTAGSRC:$(BTAGDIR)/%.cpp=$(OBJDIR)/%.o)
 MT2SRC = $(wildcard $(MT2DIR)/*.cc)
 MT2OBJ = $(MT2SRC:$(MT2DIR)/%.cc=$(OBJDIR)/%.o)
 
+MYANASRC = $(wildcard $(MYANA)/*.cc)
+MYANAOBJ = $(MYANASRC:$(MYANA)/%.cc=$(OBJDIR)/%.o)
+
+
 #------------------------------------------------------------------------------
 
 all: $(EXE)
 
 
-$(EXE): $(OBJECTS) $(BTAGOBJ) $(MT2OBJ)
+$(EXE): $(OBJECTS) $(BTAGOBJ) $(MT2OBJ) $(MYANAOBJ)
 	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 
@@ -91,10 +101,12 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cc $(SRCDIR)/%.h
 
 $(OBJDIR)/%.o: $(BTAGDIR)/%.cpp $(BTAGDIR)/%.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@
-	
+
 $(OBJDIR)/%.o: $(MT2DIR)/%.cc $(MT2DIR)/%.hh
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(OBJDIR)/%.o: $(MYANA)/%.cc $(MYANA)/%.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean :
 	rm $(OBJDIR)/*
-

@@ -72,9 +72,20 @@ public:
     return distats[partName].dmap.at("PZetaCutCoefficient") * getPZeta(Tobj1, Tobj2).first;
 
   }
+  Generated* _Gen;
+  Electron* _Electron;
+  Muon* _Muon;
+  Taus* _Tau;
+  Jet* _Jet;
+  FatJet* _FatJet;
+  Met* _MET;
+  Histogramer histo;
+  Histogramer syst_histo;
+  unordered_map<CUTS, vector<int>*, EnumHash>* active_part;
+  static const unordered_map<string, CUTS> cut_num;
 
 
-private:
+// private:
   void CRfillCuts();
   ///// Functions /////
   //void fill_Folder(string, const int, string syst="");
@@ -85,7 +96,7 @@ private:
   void initializePileupInfo(string, string, string, string);
   void initializeMCSelection(vector<string> infiles);
   void initializeWkfactor(vector<string> infiles);
-  
+
   void read_info(string);
   void setupGeneral();
   void initializeTrigger();
@@ -137,7 +148,7 @@ private:
   inline bool passCutRange(string, double, const PartStats&);
   bool passCutRange(double, const pair<double, double>&);
   bool findCut(const vector<string>&, string);
-  
+
   void updateMet(int syst=0);
   //  void treatMuons_Met(string syst="orig");
   double getPileupWeight(float);
@@ -155,15 +166,7 @@ private:
   double hPU[100];
   int version=0;
 
-  Generated* _Gen;
-  Electron* _Electron;
-  Muon* _Muon;
-  Taus* _Tau;
-  Jet* _Jet;
-  FatJet* _FatJet;
-  Met* _MET;
-  Histogramer histo;
-  Histogramer syst_histo;
+
   Systematics systematics;
   JetScaleResolution jetScaleRes;
   PartStats genStat;
@@ -171,35 +174,33 @@ private:
   unordered_map<string, PartStats> distats;
   unordered_map<string, FillVals*> fillInfo;
   unordered_map<string, double> genMap;
-  unordered_map<CUTS, vector<int>*, EnumHash>* active_part;
   unordered_map<CUTS, vector<int>*, EnumHash> goodParts;
   vector<unordered_map<CUTS, vector<int>*, EnumHash>> syst_parts;
   unordered_map<CUTS, bool, EnumHash> need_cut;
 
   unordered_map<string,bool> gen_selection;
   regex genName_regex;
-  
+
   TH1D* k_ele_h;
   TH1D* k_mu_h;
   TH1D* k_tau_h;
-  
+
   bool isVSample;
   bool isWSample;
-  
+
 
   vector<Particle*> allParticles;
   vector<string> syst_names;
   map<CUTS, Particle* >  particleCutMap;
   DepGraph neededCuts;
 
-  static const unordered_map<string, CUTS> cut_num;
   static const unordered_map<CUTS, vector<CUTS>, EnumHash> adjList;
 
   vector<int>* trigPlace[nTrigReq];
   bool setTrigger = false;
   vector<string>* trigName[nTrigReq];
   vector<int> cuts_per, cuts_cumul;
-  
+
   unordered_map< string,float > zBoostTree;
 
   double maxIso, minIso;
