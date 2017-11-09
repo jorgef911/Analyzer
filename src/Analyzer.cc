@@ -1346,6 +1346,8 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
           passCuts = passCuts && (stats.smap.at("ProngType").find("hps") == string::npos || _Tau->decayModeFindingNewDMs->at(i) != 0);
           passCuts = passCuts && passProng(stats.smap.at("ProngType"), _Tau->nProngs->at(i));
         }
+        else if(cut == "decayModeFindingNewDMs") passCuts = passCuts && _Tau->decayModeFindingNewDMs->at(i) != 0;
+        else if(cut == "decayModeFinding") passCuts = passCuts && _Tau->decayModeFinding->at(i) != 0;
               // ----anti-overlap requirements
         else if(cut == "RemoveOverlapWithMuon1s") passCuts = passCuts && !isOverlaping(lvec, *_Muon, CUTS::eRMuon1, stats.dmap.at("Muon1MatchingDeltaR"));
         else if(cut == "RemoveOverlapWithMuon2s") passCuts = passCuts && !isOverlaping(lvec, *_Muon, CUTS::eRMuon2, stats.dmap.at("Muon2MatchingDeltaR"));
@@ -1935,6 +1937,9 @@ void Analyzer::fill_histogram() {
       wgt=backup_wgt;
     }
   }
+  for(Particle* ipart: allParticles) ipart->setCurrentP(0);
+  _MET->setCurrentP(0);
+  active_part = &goodParts;
 }
 
 ///Function that fills up the histograms
@@ -2520,13 +2525,17 @@ void Analyzer::initializePileupInfo(string MCHisto, string DataHisto, string Dat
 
   //double factor = histmc->Integral() / histdata->Integral();
   double value,valueUp,valueDown;
-  for(int bin=0; bin < histmc.GetNbinsX(); bin++) {
-    if(histmc->GetBinContent(bin) == 0) value = 1;
-    //else value = factor*histdata->GetBinContent(bin) / histmc->GetBinContent(bin);
-    else{
-      value = histdata->GetBinContent(bin) / histmc->GetBinContent(bin);
-      valueUp = histdata->GetBinContent(bin) / histmc->GetBinContent(bin);
-      valueDown = histdata->GetBinContent(bin) / histmc->GetBinContent(bin);
+  int ibin=0;
+  for(int bin=0; bin < histmc->GetNbinsX(); bin++) {
+    ibin=histdata->FindBin(bin);
+    if(histmc->GetBinContent(ibin) == 0){
+      value = 1;
+      valueUp = 1;
+      valueDown = 1;
+    }else{
+      value = histdata->GetBinContent(ibin) / histmc->GetBinContent(ibin);
+      valueUp = histdata->GetBinContent(ibin) / histmc->GetBinContent(ibin);
+      valueDown = histdata->GetBinContent(ibin) / histmc->GetBinContent(ibin);
     }
     hPU[bin]      = value;
     hPU_up[bin]   = valueUp;

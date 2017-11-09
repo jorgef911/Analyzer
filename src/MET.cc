@@ -4,7 +4,7 @@
 #define SetBranch(name, variable) BOOM->SetBranchStatus(name, true);  BOOM->SetBranchAddress(name, &variable);
 
 //particle is a objet that stores multiple versions of the particle candidates
-Met::Met(TTree* _BOOM, string _GenName,  vector<string> _syst_names, double _MT2mass) : BOOM(_BOOM), GenName(_GenName), syst_names(_syst_names), MT2mass(_MT2mass) {
+Met::Met(TTree* _BOOM, string _GenName,  vector<string> _syst_names, double _MT2mass) : BOOM(_BOOM), GenName(_GenName), syst_names(_syst_names), MT2mass(_MT2mass)  {
 
   SetBranch((GenName+"_px").c_str(), mMet[0]);
   SetBranch((GenName+"_py").c_str(), mMet[1]);

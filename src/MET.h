@@ -28,11 +28,12 @@ typedef unsigned int uint;
 class Met {
 
 public:
-  Met();
+  Met(){};
+  Met(TTree*, string, string, vector<string>){};
   Met(TTree*, string, vector<string>, double);
   virtual ~Met() {}
 
-  virtual void findExtraCuts() {}
+  virtual vector<CUTS> findExtraCuts(){return vector<CUTS>();}
   void init();
   void unBranch();
   double pt() const;

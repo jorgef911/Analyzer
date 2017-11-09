@@ -124,6 +124,9 @@ int main (int argc, char* argv[]) {
   }
   //main event loop
   for(size_t i=0; i < Nentries; i++) {
+    if(i==0){
+      spechialAna.begin_run();
+    }
     testing.clear_values();
     testing.preprocess(i);
     testing.fill_efficiency();
