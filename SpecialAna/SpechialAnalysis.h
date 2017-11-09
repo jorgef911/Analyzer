@@ -1,15 +1,16 @@
 #ifndef analysis_h
 #define analysis_h
 
-class Analyzer;
+struct Analyzer;
 #include "src/Analyzer.h"
 
 class SpechialAnalysis {
 public:
   SpechialAnalysis(Analyzer* _a);
+  void init();
 
   void begin_run();
-  void analyze(int n_syst);
+  void analyze();
   void end_run();
 
 private:

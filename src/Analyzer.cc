@@ -1,13 +1,6 @@
 #include "Analyzer.h"
 #include <regex>
 
-// Include user defined Analysis or use Validator as default
-// Implement your own analysis composer and use export to define the
-// header file as environment variable MYANA.
-#define Q(x) #x
-#define QUOTE(x) Q(x)
-#include QUOTE(MYANA)
-
 
 //// Used to convert Enums to integers
 #define ival(x) static_cast<int>(x)
@@ -85,7 +78,7 @@ const unordered_map<string, CUTS> Analyzer::cut_num = {
 //////////////////////////////////////////////////////
 
 ///Constructor
-Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string configFolder) : goodParts(getArray()), genName_regex(".*([A-Z][^[:space:]]+)") {
+Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string configFolder) : goodParts(getArray()), genName_regex(".*([A-Z][^[:space:]]+)"){
   cout << "setup start" << endl;
 
   BOOM= new TChain("TNT/BOOM");
@@ -247,6 +240,8 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
   initializeMCSelection(infiles);
   initializeWkfactor(infiles);
   setCutNeeds();
+  
+  
 
   std::cout << "setup complete" << std::endl << endl;
   start = std::chrono::system_clock::now();
@@ -473,6 +468,7 @@ void Analyzer::preprocess(int event) {
     getGoodParticles(i);
   }
   active_part = &goodParts;
+  
   if( event < 10 || ( event < 100 && event % 10 == 0 ) ||
     ( event < 1000 && event % 100 == 0 ) ||
     ( event < 10000 && event % 1000 == 0 ) ||

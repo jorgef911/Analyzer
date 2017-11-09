@@ -48,11 +48,12 @@ public:
   void setControlRegions();
   void createTree(unordered_map< string , float >*, string);
   void fillTree(string);
+  string outname;
 
 
 private:
   TFile * outfile;
-  string outname;
+  
   int NFolders;
   int Npdf;
   bool isData, fillSingle=false;

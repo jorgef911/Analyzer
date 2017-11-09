@@ -4,8 +4,8 @@
 
 Histogramer::Histogramer() : outfile(nullptr) {}
 
-Histogramer::Histogramer(int _Npdf, string histname, string cutname, string outfilename, bool _isData, vector<string>& folderCuts, const vector<string> &syst_unvertainties ):
-outfile(nullptr), outname(outfilename), Npdf(_Npdf), isData(_isData) {
+Histogramer::Histogramer(int _Npdf, string histname, string cutname, string outfilename, bool _isData, vector<string>& folderCuts, const vector<string> &syst_unvertainties ): outname(outfilename), 
+outfile(nullptr), Npdf(_Npdf), isData(_isData) {
 
   //no syst uncertainty hist object
   if (syst_unvertainties.size()==0){

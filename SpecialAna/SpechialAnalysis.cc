@@ -1,9 +1,15 @@
 #include "SpechialAnalysis.h"
 #include "HistClass.h"
+#include <TFile.h>
+#include <Compression.h>
 #define BIG_NUM 46340
 
 SpechialAnalysis::SpechialAnalysis(Analyzer* _a) {
-  a = _a;
+  a=_a;
+}
+
+void SpechialAnalysis::init() {
+  
 
   //this is just to store the histograms if they are to much to hold in memory
   // string safeFileName = "SpecialHistos.root";
@@ -31,7 +37,7 @@ SpechialAnalysis::SpechialAnalysis(Analyzer* _a) {
 void SpechialAnalysis::begin_run() {
 }
 
-void SpechialAnalysis::analyze(int n_syst) {
+void SpechialAnalysis::analyze() {
   //just because it is convinient read in  the cuts:
   // const unordered_map<string,pair<int,int> >* cut_info = a->histo.get_cuts();
   // const vector<string>* cut_order = a->histo.get_cutorder();
@@ -61,9 +67,21 @@ void SpechialAnalysis::analyze(int n_syst) {
   }
   if (p1 < 0 or p2 < 0 or j1 < 0 or j2 < 0)
     return;
+    
+  HistClass::Fill("Tau_num",a->active_part->at(CUTS::eRTau1)->size(),a->wgt);
 
 
 }
 
 void SpechialAnalysis::end_run() {
+  
+  TFile* outfile = new TFile(a->histo.outname.c_str(), "UPDATE", a->histo.outname.c_str(), ROOT::CompressionSettings(ROOT::kLZMA, 9));
+  
+  outfile->cd();
+  outfile->mkdir("Spechial");
+  outfile->cd("Spechial/");
+  HistClass::WriteAll("Tau_");
+
+  
+  
 }

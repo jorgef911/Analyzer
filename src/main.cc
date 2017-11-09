@@ -1,5 +1,10 @@
 #include "Analyzer.h"
 #include <csignal>
+#define Q(x) #x
+#define QUOTE(x) Q(x)
+#include QUOTE(MYANA)
+
+
 
 bool do_break;
 void KeyboardInterrupt_endJob(int signum) {
@@ -105,6 +110,8 @@ int main (int argc, char* argv[]) {
 
   //setup the analyser
   Analyzer testing(inputnames, outputname, setCR, configFolder);
+  SpechialAnalysis spechialAna = SpechialAnalysis(&testing);
+  spechialAna.init();
 
   //catch ctrl+c and just exit the loop
   //this way we still have the output
@@ -121,6 +128,7 @@ int main (int argc, char* argv[]) {
     testing.preprocess(i);
     testing.fill_efficiency();
     testing.fill_histogram();
+    spechialAna.analyze();
     //this will be set if ctrl+c is pressed
     if(do_break){
       testing.nentries=i+1;
@@ -128,5 +136,6 @@ int main (int argc, char* argv[]) {
     }
   }
   testing.printCuts();
+  spechialAna.end_run();
   return 0;
 }

@@ -72,19 +72,6 @@ public:
     return distats[partName].dmap.at("PZetaCutCoefficient") * getPZeta(Tobj1, Tobj2).first;
 
   }
-  Generated* _Gen;
-  Electron* _Electron;
-  Muon* _Muon;
-  Taus* _Tau;
-  Jet* _Jet;
-  FatJet* _FatJet;
-  Met* _MET;
-  Histogramer histo;
-  Histogramer syst_histo;
-  unordered_map<CUTS, vector<int>*, EnumHash>* active_part;
-  static const unordered_map<string, CUTS> cut_num;
-
-
 // private:
   void CRfillCuts();
   ///// Functions /////
@@ -166,6 +153,17 @@ public:
   double hPU[100];
   int version=0;
 
+  Generated* _Gen;
+  Electron* _Electron;
+  Muon* _Muon;
+  Taus* _Tau;
+  Jet* _Jet;
+  FatJet* _FatJet;
+  Met* _MET;
+  Histogramer histo;
+  Histogramer syst_histo;
+  unordered_map<CUTS, vector<int>*, EnumHash>* active_part;
+  static const unordered_map<string, CUTS> cut_num;
 
   Systematics systematics;
   JetScaleResolution jetScaleRes;

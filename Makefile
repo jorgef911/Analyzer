@@ -106,7 +106,7 @@ $(OBJDIR)/%.o: $(MT2DIR)/%.cc $(MT2DIR)/%.hh
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJDIR)/%.o: $(MYANA)/%.cc $(MYANA)/%.h
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -DANA=$(SRCDIR)/Analyzer.h -c $< -o $@
 
 clean :
 	rm $(OBJDIR)/*
