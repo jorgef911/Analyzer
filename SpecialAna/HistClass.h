@@ -53,7 +53,7 @@ namespace HistClass {
      * \param[in] xup Upper edge of the x-axis
      * \param[in] xtitle Optinal title of the x-axis (DEFAULT = "")
      */
-    SUPPRESS_NOT_USED_WARN static void CreateHisto(Int_t n_histos, const char* name, Int_t nbinsx, Double_t xlow, Double_t xup, TString xtitle = "") {
+    SUPPRESS_NOT_USED_WARN static void CreateHisto(int n_histos, const char* name, int nbinsx, double xlow, double xup, TString xtitle = "") {
         std::string _name=name;
         for (int j = 0; j < n_histos; j++) {
             TH1D * tmphist = new TH1D(Form("h1_%d_%s", j, _name.c_str()), xtitle, nbinsx, xlow, xup);
@@ -73,7 +73,7 @@ namespace HistClass {
      * \param[in] xup Upper edge of the x-axis
      * \param[in] xtitle Optinal title of the x-axis (DEFAULT = "")
      */
-    SUPPRESS_NOT_USED_WARN static void CreateHisto(Int_t n_histos, const char* name, const char* particle, Int_t nbinsx, Double_t xlow, Double_t xup, TString xtitle = "") {
+    SUPPRESS_NOT_USED_WARN static void CreateHisto(int n_histos, const char* name, const char* particle, int nbinsx, double xlow, double xup, TString xtitle = "") {
         std::string _name=name;
         for (int i = 0; i < n_histos; i++) {
             TH1D * tmphist = new TH1D(Form("h1_%d_%s_%s", i, particle, _name.c_str()), xtitle, nbinsx, xlow, xup);
@@ -91,7 +91,7 @@ namespace HistClass {
      * \param[in] xup Upper edge of the x-axis
      * \param[in] xtitle Optinal title of the x-axis (DEFAULT = "")
      */
-    SUPPRESS_NOT_USED_WARN static void CreateHistoUnchangedName(const char* name, Int_t nbinsx, Double_t xlow, Double_t xup, TString xtitle = "") {
+    SUPPRESS_NOT_USED_WARN static void CreateHistoUnchangedName(const char* name, int nbinsx, double xlow, double xup, TString xtitle = "") {
         TH1D * tmphist = new TH1D(Form("%s", name), xtitle, nbinsx, xlow, xup);
         tmphist->SetXTitle(xtitle);
         tmphist->Sumw2();
@@ -107,7 +107,7 @@ namespace HistClass {
      * \param[in] xtitle Optinal title of the x-axis (DEFAULT = "")
      * \param[in] ytitle Optinal title of the y-axis (DEFAULT = "")
      */
-    SUPPRESS_NOT_USED_WARN static void CreateHisto(const char* name, Int_t nbinsx, Double_t xlow, Double_t xup, TString xtitle = "", TString ytitle = "") {
+    SUPPRESS_NOT_USED_WARN static void CreateHisto(const char* name, int nbinsx, double xlow, double xup, TString xtitle = "", TString ytitle = "") {
         TH1D * tmphist = new TH1D(Form("h1_%s", name), xtitle, nbinsx, xlow, xup);
         tmphist->SetXTitle(xtitle);
         tmphist->SetYTitle(ytitle);
@@ -124,7 +124,7 @@ namespace HistClass {
      * \param[in] xup Upper edge of the x-axis
      * \param[in] xtitle Optinal title of the x-axis (DEFAULT = "")
      */
-    SUPPRESS_NOT_USED_WARN static void CreateHisto(const char* name, const char* particle, Int_t nbinsx, Double_t xlow, Double_t xup, TString xtitle = "") {
+    SUPPRESS_NOT_USED_WARN static void CreateHisto(const char* name, const char* particle, int nbinsx, double xlow, double xup, TString xtitle = "") {
         TH1D * tmphist = new TH1D(Form("h1_%s_%s", particle, name), xtitle, nbinsx, xlow, xup);
         tmphist->SetXTitle(xtitle);
         tmphist->Sumw2();
@@ -139,7 +139,7 @@ namespace HistClass {
      * \param[in] xup Upper edge of the x-axis
      * \param[in] xtitle Optinal title of the x-axis (DEFAULT = "")
      */
-    SUPPRESS_NOT_USED_WARN static void CreateHisto(boost::basic_format<char> name, Int_t nbinsx, Double_t xlow, Double_t xup, TString xtitle = "") {
+    SUPPRESS_NOT_USED_WARN static void CreateHisto(boost::basic_format<char> name, int nbinsx, double xlow, double xup, TString xtitle = "") {
         CreateHisto(str(name).c_str(), nbinsx, xlow, xup, xtitle);
     }
 
@@ -155,7 +155,7 @@ namespace HistClass {
      * \param[in] xtitle Optinal title of the x-axis (DEFAULT = "")
      * \param[in] ytitle Optinal title of the y-axis (DEFAULT = "")
      */
-    SUPPRESS_NOT_USED_WARN static void CreateHisto(const char* name, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, TString xtitle = "", TString ytitle = "") {
+    SUPPRESS_NOT_USED_WARN static void CreateHisto(const char* name, int nbinsx, double xlow, double xup, int nbinsy, double ylow, double yup, TString xtitle = "", TString ytitle = "") {
         std::string dummy = Form("h2_%s", name);
         histo2[dummy] = new TH2D(Form("h2_%s", name), Form("h2_%s", name), nbinsx, xlow, xup, nbinsy, ylow, yup);
         histo2[dummy] -> Sumw2();
@@ -176,7 +176,7 @@ namespace HistClass {
      * \param[in] xtitle Optinal title of the x-axis (DEFAULT = "")
      * \param[in] ytitle Optinal title of the y-axis (DEFAULT = "")
      */
-    SUPPRESS_NOT_USED_WARN static void CreateHisto(Int_t n_histos, const char* name, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, TString xtitle = "", TString ytitle = "") {
+    SUPPRESS_NOT_USED_WARN static void CreateHisto(int n_histos, const char* name, int nbinsx, double xlow, double xup, int nbinsy, double ylow, double yup, TString xtitle = "", TString ytitle = "") {
         std::string _name=name;
         for (int i = 0; i < n_histos; i++) {
             TH2D * tmphist = new TH2D(Form("h2_%d_%s", i, _name.c_str()), Form("h2_%d_%s", i, _name.c_str()), nbinsx, xlow, xup, nbinsy, ylow, yup);
@@ -198,7 +198,7 @@ namespace HistClass {
      * \param[in] xtitle Optinal title of the x-axis (DEFAULT = "")
      * \param[in] ytitle Optinal title of the y-axis (DEFAULT = "")
      */
-    SUPPRESS_NOT_USED_WARN static void CreateHisto(const char* name, Int_t nbinsx, const Double_t * xbins,  Int_t nbinsy, Double_t ylow, Double_t yup, TString xtitle = "", TString ytitle = "") {
+    SUPPRESS_NOT_USED_WARN static void CreateHisto(const char* name, int nbinsx, const double * xbins,  int nbinsy, double ylow, double yup, TString xtitle = "", TString ytitle = "") {
         std::string dummy = Form("h2_%s", name);
         histo2[dummy] = new TH2D(Form("h2_%s", name), Form("h2_%s", name), nbinsx, xbins, nbinsy, ylow, yup);
         histo2[dummy] -> Sumw2();
@@ -217,7 +217,7 @@ namespace HistClass {
      * \param[in] xtitle Optinal title of the x-axis (DEFAULT = "")
      * \param[in] ytitle Optinal title of the y-axis (DEFAULT = "")
      */
-    SUPPRESS_NOT_USED_WARN static void CreateHisto(const char* name, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, const Double_t * ybins, TString xtitle = "", TString ytitle = "") {
+    SUPPRESS_NOT_USED_WARN static void CreateHisto(const char* name, int nbinsx, double xlow, double xup, int nbinsy, const double * ybins, TString xtitle = "", TString ytitle = "") {
         std::string dummy = Form("h2_%s", name);
         histo2[dummy] = new TH2D(Form("h2_%s", name), Form("h2_%s", name), nbinsx, xlow, xup, nbinsy, ybins);
         histo2[dummy] -> Sumw2();
@@ -236,7 +236,7 @@ namespace HistClass {
      * \param[in] xtitle Optinal title of the x-axis (DEFAULT = "")
      * \param[in] ytitle Optinal title of the y-axis (DEFAULT = "")
      */
-    SUPPRESS_NOT_USED_WARN static void CreateHisto(const char* name, Int_t nbinsx, const Double_t * xbins, Int_t nbinsy, const Double_t * ybins, TString xtitle = "", TString ytitle = "") {
+    SUPPRESS_NOT_USED_WARN static void CreateHisto(const char* name, int nbinsx, const double * xbins, int nbinsy, const double * ybins, TString xtitle = "", TString ytitle = "") {
         std::string dummy = Form("h2_%s", name);
         histo2[dummy] = new TH2D(Form("h2_%s", name), Form("h2_%s", name), nbinsx, xbins, nbinsy, ybins);
         histo2[dummy] -> Sumw2();
@@ -302,7 +302,7 @@ namespace HistClass {
      * \param[in] Variable that should be added to the tree
      * \param[in] name Name of the TTree
      */
-    SUPPRESS_NOT_USED_WARN static void AddBranch(std::string branch, Int_t content, const char * name) {
+    SUPPRESS_NOT_USED_WARN static void AddBranch(std::string branch, int content, const char * name) {
         trees[name]->Branch(branch.c_str(), &content, Form("%s/I", branch.c_str()));
     }
 
@@ -343,7 +343,7 @@ namespace HistClass {
      * \param[in] xbins defines the binning bounds
      * \param[in] xtitle Optinal title of the x-axis (DEFAULT = "")
      */
-    SUPPRESS_NOT_USED_WARN static void CreateEff(const char* name, Int_t nbinsx, Double_t* xbins, const char* xtitle = "") {
+    SUPPRESS_NOT_USED_WARN static void CreateEff(const char* name, int nbinsx, double* xbins, const char* xtitle = "") {
         TEfficiency * tmpeff = new TEfficiency(Form("eff_%s", name), Form("%s;%s;%s", name, xtitle, "#epsilon"), nbinsx, xbins);
         effs[Form("eff_%s", name)] = tmpeff;
     }
@@ -357,7 +357,7 @@ namespace HistClass {
      * \param[in] xtitle Optinal title of the x-axis (DEFAULT = "")
      * \param[in] weighted Option for weighted events (DEFAULT = false)
      */
-    SUPPRESS_NOT_USED_WARN static void CreateEff(const char* name, Int_t nbinsx, Double_t xlow, Double_t xup, const char* xtitle = "", bool weighted = false) {
+    SUPPRESS_NOT_USED_WARN static void CreateEff(const char* name, int nbinsx, double xlow, double xup, const char* xtitle = "", bool weighted = false) {
         TEfficiency * tmpeff = new TEfficiency(Form("eff_%s", name), Form("%s;%s;%s", name, xtitle, "#epsilon"), nbinsx, xlow, xup);
         if (weighted) {
             tmpeff -> SetUseWeightedEvents();
@@ -399,7 +399,7 @@ namespace HistClass {
      * \param[in] xtitle Optinal title of the x-axis (DEFAULT = "")
      * \param[in] ytitle Optinal title of the y-axis (DEFAULT = "")
      */
-    SUPPRESS_NOT_USED_WARN static void CreateEff(const char* name, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, const char* xtitle = "", const char* ytitle = "") {
+    SUPPRESS_NOT_USED_WARN static void CreateEff(const char* name, int nbinsx, double xlow, double xup, int nbinsy, double ylow, double yup, const char* xtitle = "", const char* ytitle = "") {
         TEfficiency * tmpeff = new TEfficiency(Form("eff_%s", name), Form("%s;%s;%s;%s", name, xtitle, ytitle, "#epsilon"), nbinsx, xlow, xup, nbinsy, ylow, yup);
         effs[Form("eff_%s", name)] = tmpeff;
     }
@@ -413,7 +413,7 @@ namespace HistClass {
      * \param[in] xtitle Optinal title of the x-axis (DEFAULT = "")
      * \param[in] ytitle Optinal title of the y-axis (DEFAULT = "")
      */
-    SUPPRESS_NOT_USED_WARN static void CreateProf(const char* name, Int_t nbinsx, Double_t xlow, Double_t xup, const char* xtitle = "", const char* ytitle = "") {
+    SUPPRESS_NOT_USED_WARN static void CreateProf(const char* name, int nbinsx, double xlow, double xup, const char* xtitle = "", const char* ytitle = "") {
         TProfile * tmpprof = new TProfile(Form("prof_%s", name), Form("%s;%s;%s", name, xtitle, ytitle), nbinsx, xlow, xup);
         prof[Form("prof_%s", name)] = tmpprof;
     }
@@ -423,7 +423,7 @@ namespace HistClass {
      * \param[in] n_histos Number of histogram to be deleted
      * \param[in] name Name of the histogram to be deleted
      */
-    SUPPRESS_NOT_USED_WARN static void DeleteHisto(Int_t n_histos, const char* name){
+    SUPPRESS_NOT_USED_WARN static void DeleteHisto(int n_histos, const char* name){
         for(int i = 0; i < n_histos; i++){
             std::string dummy = Form("h1_%d_%s", i, name);
             delete histo[dummy];
@@ -437,7 +437,7 @@ namespace HistClass {
      * \param[in] n_rebin Number of bins that the rebinned histogram should have
      * \param[in] bins Array of bin edges that the rebinned histogram should have
      */
-    SUPPRESS_NOT_USED_WARN static void RebinHisto(Int_t n_histos, const char* name, Int_t n_rebin, Double_t* bins) {
+    SUPPRESS_NOT_USED_WARN static void RebinHisto(int n_histos, const char* name, int n_rebin, double* bins) {
         for(int i = 0; i < n_histos; i++){
             std::string dummy = Form("h1_%d_%s", i, name);
             std::unordered_map<std::string, TH1D * >::iterator it = histo.find(dummy);
@@ -467,26 +467,18 @@ namespace HistClass {
      * \param[in] value Value that should be filled
      * \param[in] weight Weight of the event that should be filled
      */
-    static void Fill(Int_t n_histo, const char * name, double value, double weight) {
-        std::unordered_map<std::string, TH1D * >::iterator it = histo.find(Form("h1_%d_%s", n_histo, name));
+    static void Fill(int n_histo, string name, double value, double weight) {
+        std::unordered_map<std::string, TH1D * >::iterator it = histo.find("h1_"+to_string(n_histo)+"_"+name);
+        
+        //Form("h1_%d_%s", n_histo, name));
         if (it != histo.end()) {
             it->second->Fill(value, weight);
         } else {
-            std::cerr << "(Fill) No hist: " << Form("h1_%d_%s", n_histo, name) << " in map " << n_histo <<" size is : "<<  histo.size()<<"   "<<histo.max_size()
+            std::cerr << "(Fill) No hist: " << "h1_"+to_string(n_histo)+"_"+name << " in map " << n_histo <<" size is : "<<  histo.size()<<"   "<<histo.max_size()
  << std::endl;
         }
     }
 
-    /*! \brief Function to fill an event in a 1D histogram of the map with a string as histo name
-     *
-     * \param[in] n_histo Number of the histogram that should be filled
-     * \param[in] name Name of the histogram which should be filled (std string)
-     * \param[in] value Value that should be filled
-     * \param[in] weight Weight of the event that should be filled
-     */
-    SUPPRESS_NOT_USED_WARN static void Fill(Int_t n_histo, std::string name, double value, double weight) {
-        Fill(n_histo, name.c_str(), value, weight);
-    }
 
     /*! \brief Function to fill an event in a 1D histogram of the map without histo number
      *
@@ -545,7 +537,7 @@ namespace HistClass {
      * \param[in] value Value that should be filled
      * \param[in] weight Weight of the event that should be filled
      */
-    SUPPRESS_NOT_USED_WARN static void FillStr(Int_t n_histo, const char * name, const char * value, double weight) {
+    SUPPRESS_NOT_USED_WARN static void FillStr(int n_histo, const char * name, const char * value, double weight) {
         FillStr(Form("%d_%s",n_histo, name), value,  weight);
     }
 
@@ -576,7 +568,7 @@ namespace HistClass {
      * \param[in] valuey y-value that should be filled
      * \param[in] weight Weight of the event that should be filled
      */
-    SUPPRESS_NOT_USED_WARN static void Fill(Int_t n_histo, const char * name, double valuex, double valuey, double weight) {
+    SUPPRESS_NOT_USED_WARN static void Fill(int n_histo, const char * name, double valuex, double valuey, double weight) {
         std::unordered_map<std::string, TH2D * >::iterator it = histo2.find(Form("h2_%d_%s", n_histo, name));
         if (it != histo2.end()) {
             it->second->Fill(valuex, valuey, weight);
@@ -698,7 +690,7 @@ namespace HistClass {
      * \param[in] n_histo Number of the histogram that should be written
      * \param[in] name Name of the histogram that should be written
      */
-    SUPPRESS_NOT_USED_WARN static void Write(Int_t n_histo, const char * name) {
+    SUPPRESS_NOT_USED_WARN static void Write(int n_histo, const char * name) {
         std::string dummy = Form("h1_%d_%s", n_histo, name);
         histo[dummy]->Write();
     }
@@ -726,6 +718,28 @@ namespace HistClass {
                 it->second -> Write();
             } else if (strcmp(name, "") == 0) {
                 it->second -> Write();
+            }
+        }
+    }
+    
+    /*! \brief Function to write many 1D histograms of the map
+     *
+     * This function writes all histograms of the map with the
+     * default options, otherwise it writes all histograms that
+     * contain the given string in there name.
+     * \param[in] name Optional string that all histogram names that should be written contain (DEFAULT = "")
+     */
+    SUPPRESS_NOT_USED_WARN static void WriteAll_NonZero(const char * name = "") {
+        std::unordered_map<std::string, TH1D * >::iterator it;
+        for (std::unordered_map<std::string, TH1D * >::iterator it = histo.begin(); it != histo.end(); ++it) {
+            if (strcmp(name, "") != 0 && std::string::npos != it->first.find(name)) {
+                if(it->second->Integral()>0){
+                    it->second -> Write();
+                }
+            } else if (strcmp(name, "") == 0) {
+                if(it->second->Integral()>0){
+                    it->second -> Write();
+                }
             }
         }
     }
@@ -1062,7 +1076,7 @@ namespace HistClass {
      * \param[in] n_histo Number of the histogram that should be modified
      * \param[in] name Name of the histogram that should be modified
      */
-    SUPPRESS_NOT_USED_WARN static void SetToZero(Int_t n_histo, const char * name) {
+    SUPPRESS_NOT_USED_WARN static void SetToZero(int n_histo, const char * name) {
         std::string dummy = Form("h1_%d_%s", n_histo, name);
         int Nbins2 = histo[dummy] -> GetNbinsX();
         for (int bb = 0; bb < Nbins2+1; bb++) {
@@ -1126,7 +1140,7 @@ namespace HistClass {
      * \param[in] n_bins of bins that should be renamed
      * \param[in] d_mydisc Array with the names that th bins should get
      */
-    SUPPRESS_NOT_USED_WARN static void NameBins(Int_t n_histo, const char * name, const uint n_bins, TString* d_mydisc) {
+    SUPPRESS_NOT_USED_WARN static void NameBins(int n_histo, const char * name, const uint n_bins, TString* d_mydisc) {
         for (int i = 0; i < n_histo; i++) {
             std::string dummy = Form("h1_%d_%s", i, name);
             for (uint i = 0; i < n_bins; i++) {
