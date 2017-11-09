@@ -1910,6 +1910,17 @@ void Analyzer::fill_histogram() {
             wgt *= getTauDataMCScaleFactor(-1);
           }
         }
+        if(syst_names[i]=="Pileup_weight_Up"){
+          if(distats["Run"].bfind("UsePileUpWeight")) {
+            wgt/=   pu_weight;
+            wgt *=  hPU_up[(int)(nTruePU+1)];
+          }
+        }else if(syst_names[i]=="Pileup_weight_Down"){
+          if(distats["Run"].bfind("UsePileUpWeight")) {
+            wgt/=   pu_weight;
+            wgt *=  hPU_down[(int)(nTruePU+1)];
+          }
+        }
       }
       //get the non particle conditions:
       for(auto itCut : nonParticleCuts){
@@ -2498,17 +2509,29 @@ void Analyzer::initializePileupInfo(string MCHisto, string DataHisto, string Dat
   TFile* file2 = new TFile((PUSPACE+DataHisto).c_str());
   TH1D* histdata = (TH1D*)file2->FindObjectAny(DataHistoName.c_str());
   if(!histdata) throw std::runtime_error("failed to extract histogram");
-
+  TH1D* histdata_up = (TH1D*)file2->FindObjectAny((DataHistoName+"Up").c_str());
+  TH1D* histdata_down = (TH1D*)file2->FindObjectAny((DataHistoName+"Down").c_str());
+  
+  
   histmc->Scale(1./histmc->Integral());
   histdata->Scale(1./histdata->Integral());
+  histdata_up->Scale(1./histdata_up->Integral());
+  histdata_down->Scale(1./histdata_down->Integral());
 
   //double factor = histmc->Integral() / histdata->Integral();
-  double value;
-  for(int bin=0; bin < 100; bin++) {
+  double value,valueUp,valueDown;
+  for(int bin=0; bin < histmc.GetNbinsX(); bin++) {
     if(histmc->GetBinContent(bin) == 0) value = 1;
     //else value = factor*histdata->GetBinContent(bin) / histmc->GetBinContent(bin);
-    else value = histdata->GetBinContent(bin) / histmc->GetBinContent(bin);
-    hPU[bin] = value;
+    else{
+      value = histdata->GetBinContent(bin) / histmc->GetBinContent(bin);
+      valueUp = histdata->GetBinContent(bin) / histmc->GetBinContent(bin);
+      valueDown = histdata->GetBinContent(bin) / histmc->GetBinContent(bin);
+    }
+    hPU[bin]      = value;
+    hPU_up[bin]   = valueUp;
+    hPU_down[bin] = valueDown;
+    
   }
 
   file1->Close();

@@ -150,7 +150,9 @@ public:
   TTree* BAAM;
   TFile* infoFile;
   string filespace = "";
-  double hPU[100];
+  double hPU[200];
+  double hPU_up[200];
+  double hPU_down[200];
   int version=0;
 
   Generated* _Gen;
