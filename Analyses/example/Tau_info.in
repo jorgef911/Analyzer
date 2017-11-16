@@ -31,11 +31,13 @@ DoDiscrByLeadTrack true
 LeadTrackThreshold 5.0
 
 DoDiscrByIsolation true
-DiscrByMinIsolation ZERO
-DiscrByMaxIsolation byTightIsolationMVArun2v1DBnewDMwLT
+DiscrByMinIsolation byVLooseIsolationMVArun2v1DBnewDMwLT
+DiscrByMaxIsolation byLooseIsolationMVArun2v1DBnewDMwLT
 FlipIsolationRequirement false
 DiscrByProngType true
 ProngType  1or3hps
+decayModeFindingNewDMs false
+decayModeFinding true
 
 DoDiscrAgainstElectron true
 DiscrAgainstElectron againstElectronMVALooseMVA6
@@ -83,6 +85,8 @@ DiscrByMaxIsolation byTightIsolationMVArun2v1DBnewDMwLT
 FlipIsolationRequirement false
 DiscrByProngType true
 ProngType  1or3hps
+decayModeFindingNewDMs false
+decayModeFinding true
 
 DoDiscrAgainstElectron true
 DiscrAgainstElectron againstElectronMVALooseMVA6
