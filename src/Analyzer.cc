@@ -2254,56 +2254,6 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
         histAddVal(absnormPhi(part2.Phi() - TheLeadDiJetVect.Phi()), "Part2DiJetDeltaPhi");
         histAddVal(diParticleMass(TheLeadDiJetVect, part1+part2, "VectorSumOfVisProductsAndMet"), "DiJetReconstructableMass");
       }
-      //electron tau stuff:
-      if(lep->type == PType::Electron){
-        //loop over taus to find a match in the unisolated taus:
-        int matchedTauInd=-1;
-        TLorentzVector matchedEle;
-        TLorentzVector unmatchedEle;
-        for( size_t itau =0; itau< _Tau->size(); itau++){
-          if(part2.DeltaR(_Tau->p4(itau))<0.3){
-            //we are sure that part1 passes the tight id
-            matchedTauInd=itau;
-            matchedEle=part2;
-            unmatchedEle=part1;
-          }
-        }
-        if(matchedTauInd>=0){
-          if(find(active_part->at(CUTS::eRTau1)->begin(),active_part->at(CUTS::eRTau1)->end(),matchedTauInd)!=active_part->at(CUTS::eRTau1)->end()){
-            histAddVal(_Tau->p4(matchedTauInd).Pt(), "Part1Part2GoodTauMatchPt");
-            histAddVal(_Tau->p4(matchedTauInd).Pt()-matchedEle.Pt(), "Part1Part2GoodTauMatchDeltaPt");
-            histAddVal((_Tau->p4(matchedTauInd)+unmatchedEle).M(), "Part1Part2GoodTauMatchMass");
-            histAddVal((matchedEle+unmatchedEle).M(), "Part1Part2EleGoodMatchMass");
-            histAddVal(matchedEle.Pt(), "Part1Part2EleGoodMatchPt");
-            histAddVal(_Tau->leadChargedCandPtError->at(matchedTauInd),"Part1Part2leadChargedCandPtErrorGoodMatched");
-            histAddVal(_Tau->leadChargedCandValidHits->at(matchedTauInd),"Part1Part2leadChargedCandValidHitGoodMatched");
-            histAddVal2( matchedEle.Pt(),   (_Tau->p4(matchedTauInd).Pt()-matchedEle.Pt())/matchedEle.Pt(), "Part1Part2TauGoodMatchPt_vs_DeltaPt");
-            histAddVal2( matchedEle.Pt(),   matchedEle.Eta(), "Part1Part2TauGoodMatchPt_vs_eta");
-            histAddVal2( _Tau->pt(matchedTauInd),   _Tau->decayMode->at(matchedTauInd), "Part1Part2TauGoodMatchPt_vs_Decay");
-          }else{
-            histAddVal(_Tau->p4(matchedTauInd).Pt(), "Part1Part2TauMatchPt");
-            histAddVal(_Tau->p4(matchedTauInd).Pt()-matchedEle.Pt(), "Part1Part2TauMatchDeltaPt");
-            histAddVal((_Tau->p4(matchedTauInd)+unmatchedEle).M(), "Part1Part2TauMatchMass");
-            histAddVal((matchedEle+unmatchedEle).M(), "Part1Part2EleMatchMass");
-            histAddVal(matchedEle.Pt(), "Part1Part2EleMatchPt");
-            histAddVal(_Tau->leadChargedCandPtError->at(matchedTauInd),"Part1Part2leadChargedCandPtErrorMatched");
-            histAddVal(_Tau->leadChargedCandValidHits->at(matchedTauInd),"Part1Part2leadChargedCandValidHitsMatched");
-            histAddVal2( matchedEle.Pt(),   (_Tau->p4(matchedTauInd).Pt()-matchedEle.Pt())/matchedEle.Pt(), "Part1Part2TauMatchPt_vs_DeltaPt");
-            histAddVal2( matchedEle.Pt(),   matchedEle.Eta(), "Part1Part2TauMatchPt_vs_eta");
-            histAddVal2( _Tau->pt(matchedTauInd),   _Tau->decayMode->at(matchedTauInd), "Part1Part2TauMatchPt_vs_Decay");
-          }
-        }else{
-          histAddVal((part1+part2).M(), "Part1Part2EleUnMatchMass");
-          histAddVal(part2.Pt(), "Part1Part2EleUnMatchPt");
-          histAddVal2( part2.Pt(),   part2.Eta(), "Part1Part2UnMatchPt_vs_eta");
-          if(!isData){
-            histAddVal(part2.Pt(), "Part1Part2EleUnMatchPt_gen_"+to_string(abs(matchToGenPdg(part2,0.3))));
-          }
-          histAddVal(jet->chargedMultiplicity->at(p2), "Part1Part2EleUnMatchJetMultiplicity");
-        }
-      }
-
-
     }
   } else if(fillInfo[group]->type == FILLER::Dipart) {
     Lepton* lep1 = static_cast<Lepton*>(fillInfo[group]->part);
