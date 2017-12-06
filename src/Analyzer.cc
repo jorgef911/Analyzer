@@ -2466,12 +2466,14 @@ void Analyzer::initializePileupInfo(string MCHisto, string DataHisto, string Dat
   if(!histdata) throw std::runtime_error("failed to extract histogram");
   TH1D* histdata_up = (TH1D*)file2->FindObjectAny((DataHistoName+"Up").c_str());
   TH1D* histdata_down = (TH1D*)file2->FindObjectAny((DataHistoName+"Down").c_str());
-  
-  
+
+
   histmc->Scale(1./histmc->Integral());
   histdata->Scale(1./histdata->Integral());
-  histdata_up->Scale(1./histdata_up->Integral());
-  histdata_down->Scale(1./histdata_down->Integral());
+  if(histdata_up){
+    histdata_up->Scale(1./histdata_up->Integral());
+    histdata_down->Scale(1./histdata_down->Integral());
+  }
 
   //double factor = histmc->Integral() / histdata->Integral();
   double value,valueUp,valueDown;
@@ -2484,13 +2486,20 @@ void Analyzer::initializePileupInfo(string MCHisto, string DataHisto, string Dat
       valueDown = 1;
     }else{
       value = histdata->GetBinContent(ibin) / histmc->GetBinContent(ibin);
-      valueUp = histdata->GetBinContent(ibin) / histmc->GetBinContent(ibin);
-      valueDown = histdata->GetBinContent(ibin) / histmc->GetBinContent(ibin);
+      if(histdata_up){
+        valueUp = histdata->GetBinContent(ibin) / histmc->GetBinContent(ibin);
+        valueDown = histdata->GetBinContent(ibin) / histmc->GetBinContent(ibin);
+      }
     }
     hPU[bin]      = value;
-    hPU_up[bin]   = valueUp;
-    hPU_down[bin] = valueDown;
-    
+    if(histdata_up){
+      hPU_up[bin]   = valueUp;
+      hPU_down[bin] = valueDown;
+    }else{
+      hPU_up[bin]   = value;
+      hPU_down[bin] = value;
+    }
+
   }
 
   file1->Close();
