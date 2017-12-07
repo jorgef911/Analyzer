@@ -15,9 +15,13 @@ void Piece1D::bin(int folder, double y, double weight) {
   histograms.at(folder).Fill(y,weight);
 }
 
-void Piece1D::write_histogram(vector<string>& folders, TFile* outfile) {
+void Piece1D::write_histogram(vector<string>& folders, TFile* outfile, string subfolder) {
   for(int i =0; i < (int)folders.size(); i++) {
-    outfile->cd(folders.at(i).c_str());
+    if(subfolder==""){
+      outfile->cd(folders.at(i).c_str());
+    }else{
+      outfile->cd((subfolder+"/"+folders.at(i)).c_str());
+    }
     histograms.at(i).Write();
   }
 }
@@ -42,9 +46,12 @@ void Piece2D::bin(int folder, double x, double y, double weight) {
 
 }
 
-void Piece2D::write_histogram(vector<string>& folders, TFile* outfile) {
+void Piece2D::write_histogram(vector<string>& folders, TFile* outfile, string subfolder) {
   for(size_t i =0; i < folders.size(); i++) {
-    outfile->cd(folders.at(i).c_str());
+    if(subfolder=="")
+      outfile->cd(folders.at(i).c_str());
+    else
+      outfile->cd((subfolder+"/"+folders.at(i)).c_str());
     histograms.at(i).Write();
   }
 }
@@ -161,8 +168,8 @@ void DataBinner::AddEff(string name, int maxfolder, double valuex, bool passFail
   datamap.at(name)->bin(maxfolder, valuex, passFail);
 }
 
-void DataBinner::write_histogram(TFile* outfile, vector<string>& folders) {
+void DataBinner::write_histogram(TFile* outfile, vector<string>& folders, string subfolder) {
   for(vector<string>::iterator it = order.begin(); it != order.end(); it++) {
-    datamap.at(*it)->write_histogram(folders, outfile);
+    datamap.at(*it)->write_histogram(folders, outfile, subfolder);
   }
 }

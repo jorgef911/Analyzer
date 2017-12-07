@@ -456,6 +456,7 @@ Taus::Taus(TTree* _BOOM, string filename, vector<string> syst_names) : Lepton(_B
   SetBranch("Tau_leadChargedCandPt", leadChargedCandPt);
   SetBranch("Tau_leadChargedCandTrack_ptError", leadChargedCandPtError);
   SetBranch("Tau_leadChargedCandValidHits", leadChargedCandValidHits);
+  SetBranch("Tau_leadChargedCandDz_pv", leadChargedCandDz_pv);
 
 }
 

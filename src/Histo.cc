@@ -272,22 +272,32 @@ void Histogramer::fillCRFolderNames(string sofar, int index, bool isFirst, const
 }
 
 
-void Histogramer::fill_histogram() {
-
+void Histogramer::fill_histogram(string subfolder) {
   if( access( outname.c_str(), F_OK ) == -1 ){
     outfile = new TFile(outname.c_str(), "RECREATE", outname.c_str(), ROOT::CompressionSettings(ROOT::kLZMA, 9));
   }else{
     outfile = new TFile(outname.c_str(), "UPDATE", outname.c_str(), ROOT::CompressionSettings(ROOT::kLZMA, 9));
   }
-  for(auto it: folders) {
-    outfile->mkdir( it.c_str() );
-  }
-  if(outfile->GetDirectory("Eff")==nullptr)
+  if(subfolder!=""){
+    outfile->mkdir(subfolder.c_str());
+    outfile->cd(subfolder.c_str());
+    for(string it: folders) {
+      outfile->mkdir( (subfolder+"/"+it).c_str() );
+    }
+  }else{
+    for(auto it: folders) {
+      outfile->mkdir( it.c_str() );
+    }
+    if(outfile->GetDirectory("Eff")==nullptr)
     outfile->mkdir("Eff");
+  }
   for(auto it: data_order) {
-    data[it]->write_histogram(outfile, folders);
+    data[it]->write_histogram(outfile, folders, subfolder);
   }
   outfile->cd();
+  if(subfolder!=""){
+    outfile->cd(subfolder.c_str());
+  }
   for (std::unordered_map<std::string, TTree * >::iterator it = trees.begin(); it != trees.end(); ++it) {
     it->second->Write();
   }

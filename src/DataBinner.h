@@ -45,7 +45,7 @@ public:
     TH1::AddDirectory(false);  
   };
   virtual ~DataPiece() {};
-  virtual void write_histogram(vector<string>&, TFile*) {};
+  virtual void write_histogram(vector<string>&, TFile*, string subfolder) {};
   virtual void bin(int, double, double) {};
   virtual void bin(int, double, double, double) {};
   virtual void bin(int, double, bool) {};
@@ -63,7 +63,7 @@ private:
 
 public:
   Piece1D(string, int, double, double, int);
-  void write_histogram(vector<string>&, TFile*);
+  void write_histogram(vector<string>&, TFile*, string subfolder);
   void bin(int, double, double);
 };
 
@@ -77,7 +77,7 @@ private:
 
 public:
   Piece2D(string, int, double, double, int, double, double, int);
-  void write_histogram(vector<string>&, TFile*);
+  void write_histogram(vector<string>&, TFile*, string subfolder);
   void bin(int, double, double, double);
 };
 
@@ -136,7 +136,7 @@ public:
   void Add_Hist(string, string, int, double, double, int, double, double, int);
   void Add_Hist(string, int, double, double, int);
   void AddEff(string, int, double, bool);
-  void write_histogram(TFile*, vector<string>&);
+  void write_histogram(TFile*, vector<string>&, string);
   void setSingleFill() {fillSingle = true;}
 
 private:

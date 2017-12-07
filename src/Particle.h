@@ -255,6 +255,7 @@ public:
   vector<double>  *leadChargedCandPt = 0;
   vector<double>  *leadChargedCandPtError = 0;
   vector<double>  *leadChargedCandValidHits = 0;
+  vector<double>  *leadChargedCandDz_pv = 0;
 };
 
 

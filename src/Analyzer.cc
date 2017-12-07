@@ -640,6 +640,8 @@ bool Analyzer::fillCuts(bool fillCounter) {
         cuts_per[i]++;
         cuts_cumul[i] += (prevTrue) ? 1 : 0;
         maxCut += (prevTrue) ? 1 : 0;
+      }else{
+        maxCut += (prevTrue) ? 1 : 0;
       }
     }else {
       //cout<<"here 2  "<<endl;
@@ -1334,6 +1336,7 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
       else if(lep.type == PType::Tau){
         if(cut == "DoDiscrByCrackCut") passCuts = passCuts && !isInTheCracks(lvec.Eta());
         /////tau cuts
+        else if(cut == "DoDzCut") passCuts = passCuts && (_Tau->leadChargedCandDz_pv->at(i) <= stats.dmap.at("DzCutThreshold"));
         else if(cut == "DoDiscrByLeadTrack") passCuts = passCuts && (_Tau->leadChargedCandPt->at(i) >= stats.dmap.at("LeadTrackThreshold"));
              // ----Electron and Muon vetos
         else if (cut == "DoDiscrAgainstElectron") passCuts = passCuts && _Tau->pass_against_Elec(ePos, i);
@@ -1344,7 +1347,7 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
 
         else if(cut == "DiscrByProngType") {
           passCuts = passCuts && (stats.smap.at("ProngType").find("hps") == string::npos || _Tau->decayModeFindingNewDMs->at(i) != 0);
-          passCuts = passCuts && passProng(stats.smap.at("ProngType"), _Tau->nProngs->at(i));
+          passCuts = passCuts && passProng(stats.smap.at("ProngType"), _Tau->decayMode->at(i));
         }
         else if(cut == "decayModeFindingNewDMs") passCuts = passCuts && _Tau->decayModeFindingNewDMs->at(i) != 0;
         else if(cut == "decayModeFinding") passCuts = passCuts && _Tau->decayModeFinding->at(i) != 0;
@@ -1478,9 +1481,9 @@ bool Analyzer::isOverlaping(const TLorentzVector& lvec, Lepton& overlapper, CUTS
 
 ///Tests if tau decays into the specified number of jet prongs.
 bool Analyzer::passProng(string prong, int value) {
-  return ( (prong.find("1") != string::npos && value == 1) ||
-  (prong.find("2") != string::npos && value == 2) ||
-  (prong.find("3") != string::npos && value == 3) );
+  return ( (prong.find("1") != string::npos &&  (value<5)) ||
+  (prong.find("2") != string::npos &&  (value>=5 && value<10)) ||
+  (prong.find("3") != string::npos && (value>=10 && value<12)) );
 }
 
 
@@ -2057,6 +2060,7 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
         histAddVal(_Tau->nProngs->at(it), "NumSignalTracks");
         histAddVal(_Tau->charge(it), "Charge");
         histAddVal(_Tau->leadChargedCandPt->at(it), "SeedTrackPt");
+        histAddVal(_Tau->leadChargedCandDz_pv->at(it), "leadChargedCandDz");
       }
       if(part->type != PType::Jet) {
         histAddVal(calculateLeptonMetMt(part->p4(it)), "MetMt");
