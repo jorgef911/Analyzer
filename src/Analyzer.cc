@@ -624,7 +624,10 @@ bool Analyzer::fillCuts(bool fillCounter) {
 
   for(size_t i = 0; i < cut_order->size(); i++) {
     string cut = cut_order->at(i);
-    if(isData && cut.find("Gen") != string::npos) continue;
+    if(isData && cut.find("Gen") != string::npos){
+      maxCut += 1;
+      continue;
+    }
 
     int min= cut_info->at(cut).first;
     int max= cut_info->at(cut).second;
@@ -782,8 +785,11 @@ void Analyzer::updateMet(int syst) {
 
   if(!passCutRange(_MET->pt(), distats["Run"].pmap.at("MetCut"))) return;
   if(distats["Run"].bfind("DiscrByHT") && _MET->HT() < distats["Run"].dmap.at("HtCut")) return;
-
-  active_part->at(CUTS::eMET)->push_back(1);
+  if(syst==0){
+    active_part->at(CUTS::eMET)->push_back(1);
+  }else{
+    syst_parts.at(syst).at(CUTS::eMET)->push_back(1);
+  }
 }
 
 ///////////////////////////////////////////////
@@ -1903,6 +1909,7 @@ void Analyzer::fill_histogram() {
         fill_Tree();
       }
     }else{
+      wgt=backup_wgt;
       if(syst_names[i].find("weight")!=string::npos){
         if(syst_names[i]=="Tau_weight_Up"){
           if(distats["Run"].bfind("ApplyTauIDSF")) {
@@ -1931,9 +1938,7 @@ void Analyzer::fill_histogram() {
       for(auto itCut : nonParticleCuts){
         active_part->at(itCut)=goodParts.at(itCut);
       }
-      //cout<<"________________"<<i<<endl;
       if(!fillCuts(false)) continue;
-
       for(auto it: *syst_histo.get_groups()) {
         fill_Folder(it, i, syst_histo, true);
       }
