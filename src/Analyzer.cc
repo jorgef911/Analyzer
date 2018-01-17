@@ -526,7 +526,10 @@ bool Analyzer::fillCuts(bool fillCounter) {
 
   for(size_t i = 0; i < cut_order->size(); i++) {
     string cut = cut_order->at(i);
-    if(isData && cut.find("Gen") != string::npos) continue;
+    if(isData && cut.find("Gen") != string::npos){
+      maxCut += 1;
+      continue;
+    }
     
     int min= cut_info->at(cut).first;
     int max= cut_info->at(cut).second;
