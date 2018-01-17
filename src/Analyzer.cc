@@ -686,7 +686,11 @@ void Analyzer::updateMet(int syst) {
   if(!passCutRange(_MET->pt(), distats["Run"].pmap.at("MetCut"))) return;
   if(distats["Run"].bfind("DiscrByHT") && _MET->HT() < distats["Run"].dmap.at("HtCut")) return;
 
-  active_part->at(CUTS::eMET)->push_back(1);
+  if(syst==0){
+    active_part->at(CUTS::eMET)->push_back(1);
+  }else{
+    syst_parts.at(syst).at(CUTS::eMET)->push_back(1);
+  }
 }
 
 ///////////////////////////////////////////////
@@ -1702,6 +1706,7 @@ void Analyzer::fill_histogram() {
         fill_Folder(it, maxCut, histo, false);
       }
     }else{
+      wgt=backup_wgt;
       if(syst_names[i].find("weight")!=string::npos){
         if(syst_names[i]=="Tau_weight_Up"){
           if(distats["Run"].bfind("ApplyTauIDSF")) {
