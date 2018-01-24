@@ -1005,8 +1005,12 @@ void Analyzer::smearLepton(Lepton& lep, CUTS eGenPos, const PartStats& stats, co
 ///Same as smearlepton, just jet specific
 void Analyzer::smearJet(Particle& jet, const CUTS eGenPos, const PartStats& stats, int syst) {
   //at the moment
-  if(isData || jet.type != PType::Jet || !stats.bfind("SmearTheJet")) {
+  if(isData || jet.type != PType::Jet ){
+    //|| !stats.bfind("SmearTheJet")
     jet.setOrigReco();
+    return;
+  }
+  if(!jet.needSyst(syst)){
     return;
   }
   //add energy scale uncertainty
@@ -1027,17 +1031,18 @@ void Analyzer::smearJet(Particle& jet, const CUTS eGenPos, const PartStats& stat
     //only apply corrections for jets not for FatJets
 
     TLorentzVector genJet=matchJetToGen(jetReco, jet.pstats["Smear"],eGenPos);
-    if(systname=="orig"){
+    if(systname=="orig" && stats.bfind("SmearTheJet")){
       sf=jetScaleRes.GetRes(jetReco,genJet, rho, 0);
     }else if(systname=="Jet_Res_Up"){
       sf=jetScaleRes.GetRes(jetReco,genJet, rho, 1);
     }else if(systname=="Jet_Res_Down"){
       sf=jetScaleRes.GetRes(jetReco,genJet, rho, -1);
     }else if(systname=="Jet_Scale_Up"){
-      sf = 1.+ jetScaleRes.GetScale(jetReco, false, +1.);
+      sf = jetScaleRes.GetScale(jetReco, false, +1.);
     }else if(systname=="Jet_Scale_Down"){
-      sf = 1.- jetScaleRes.GetScale(jetReco, false, -1) ;
+      sf = jetScaleRes.GetScale(jetReco, false, -1) ;
     }
+    //cout<<systname<<"  "<<sf<<"  "<<jetReco.Pt()<<"  "<<genJet.Pt()<<endl;
     systematics.shiftParticle(jet, jetReco, sf, _MET->systdeltaMEx[syst], _MET->systdeltaMEy[syst], syst);
   }
 }
