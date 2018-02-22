@@ -25,6 +25,16 @@ MET cuts are now in the file PartDet/Run_info.in.  SVFit cuts are not necessary 
 
 ### A: SegFault
 
+Try to get more info:
+
+make clean; DEBUG=1 make -j8
+
+and then run the Analyzer again e.g.:
+
+```
+gdb --args ./Analyzer -in /uscms_data/d3/cfgonzal/ZprimeAnalysis/2017_BSG3G/CMSSW_8_0_10/src/LIST_SAMPLES/ZprimeSamples/OutTree_Zprime3000.root -out test_2.root
+```
+
 If you get a setfault, it can mean one of two things.  If the error looks like:
 
 ```
