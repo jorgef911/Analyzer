@@ -94,10 +94,16 @@ protected:
   };
 
  private:
-  vector<double>* mpt = 0;
-  vector<double>* meta = 0;
-  vector<double>* mphi = 0;
-  vector<double>* menergy = 0;
+  //vector<double>* mpt = 0;
+  //vector<double>* meta = 0;
+  //vector<double>* mphi = 0;
+  //vector<double>* menergy = 0;
+  uint  m_n;
+  float m_pt[];
+  float m_phi[];
+  float m_eta[];
+  float m_mass[];
+  
 
   vector<TLorentzVector> Reco;
   vector<TLorentzVector> *cur_P;
@@ -112,16 +118,13 @@ public:
   Photon();
   Photon(TTree*, string, vector<string>);
 
-  vector<double>* et = 0;
-  vector<double>* hoverE = 0;
-  vector<double>* phoR = 0;
-  vector<double>* sigmaIEtaIEta = 0;
-  vector<double>* sigmaIPhiIPhi = 0;
-  vector<double>* pfChIso = 0;
-  vector<double>* pfPhoIso = 0;
-  vector<double>* pfNeuIso = 0;
-  vector<bool>*   eleVeto = 0;
-  vector<bool>*   hasPixelSeed = 0;
+  float hoverE[];
+  float phoR[];
+  float sigmaIEtaIEta[];
+  float pfIso_all[];
+  float pfIso_chg[];
+  bool eleVeto[];
+  bool hasPixelSeed[];
 };
 
 
@@ -131,12 +134,13 @@ class Generated : public Particle {
 public:
   Generated();
   Generated(TTree*, string, vector<string>);
-
-  vector<double>  *pdg_id = 0;
-  vector<double>  *motherpdg_id = 0;
-  vector<double>  *status = 0;
-  vector<int>  *BmotherIndex = 0;
-
+  
+  
+  int  genPartIdxMother[];
+  int  pdg_id[];
+  int  status[];
+  int  statusFlags[];
+  
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -148,21 +152,18 @@ public:
   vector<CUTS> findExtraCuts();
   vector<CUTS> overlapCuts(CUTS);
   bool passedLooseJetID(int);
-  
-  vector<double>* neutralHadEnergyFraction = 0;
-  vector<double>* neutralEmEmEnergyFraction = 0;
-  vector<int>*    numberOfConstituents = 0;
-  vector<double>* muonEnergyFraction = 0;
-  vector<double>* chargedHadronEnergyFraction = 0;
-  vector<int>*    chargedMultiplicity = 0;
-  vector<double>* chargedEmEnergyFraction = 0;
-  vector<int>*    partonFlavour = 0;
-  vector<double>* bDiscriminator = 0;
-  vector<double>* tau1 = 0;
-  vector<double>* tau2 = 0;
-  vector<double>* tau3 = 0;
-  vector<double>* PrunedMass = 0;
-  vector<double>* SoftDropMass = 0;
+   
+  float area[];
+  float bDiscriminator[];
+  float chargedEmEnergyFraction[];
+  float chargedHadronEnergyFraction[];
+  float neutralEmEmEnergyFraction[];
+  float neutralHadEnergyFraction[];
+  int jetId[];
+  int nMuons[];
+  int numberOfConstituents[];
+  int puID[];
+  int partonFlavour[];
 
  protected:
 
@@ -175,12 +176,13 @@ public:
 
   vector<CUTS> findExtraCuts();
   vector<CUTS> overlapCuts(CUTS);
-
-  vector<double>* tau1 = 0;
-  vector<double>* tau2 = 0;
-  vector<double>* tau3 = 0;
-  vector<double>* PrunedMass = 0;
-  vector<double>* SoftDropMass = 0;
+  
+  float tau1[];
+  float tau2[];
+  float tau3[];
+  float tau4[];
+  float PrunedMass[];
+  float SoftDropMass[];
 
 };
 
@@ -192,7 +194,7 @@ public:
   vector<CUTS> findExtraCuts();
 
   double charge(uint)const;
-  vector<double>* _charge = 0;
+  int _charge[];
 
 
   virtual bool get_Iso(int, double, double) const {return false;}
@@ -204,16 +206,28 @@ public:
   Electron(TTree*, string, vector<string>);
 
   bool get_Iso(int, double, double) const;
+  
+  bitset<8> cbIDele1;
+  bitset<8> cbIDele2;
+  bitset<8> cbHLTIDele1;
+  bitset<8> cbHLTIDele2;
+  
+  float miniPFRelIso_all[];
+  float miniPFRelIso_chg[];
+  float mvaFall17Iso[];
+  float mvaFall17noIso[];
+  float pfRelIso03_all[];
+  float pfRelIso03_chg[];
+  bool cutBased[];
+  bool cutBased_HLTPreSel[];
+  bool mvaIso_90[];
+  bool mvanoIso_WP90[];
+  bool mvaIso_80[];
+  bool mvanoIso_WP80[];
+  bool mvaIso_WPL[];
+  bool mvanoIso_WPL[];
+  bool isPassHEEPId[];
 
-  vector<int>     *isPassVeto = 0;
-  vector<int>     *isPassLoose = 0;
-  vector<int>     *isPassMedium = 0;
-  vector<int>     *isPassTight = 0;
-  vector<int>     *isPassHEEPId = 0;
-  vector<double>  *isoChargedHadrons = 0;
-  vector<double>  *isoNeutralHadrons = 0;
-  vector<double>  *isoPhotons = 0;
-  vector<double>  *isoPU = 0;
 };
 
 
@@ -225,12 +239,13 @@ public:
 
   bool get_Iso(int, double, double) const;
 
-  vector<bool>* tight = 0;
-  vector<bool>* soft = 0;
-  vector<double>* isoCharged = 0;
-  vector<double>* isoNeutralHadron = 0;
-  vector<double>* isoPhoton = 0;
-  vector<double>* isoPU = 0;
+  bool tight[];
+  bool soft[];
+  float miniPFRelIso_all[];
+  float miniPFRelIso_chg[];
+  float pfRelIso03_all[];
+  float pfRelIso03_chg[];
+  float pfRelIso04_all[];
 };
 
 class Taus : public Lepton {
@@ -243,19 +258,41 @@ public:
   bool get_Iso(int, double, double) const;
   bool pass_against_Elec(CUTS, int);
   bool pass_against_Muon(CUTS, int);
-
-  vector<int>     *decayModeFindingNewDMs = 0;
-  vector<int>     *decayModeFinding = 0;
-  vector<double>  *nProngs = 0;
-  vector<int>  *decayMode = 0;
-  pair<vector<int>*,vector<int>* > againstElectron = make_pair(nullptr,nullptr);
-  pair<vector<int>*,vector<int>* > againstMuon = make_pair(nullptr,nullptr);
-  pair<vector<int>*,vector<int>* > minIso = make_pair(nullptr,nullptr);
-  pair<vector<int>*,vector<int>* > maxIso = make_pair(nullptr,nullptr);
-  vector<double>  *leadChargedCandPt = 0;
-  vector<double>  *leadChargedCandPtError = 0;
-  vector<double>  *leadChargedCandValidHits = 0;
-  vector<double>  *leadChargedCandDz_pv = 0;
+  
+  bitset<8> tau1minIso;
+  bitset<8> tau1maxIso;
+  
+  bitset<8> tau2minIso;
+  bitset<8> tau2maxIso;
+  
+  bitset<8> tau1ele;
+  bitset<8> tau1mu;
+  
+  bitset<8> tau2ele;
+  bitset<8> tau2mu;
+  
+  
+  uint8_t againstElectron[];
+  uint8_t againstMuon[];
+  bool DecayMode[];
+  bool DecayModeNewDMs[];
+  //uint8_t Tau_idMVAnewDM2017v2[];
+  uint8_t MVAoldDM[];
+  uint8_t MVAnewDM[];
+  //uint8_t Tau_idMVAoldDM2017v1[];
+  //uint8_t Tau_idMVAoldDM2017v2[];
+  //uint8_t Tau_idMVAoldDMdR032017v2[];
+   
+  int decayMode[];
+  float leadTkDeltaEta[];
+  float leadTkDeltaPhi[];
+  float leadTkPtOverTauPt[];
+  float dz[];
+  float dxy[];
+  float chargedIsoPtSum[];
+  float neutralIso[];
+  float puCorr[];
+  
 };
 
 

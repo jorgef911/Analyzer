@@ -112,7 +112,7 @@ public:
   void getGoodDiJets(const PartStats&, const int);
 
   void VBFTopologyCut(const PartStats&, const int);
-  void TriggerCuts(vector<int>&, const vector<string>&, CUTS);
+  void TriggerCuts(CUTS);
 
 
   double calculateLeptonMetMt(const TLorentzVector&);
@@ -198,7 +198,8 @@ public:
 
   vector<int>* trigPlace[nTrigReq];
   bool setTrigger = false;
-  vector<string>* trigName[nTrigReq];
+  vector<string> trigNames;
+  vector<bool> trig_decision;
   vector<int> cuts_per, cuts_cumul;
 
   unordered_map< string,float > zBoostTree;
@@ -207,12 +208,9 @@ public:
   int leadIndex, maxCut, crbins=1;
   bool isData, CalculatePUSystematics, doSystematics;
 
-  vector<int>* Trigger_decision = 0;
-  vector<int>* Trigger_decisionV1 = 0;
-  vector<string>* Trigger_names = 0;
   float nTruePU = 0;
   int bestVertices = 0;
-  double gen_weight = 0;
+  float gen_weight = 0;
 
   BTagCalibration calib = BTagCalibration("csvv1", "Pileup/btagging.csv");
   BTagCalibrationReader reader = BTagCalibrationReader(BTagEntry::OP_TIGHT, "central");
