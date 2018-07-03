@@ -39,6 +39,7 @@ struct PartStats {
 
 enum class PType { Electron, Muon, Tau, Jet, FatJet, None};
 
+const Int_t MAXINDEX = 500;
 
 class Particle {
 
@@ -99,10 +100,10 @@ protected:
   //vector<double>* mphi = 0;
   //vector<double>* menergy = 0;
   uint  m_n;
-  float m_pt[];
-  float m_phi[];
-  float m_eta[];
-  float m_mass[];
+  float m_pt[MAXINDEX];
+  float m_phi[MAXINDEX];
+  float m_eta[MAXINDEX];
+  float m_mass[MAXINDEX];
   
 
   vector<TLorentzVector> Reco;
@@ -118,13 +119,13 @@ public:
   Photon();
   Photon(TTree*, string, vector<string>);
 
-  float hoverE[];
-  float phoR[];
-  float sigmaIEtaIEta[];
-  float pfIso_all[];
-  float pfIso_chg[];
-  bool eleVeto[];
-  bool hasPixelSeed[];
+  float hoverE[MAXINDEX];
+  float phoR[MAXINDEX];
+  float sigmaIEtaIEta[MAXINDEX];
+  float pfIso_all[MAXINDEX];
+  float pfIso_chg[MAXINDEX];
+  bool eleVeto[MAXINDEX];
+  bool hasPixelSeed[MAXINDEX];
 };
 
 
@@ -136,10 +137,10 @@ public:
   Generated(TTree*, string, vector<string>);
   
   
-  int  genPartIdxMother[];
-  int  pdg_id[];
-  int  status[];
-  int  statusFlags[];
+  int  genPartIdxMother[MAXINDEX];
+  int  pdg_id[MAXINDEX];
+  int  status[MAXINDEX];
+  int  statusFlags[MAXINDEX];
   
 };
 
@@ -153,17 +154,17 @@ public:
   vector<CUTS> overlapCuts(CUTS);
   bool passedLooseJetID(int);
    
-  float area[];
-  float bDiscriminator[];
-  float chargedEmEnergyFraction[];
-  float chargedHadronEnergyFraction[];
-  float neutralEmEmEnergyFraction[];
-  float neutralHadEnergyFraction[];
-  int jetId[];
-  int nMuons[];
-  int numberOfConstituents[];
-  int puID[];
-  int partonFlavour[];
+  float area[MAXINDEX];
+  float bDiscriminator[MAXINDEX];
+  float chargedEmEnergyFraction[MAXINDEX];
+  float chargedHadronEnergyFraction[MAXINDEX];
+  float neutralEmEmEnergyFraction[MAXINDEX];
+  float neutralHadEnergyFraction[MAXINDEX];
+  int jetId[MAXINDEX];
+  int nMuons[MAXINDEX];
+  int numberOfConstituents[MAXINDEX];
+  int puID[MAXINDEX];
+  int partonFlavour[MAXINDEX];
 
  protected:
 
@@ -177,12 +178,12 @@ public:
   vector<CUTS> findExtraCuts();
   vector<CUTS> overlapCuts(CUTS);
   
-  float tau1[];
-  float tau2[];
-  float tau3[];
-  float tau4[];
-  float PrunedMass[];
-  float SoftDropMass[];
+  float tau1[MAXINDEX];
+  float tau2[MAXINDEX];
+  float tau3[MAXINDEX];
+  float tau4[MAXINDEX];
+  float PrunedMass[MAXINDEX];
+  float SoftDropMass[MAXINDEX];
 
 };
 
@@ -194,7 +195,7 @@ public:
   vector<CUTS> findExtraCuts();
 
   double charge(uint)const;
-  int _charge[];
+  int _charge[MAXINDEX];
 
 
   virtual bool get_Iso(int, double, double) const {return false;}
@@ -212,21 +213,21 @@ public:
   bitset<8> cbHLTIDele1;
   bitset<8> cbHLTIDele2;
   
-  float miniPFRelIso_all[];
-  float miniPFRelIso_chg[];
-  float mvaFall17Iso[];
-  float mvaFall17noIso[];
-  float pfRelIso03_all[];
-  float pfRelIso03_chg[];
-  bool cutBased[];
-  bool cutBased_HLTPreSel[];
-  bool mvaIso_90[];
-  bool mvanoIso_WP90[];
-  bool mvaIso_80[];
-  bool mvanoIso_WP80[];
-  bool mvaIso_WPL[];
-  bool mvanoIso_WPL[];
-  bool isPassHEEPId[];
+  float miniPFRelIso_all[MAXINDEX];
+  float miniPFRelIso_chg[MAXINDEX];
+  float mvaFall17Iso[MAXINDEX];
+  float mvaFall17noIso[MAXINDEX];
+  float pfRelIso03_all[MAXINDEX];
+  float pfRelIso03_chg[MAXINDEX];
+  bool cutBased[MAXINDEX];
+  bool cutBased_HLTPreSel[MAXINDEX];
+  bool mvaIso_90[MAXINDEX];
+  bool mvanoIso_WP90[MAXINDEX];
+  bool mvaIso_80[MAXINDEX];
+  bool mvanoIso_WP80[MAXINDEX];
+  bool mvaIso_WPL[MAXINDEX];
+  bool mvanoIso_WPL[MAXINDEX];
+  bool isPassHEEPId[MAXINDEX];
 
 };
 
@@ -239,13 +240,13 @@ public:
 
   bool get_Iso(int, double, double) const;
 
-  bool tight[];
-  bool soft[];
-  float miniPFRelIso_all[];
-  float miniPFRelIso_chg[];
-  float pfRelIso03_all[];
-  float pfRelIso03_chg[];
-  float pfRelIso04_all[];
+  bool tight[MAXINDEX];
+  bool soft[MAXINDEX];
+  float miniPFRelIso_all[MAXINDEX];
+  float miniPFRelIso_chg[MAXINDEX];
+  float pfRelIso03_all[MAXINDEX];
+  float pfRelIso03_chg[MAXINDEX];
+  float pfRelIso04_all[MAXINDEX];
 };
 
 class Taus : public Lepton {
@@ -272,26 +273,26 @@ public:
   bitset<8> tau2mu;
   
   
-  uint8_t againstElectron[];
-  uint8_t againstMuon[];
-  bool DecayMode[];
-  bool DecayModeNewDMs[];
-  //uint8_t Tau_idMVAnewDM2017v2[];
-  uint8_t MVAoldDM[];
-  uint8_t MVAnewDM[];
-  //uint8_t Tau_idMVAoldDM2017v1[];
-  //uint8_t Tau_idMVAoldDM2017v2[];
-  //uint8_t Tau_idMVAoldDMdR032017v2[];
+  uint8_t againstElectron[MAXINDEX];
+  uint8_t againstMuon[MAXINDEX];
+  bool DecayMode[MAXINDEX];
+  bool DecayModeNewDMs[MAXINDEX];
+  //uint8_t Tau_idMVAnewDM2017v2[MAXINDEX];
+  uint8_t MVAoldDM[MAXINDEX];
+  uint8_t MVAnewDM[MAXINDEX];
+  //uint8_t Tau_idMVAoldDM2017v1[MAXINDEX];
+  //uint8_t Tau_idMVAoldDM2017v2[MAXINDEX];
+  //uint8_t Tau_idMVAoldDMdR032017v2[MAXINDEX];
    
-  int decayMode[];
-  float leadTkDeltaEta[];
-  float leadTkDeltaPhi[];
-  float leadTkPtOverTauPt[];
-  float dz[];
-  float dxy[];
-  float chargedIsoPtSum[];
-  float neutralIso[];
-  float puCorr[];
+  int decayMode[MAXINDEX];
+  float leadTkDeltaEta[MAXINDEX];
+  float leadTkDeltaPhi[MAXINDEX];
+  float leadTkPtOverTauPt[MAXINDEX];
+  float dz[MAXINDEX];
+  float dxy[MAXINDEX];
+  float chargedIsoPtSum[MAXINDEX];
+  float neutralIso[MAXINDEX];
+  float puCorr[MAXINDEX];
   
 };
 

@@ -242,7 +242,7 @@ vector<CUTS> Jet::overlapCuts(CUTS ePos) {
 }
 
 bool Jet::passedLooseJetID(int nobj) {
-  std::bitset<8> bit_jet(jetId);
+  std::bitset<8> bit_jet(jetId[nobj]);
   return bit_jet[0];
 }
 
