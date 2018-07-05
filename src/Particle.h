@@ -73,7 +73,7 @@ public:
   void addP4Syst(TLorentzVector, int);
   void setOrigReco();
   void setCurrentP(int);
-  string getName() {return GenName;};
+  string getName() const {return GenName;};
 
   bool findCut(const vector<string>&, string);
   
@@ -219,7 +219,7 @@ public:
   float mvaFall17noIso[MAXINDEX];
   float pfRelIso03_all[MAXINDEX];
   float pfRelIso03_chg[MAXINDEX];
-  bool cutBased[MAXINDEX];
+  int cutBased[MAXINDEX];
   bool cutBased_HLTPreSel[MAXINDEX];
   bool mvaIso_90[MAXINDEX];
   bool mvanoIso_WP90[MAXINDEX];
@@ -273,13 +273,13 @@ public:
   bitset<8> tau2mu;
   
   
-  uint8_t againstElectron[MAXINDEX];
-  uint8_t againstMuon[MAXINDEX];
+  UChar_t againstElectron[MAXINDEX];
+  UChar_t againstMuon[MAXINDEX];
   bool DecayMode[MAXINDEX];
   bool DecayModeNewDMs[MAXINDEX];
   //uint8_t Tau_idMVAnewDM2017v2[MAXINDEX];
-  uint8_t MVAoldDM[MAXINDEX];
-  uint8_t MVAnewDM[MAXINDEX];
+  UChar_t MVAoldDM[MAXINDEX];
+  UChar_t MVAnewDM[MAXINDEX];
   //uint8_t Tau_idMVAoldDM2017v1[MAXINDEX];
   //uint8_t Tau_idMVAoldDM2017v2[MAXINDEX];
   //uint8_t Tau_idMVAoldDMdR032017v2[MAXINDEX];

@@ -151,7 +151,12 @@ void Particle::getPartStats(string filename) {
       exit(1);
     } else if(stemp.size() == 2) {
 
-      if(stemp[1] == "1" || stemp[1] == "true" ) pstats[group].bset.push_back(stemp[0]);
+      if(stemp[1] == "1" || stemp[1] == "true" ){
+        pstats[group].bset.push_back(stemp[0]);
+        if(stemp[1] == "1" ){
+          pstats[group].dmap[stemp[0]]=stod(stemp[1]);
+        }
+      }
       //      else if(stemp[1] == "0"  || stemp[1] == "false" ) pstats[group]bmap[stemp[0]]=false;
 
       else if(stemp[1].find_first_not_of("0123456789+-.") == string::npos) pstats[group].dmap[stemp[0]]=stod(stemp[1]);
@@ -215,7 +220,9 @@ Jet::Jet(TTree* _BOOM, string filename, vector<string> syst_names) : Particle(_B
   SetBranch("Jet_btagCSVV2", bDiscriminator);
   SetBranch("Jet_puId", puID);
   SetBranch("Jet_area", area);
-  SetBranch("Jet_partonFlavour", partonFlavour);
+  if(_BOOM->FindBranch("Jet_partonFlavour")!=0){
+    SetBranch("Jet_partonFlavour", partonFlavour);
+  }
   
   
 }
@@ -471,29 +478,31 @@ bool Taus::get_Iso(int index, double onetwo, double flipisolation) const {
   }
   
   if(!flipisolation){
+    //cout<<tau_isomax_mask<<"  "<<tau_iso<<"   "<<(tau_isomax_mask& tau_iso)<<"   "<<  (tau_isomax_mask& tau_iso).count()<<endl; 
     return (tau_isomax_mask& tau_iso).count();
   }else{
-    
     return(!((tau_isomax_mask&tau_iso).count()) and (tau_isomin_mask&tau_iso).count());
   }
 }
 
 bool Taus::pass_against_Elec(CUTS ePos, int index) {
   std::bitset<8> tau_ele(againstElectron[index]);
-  std::bitset<8> tau_ele_mask(tau1ele[index]);
+  std::bitset<8> tau_ele_mask(tau1ele);
   if(ePos == CUTS::eRTau2){
-    std::bitset<8> tmp(tau2ele[index]);
+    std::bitset<8> tmp(tau2ele);
     tau_ele_mask=tmp;
   }
+  //cout<<tau_ele_mask<<"  "<<tau_ele<<"   "<<(tau_ele_mask&tau_ele)<<"   "<<  (tau_ele_mask&tau_ele).count()<<endl; 
   return (tau_ele_mask&tau_ele).count();
 }
 
 bool Taus::pass_against_Muon(CUTS ePos, int index) {
   std::bitset<8> tau_mu(againstMuon[index]);
-  std::bitset<8> tau_mu_mask(tau1mu[index]);
+  std::bitset<8> tau_mu_mask(tau1mu);
   if(ePos == CUTS::eRTau2){
-    std::bitset<8> tmp(tau2mu[index]);
+    std::bitset<8> tmp(tau2mu);
     tau_mu_mask=tmp;
   }
+  //cout<<tau_mu_mask<<"  "<<tau_mu<<"   "<<(tau_mu_mask&tau_mu)<<"   "<<  (tau_mu_mask&tau_mu).count()<<endl; 
   return (tau_mu_mask&tau_mu).count();
 }

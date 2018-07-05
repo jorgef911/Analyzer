@@ -97,12 +97,13 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
 
   filespace=configFolder;
   filespace+="/";
-
+  
   setupGeneral();
+  //isData = distats["Run"].bfind("isData");
 
   reader.load(calib, BTagEntry::FLAV_B, "comb");
 
-  isData = distats["Run"].bfind("isData");
+  
 
   CalculatePUSystematics = distats["Run"].bfind("CalculatePUSystematics");
   initializePileupInfo(distats["Run"].smap.at("MCHistos"), distats["Run"].smap.at("DataHistos"),distats["Run"].smap.at("DataPUHistName"),distats["Run"].smap.at("MCPUHistName"));
@@ -398,7 +399,10 @@ void Analyzer::clear_values() {
 
 ///Function that does most of the work.  Calculates the number of each particle
 void Analyzer::preprocess(int event) {
-  BOOM->GetEntry(event);
+  int test= BOOM->GetEntry(event);
+  if(test<0){
+    cout << "Could not read the event from the following file: "<<BOOM->GetFile()->GetNewUrl().Data() << endl;
+  }
   for(Particle* ipart: allParticles){
     ipart->init();
   }
@@ -864,11 +868,29 @@ void Analyzer::setupGeneral() {
     {15, new GenFill(2, CUTS::eGTau)},    {23, new GenFill(62, CUTS::eGZ)},
     {24, new GenFill(62, CUTS::eGW)},      {25, new GenFill(2, CUTS::eGHiggs)}
 };
-
-  SetBranch("Pileup_nTrueInt", nTruePU);
+  
+  isData=true;
+  if(BOOM->FindBranch("Pileup_nTrueInt")!=0){
+    isData=false;
+  }
+  if(!isData){
+    SetBranch("Pileup_nTrueInt", nTruePU);
+    SetBranch("genWeight", gen_weight);
+    //SetBranch("rho", rho);
+  }else{
+    nTruePU=0;
+    gen_weight=0;
+  }
+  
+  
+  for( int i=0; i<BOOM->GetListOfBranches()->GetSize(); i++){
+    string branch_name(BOOM->GetListOfBranches()->At(i)->GetName());
+    if (branch_name.find("HLT_")!=string::npos){
+      //cout<<branch_name<<endl;
+    }
+  }
+  
   SetBranch("PV_npvs", bestVertices);
-  SetBranch("genWeight", gen_weight);
-  //SetBranch("rho", rho);
 
   read_info(filespace + "ElectronTau_info.in");
   read_info(filespace + "MuonTau_info.in");
@@ -881,9 +903,9 @@ void Analyzer::setupGeneral() {
   
   
   
-  for(string tigger : trigNames){
+  for(string trigger : trigNames){
     bool decison=false;
-    SetBranch(tigger.c_str(),decison);
+    SetBranch(trigger.c_str(),decison);
     trig_decision.push_back(decison);
   }
 }
@@ -956,28 +978,15 @@ void Analyzer::read_info(string filename) {
       cout << "error in " << filename << "; no groups specified for data" << endl;
       exit(1);
     } else if(stemp.size() == 2) {
-      if(stemp.at(0).find("Trigger") != string::npos) {
-        char sep = ' ';
-        std::string::size_type b = 0;
-        std::vector<std::string> result;
-
-        while ((b = stemp.at(0).find_first_not_of(sep, b)) != std::string::npos) {
-            auto e = stemp.at(0).find_first_of(sep, b);
-            result.push_back(stemp.at(0).substr(b, e-b));
-            b = e;
-        }
-        for(auto trigger : result){
-          if(trigger.find("Trigger")!= string::npos and "="!=trigger ){
-            trigNames.push_back(trigger);
-          }
-        }
-        continue;
-      }
-
       char* p;
       strtod(stemp[1].c_str(), &p);
       if(group.compare("Control_Region") !=0 ){
-        if(stemp[1] == "1" || stemp[1] == "true") distats[group].bset.push_back(stemp[0]);
+        if(stemp[1] == "1" || stemp[1] == "true"){
+          distats[group].bset.push_back(stemp[0]);
+          if(stemp[1] == "1" ){
+            distats[group].dmap[stemp[0]]=stod(stemp[1]);
+          }
+        }
         else if(*p) distats[group].smap[stemp[0]] = stemp[1];
         else  distats[group].dmap[stemp[0]]=stod(stemp[1]);
       }else{
@@ -986,8 +995,25 @@ void Analyzer::read_info(string filename) {
       }
 
     } else if(stemp.size() == 3) distats[group].pmap[stemp[0]] = make_pair(stod(stemp[1]), stod(stemp[2]));
+    else{
+      if(stemp.at(0).find("Trigger") != string::npos) {
+        for(auto trigger : stemp){
+          if(trigger.find("Trigger")== string::npos and "="!=trigger ){
+            trigNames.push_back(trigger);
+          }
+        }
+        continue;
+      }
+    }
   }
   info_file.close();
+  //for( std::pair<const std::basic_string<char>, PartStats> group : distats){
+    //for( std::pair<const std::basic_string<char>, double> i : group.second.dmap){
+      //if(group.first.find("Tau")!=string::npos){
+        //cout<<group.first<<" "<< i.first<< "  "<<i.second<<endl;
+      //}
+    //}
+  //}
 }
 
 
@@ -1295,20 +1321,19 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
       ////electron cuts
       else if(lep.type == PType::Electron){
         if(cut == "DoDiscrByHLTID"){
-          bitset<8> idvariable(_Electron->cutBased[i]);
-          if(ival(ePos) - ival(CUTS::eRElec1)){
-            
-            passCuts = passCuts && (_Electron->cbHLTIDele1&idvariable).count();
-          }else{
-            passCuts = passCuts && (_Electron->cbHLTIDele1&idvariable).count();
-          }
-        }
-        if(cut == "DoDiscrByCBID"){
           bitset<8> idvariable(_Electron->cutBased_HLTPreSel[i]);
           if(ival(ePos) - ival(CUTS::eRElec1)){
             passCuts = passCuts && (_Electron->cbHLTIDele1&idvariable).count();
           }else{
             passCuts = passCuts && (_Electron->cbHLTIDele2&idvariable).count();
+          }
+        }
+        if(cut == "DoDiscrByCBID"){
+          bitset<8> idvariable(_Electron->cutBased[i]);
+          if(ival(ePos) - ival(CUTS::eRElec1)){
+            passCuts = passCuts && (_Electron->cbIDele1&idvariable).count();
+          }else{
+            passCuts = passCuts && (_Electron->cbIDele2&idvariable).count();
           }
         }
         else if(cut == "DoDiscrByHEEPID")
@@ -1384,7 +1409,7 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats, const int syst
       else if (cut =="RemoveOverlapWithTau2s") passCuts = passCuts && !isOverlaping(lvec, *_Tau, CUTS::eRTau2, stats.dmap.at("Tau2MatchingDeltaR"));
 
       else if(cut == "UseBtagSF") {
-        double bjet_SF = reader.eval_auto_bounds("central", BTagEntry::FLAV_B, lvec.Eta(), lvec.Pt());
+        //double bjet_SF = reader.eval_auto_bounds("central", BTagEntry::FLAV_B, lvec.Eta(), lvec.Pt());
         //passCuts = passCuts && (isData || ((double) rand()/(RAND_MAX)) <  bjet_SF);
       }
     }
@@ -1481,11 +1506,10 @@ bool Analyzer::isInTheCracks(float etaValue){
 ///sees if the event passed one of the two cuts provided
 void Analyzer::TriggerCuts(CUTS ePos) {
   if(! neededCuts.isPresent(ePos)) return;
-  
   for(bool trigger : trig_decision){
     if(trigger){
       active_part->at(ePos)->push_back(0);
-          return;
+      return;
     }
   }
 }
@@ -1835,7 +1859,8 @@ double Analyzer::getWkfactor(){
 
 ////Grabs a list of the groups of histograms to be filled and asked Fill_folder to fill up the histograms
 void Analyzer::fill_histogram() {
-  if(distats["Run"].bfind("ApplyGenWeight") && gen_weight == 0.0) return;
+  
+  if(!isData && distats["Run"].bfind("ApplyGenWeight") && gen_weight == 0.0) return;
 
   if(isData && blinded && maxCut == SignalRegion) return;
 
@@ -2027,6 +2052,16 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
         //}
         //histAddVal(_Tau->nProngs->at(it), "NumSignalTracks");
         histAddVal(_Tau->charge(it), "Charge");
+        histAddVal(_Tau->againstElectron[it], "againstElectron");
+        histAddVal(_Tau->againstMuon[it], "againstMuon");
+        histAddVal(_Tau->DecayMode[it], "DecayMode");
+        histAddVal(_Tau->DecayModeNewDMs[it], "DecayModeNewDMs");
+        histAddVal(_Tau->MVAoldDM[it], "MVAoldDM");
+        histAddVal(_Tau->decayMode[it], "decayMode");
+        histAddVal(_Tau->leadTkDeltaEta[it], "leadTkDeltaEta");
+        histAddVal(_Tau->leadTkDeltaPhi[it], "leadTkDeltaPhi");
+        histAddVal(_Tau->leadTkPtOverTauPt[it], "leadTkPtOverTauPt");
+        histAddVal(_Tau->dz[it], "dz");
         //histAddVal(_Tau->leadChargedCandPt->at(it), "SeedTrackPt");
         //histAddVal(_Tau->leadChargedCandDz_pv->at(it), "leadChargedCandDz");
       }
