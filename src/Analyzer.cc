@@ -628,7 +628,6 @@ bool Analyzer::fillCuts(bool fillCounter) {
       maxCut += 1;
       continue;
     }
-
     int min= cut_info->at(cut).first;
     int max= cut_info->at(cut).second;
     int nparticles = active_part->at(cut_num.at(cut))->size();
@@ -785,6 +784,7 @@ void Analyzer::updateMet(int syst) {
 
   if(!passCutRange(_MET->pt(), distats["Run"].pmap.at("MetCut"))) return;
   if(distats["Run"].bfind("DiscrByHT") && _MET->HT() < distats["Run"].dmap.at("HtCut")) return;
+
   if(syst==0){
     active_part->at(CUTS::eMET)->push_back(1);
   }else{

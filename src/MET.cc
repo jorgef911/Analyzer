@@ -99,7 +99,7 @@ void Met::update(PartStats& stats, Jet& jet, int syst=0){
     i++;
   }
   syst_HT.at(syst)=sumptForHt;
-  syst_MHT.at(syst)=sumpyForMht;
+  syst_MHT.at(syst)= sqrt( pow(sumpxForMht,2.0) + pow(sumpyForMht,2.0) );
   syst_MHTphi.at(syst)=atan2(sumpyForMht,sumpxForMht);
 
   systVec.at(syst)->SetPxPyPzE(systVec.at(syst)->Px()+systdeltaMEx[syst], 
