@@ -27,12 +27,12 @@ doEfficiencyPlots true
 EtaCut 2.1
 PtCut 20.0 9999.9
 
-DoDiscrByLeadTrack true
+DoDiscrByLeadTrack false
 LeadTrackThreshold 5.0
 
 DoDiscrByIsolation true
 //1 = VLoose, 2 = Loose, 4 = Medium, 8 = Tight, 16 = VTight, 32 = VVTight
-DiscrByMinIsolation 1
+DiscrByMinIsolation 1.
 DiscrByMaxIsolation 2
 FlipIsolationRequirement false
 DiscrByProngType true
