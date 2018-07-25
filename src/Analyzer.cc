@@ -2046,10 +2046,22 @@ void Analyzer::fill_Folder(string group, const int max, Histogramer &ihisto, boo
       double InvMass = diParticleMass(part1,part2, "InvariantMass");
       histAddVal(InvMass, "InvariantMass");
 
-      double ptSum = part1.Pt() + part2.Pt();
-      histAddVal(ptSum, "SumOfPt");
-      histAddVal(-(ptSum+_MET->pt()), "Recoil");
-      histAddVal(ptSum+_MET->pt(), "Positive_Recoil");
+
+      TVector3 ZT(0.,0.,0.);
+      ZT.SetXYZ(part1.Px() + part2.Px(),  part1.Py() + part2.Py(),  0.);
+  
+      TVector3 MET_R(_MET->p4().Px(), _MET->p4().Py(), 0.);
+
+      TVector3 Recoil(0.,0.,0.);
+      Recoil  = - ( MET_R + ZT );
+
+      double rt = Recoil.Dot(ZT)/ZT.Mag();
+     // double ptSum = part1.Pt() + part2.Pt();
+
+
+      histAddVal(ZT.Mag(), "SumOfPt");
+      histAddVal(rt, "Recoil");
+      histAddVal(-rt, "Positive_Recoil");
 
       double PZeta = getPZeta(part1,part2).first;
       double PZetaVis = getPZeta(part1,part2).second;

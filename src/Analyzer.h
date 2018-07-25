@@ -19,6 +19,7 @@ struct CRTester;
 #include <TDirectory.h>
 #include <TEnv.h>
 #include <TLorentzVector.h>
+#include <TVector3.h>
 #include <TChain.h>
 #include <TTree.h>
 #include <TH1.h>
