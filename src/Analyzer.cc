@@ -1194,6 +1194,7 @@ void Analyzer::getGoodRecoLeptons(const Lepton& lep, const CUTS ePos, const CUTS
         double firstIso = (stats.pmap.find("IsoSumPtCutValue") != stats.pmap.end()) ? stats.pmap.at("IsoSumPtCutValue").first : ival(ePos) - ival(CUTS::eRTau1) + 1;
         double secondIso = (stats.pmap.find("IsoSumPtCutValue") != stats.pmap.end()) ? stats.pmap.at("IsoSumPtCutValue").second : 0;
         passCuts = passCuts && lep.get_Iso(i, firstIso, secondIso);
+        if( lep.type == PType::Tau ) passCuts = passCuts && lep.reject_Iso(i, firstIso, secondIso);
       }
       else if(cut == "DiscrIfIsZdecay" && lep.type != PType::Tau ) passCuts = passCuts && isZdecay(lvec, lep);
       else if(cut == "DiscrByMetDphi") passCuts = passCuts && passCutRange(absnormPhi(lvec.Phi() - _MET->phi()), stats.pmap.at("MetDphiCut"));
@@ -1262,6 +1263,8 @@ void Analyzer::getGoodRecoJets(CUTS ePos, const PartStats& stats, const int syst
     if( ePos == CUTS::eRCenJet) passCuts = passCuts && (fabs(lvec.Eta()) < 2.5);
     else  passCuts = passCuts && passCutRange(fabs(lvec.Eta()), stats.pmap.at("EtaCut"));
     passCuts = passCuts && (lvec.Pt() > stats.dmap.at("PtCut")) ;
+    passCuts = passCuts && (abs( normPhi(lvec.Phi()-_MET->phi()) )  <= stats.dmap.at("DeltaPhi_Met") );
+
 
     for( auto cut: stats.bset) {
       if(!passCuts) break;
@@ -1326,6 +1329,7 @@ void Analyzer::getGoodRecoFatJets(CUTS ePos, const PartStats& stats, const int s
     bool passCuts = true;
     passCuts = passCuts && passCutRange(fabs(lvec.Eta()), stats.pmap.at("EtaCut"));
     passCuts = passCuts && (lvec.Pt() > stats.dmap.at("PtCut")) ;
+    passCuts = passCuts && (abs( normPhi(lvec.Phi()-_MET->phi()) )  <= stats.dmap.at("DeltaPhi_Met") );
 
     ///if else loop for central jet requirements
     for( auto cut: stats.bset) {
