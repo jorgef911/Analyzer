@@ -123,6 +123,7 @@ Analyzer::Analyzer(vector<string> infiles, string outfile, bool setCR, string co
     }
   }else {
     doSystematics=false;
+    cout << doSystematics << endl;
   }
 
   _Electron = new Electron(BOOM, filespace + "Electron_info.in", syst_names);
